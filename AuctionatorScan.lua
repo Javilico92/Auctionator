@@ -438,6 +438,8 @@ function AtrSearch:AnalyzeResultsPage()
 
 			local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice, bidAmount, highBidder, owner = GetAuctionItemInfo("list", x);
 
+			--zz ("owner: ", owner, "      ownerFullName: ", ownerFullName, "      bidderFullName: ", bidderFullName);
+
 			local itemLink = GetAuctionItemLink("list", x);
 			
 			if (itemLink) then
