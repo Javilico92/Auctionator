@@ -1546,8 +1546,6 @@ end
 
 function Atr_ClickAuctionSellItemButton (self, button)
 
--- zc.printstack();
-
 	if (AuctionFrameAuctions.duration == nil) then		-- blizz attempts to calculate deposit below and in some cases, duration has yet to be set
 		AuctionFrameAuctions.duration = 1;
 	end
@@ -2700,7 +2698,7 @@ function Atr_SetTextureButtonByTexture (elementName, count, texture)
 		textureElement:SetNormalTexture (texture)
 		Atr_SetTextureButtonCount (elementName, count)
 	else
-		textureElement:Hide()
+		--textureElement:Hide()		-- if hidden can't be dragged into
 		Atr_SetTextureButtonCount (elementName, 0)
 	end
 
@@ -4166,8 +4164,8 @@ function Atr_GetNumItemInBags (targItemLink)
 	
 	local targItemName, targIsBattlePet = zc.ItemNamefromLink (targItemLink)
 	
-	zz (zc.printableLink(targItemLink))
-	zz (zc.printableLink(targItemName), targIsBattlePet)
+	--zz (zc.printableLink(targItemLink))
+	--zz (zc.printableLink(targItemName), targIsBattlePet)
 	
 	for b = 1, #kBagIDs do
 		bagID = kBagIDs[b];
