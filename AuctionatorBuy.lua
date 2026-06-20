@@ -249,7 +249,8 @@ function Atr_Buy_OnAuctionUpdate()
 
 	if (gBuyState == ATR_BUY_QUERY_SENT) then
 
-		
+		gAtr_Buy_Query:CapturePageInfo(gAtr_Buy_CurPage)
+
 		-- if (gAtr_Buy_Query:CheckForDuplicatePage(gAtr_Buy_CurPage)) then
 		
 			-- Atr_Buy_QueueQuery (gAtr_Buy_CurPage);
@@ -384,6 +385,7 @@ function Atr_Buy_BuildMatchList ()
 	for i = 1,numInList do
 	
 		if (Atr_DoesAuctionMatch ("list", i, gAtr_Buy_ItemName, gAtr_Buy_BuyoutPrice, gAtr_Buy_StackSize)) then
+			--zz ("x, i: ", x, i);
 			gAtr_Buy_MatchList[x] = i;
 			x = x + 1;
 		end
