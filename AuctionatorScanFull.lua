@@ -16,6 +16,8 @@ ATR_FS_CLEANING_UP			= 6
 
 local BIGNUM = 999999999999;
 
+gDefaultFullScanChunkSize = 50;
+
 gAtr_FullScanState		= ATR_FS_NULL
 
 local gFullScanPosition
@@ -35,6 +37,7 @@ local gNumAdded
 local gNumUpdated
 
 local gDoSlowScan = false;
+local gDeniedCounter
 
 local gScanDetails = {}
 
@@ -78,15 +81,16 @@ function Atr_FullScanStart()
 		gNumScanned = 0
 		
 		gGetAllSuccess = true
+
+		gDeniedCounter = 0;
 		
 		if (gDoSlowScan) then
 			gAtr_FullScanState = ATR_FS_SLOW_QUERY_NEEDED;
 			gSlowScanPage = 0
-			zz ("QueryAuctionItems (slow) called")
 		else
 			gAtr_FullScanState = ATR_FS_STARTED;
 			QueryAuctionItems ("", nil, nil, 0, 0, 0, 0, false, -1, true);
-			zz ("QueryAuctionItems (getAll) called");
+
 		end
 		
 	end
@@ -126,7 +130,15 @@ function Atr_FullScanFrameIdle()
 
 	local statusText;
 
+	if (gAtr_FullScanState == ATR_FS_SLOW_QUERY_NEEDED and not CanSendAuctionQuery()) then
+		gDeniedCounter = gDeniedCounter+1;
+	end
+	
 	if (gAtr_FullScanState == ATR_FS_SLOW_QUERY_NEEDED and CanSendAuctionQuery()) then
+
+		zz ("gDeniedCounter", gDeniedCounter);
+		gDeniedCounter = 0;
+
 	--QueryAuctionItems ("", nil, nil, 0, 0, 0, gSlowScanPage, 0, nil)
 		QueryAuctionItems ("", nil, nil, 0, 0, 0, gSlowScanPage, false, -1)
 		gAtr_FullScanState = ATR_FS_SLOW_QUERY_SENT
@@ -181,16 +193,13 @@ function Atr_FullScanBeginAnalyzePhase()
 	end
 
 	gFullScanPosition = 1
-	gLowPrices = {}
-	gQualities = {}
-
-	if (AUCTIONATOR_DC_CHUNK == nil) then
-		AUCTIONATOR_DC_CHUNK = 100
-	end
 
 	if (not gDoSlowScan) then
+		gLowPrices = {}
+		gQualities = {}
+
 		zz ("FULL SCAN:"..numBatchAuctions.." out of  "..totalAuctions)
-		zz ("AUCTIONATOR_DC_CHUNK: ", AUCTIONATOR_DC_CHUNK)
+		zz ("AUCTIONATOR_FS_CHUNK: ", AUCTIONATOR_FS_CHUNK)
 	end
 
 end
@@ -211,8 +220,6 @@ function Atr_FullScanAnalyze()
 
 		firstScanPosition = 1
 		gSlowScanTotalPages = math.floor (totalAuctions / 50) + 1
-		
-		--zz ("gSlowScanPage:", gSlowScanPage+1, " of ", gSlowScanTotalPages)
 
 		if (numBatchAuctions == 0) then		-- slow scan done
 			Atr_FullScanUpdateDB();
@@ -226,6 +233,11 @@ function Atr_FullScanAnalyze()
 	local name, count, quality, buyoutPrice, owner
 
 	if (numBatchAuctions > 0) then
+
+		local chunk_size = gDefaultFullScanChunkSize;
+		if (AUCTIONATOR_FS_CHUNK ~= nil) then
+			chunk_size = AUCTIONATOR_FS_CHUNK
+		end
 
 		local x;
 
@@ -265,7 +277,7 @@ function Atr_FullScanAnalyze()
 				end
 			end
 			
-			if (not gDoSlowScan and x % AUCTIONATOR_DC_CHUNK == 0 and x < numBatchAuctions) then			-- analyze fast scan data in chunks so as not to cause client to timeout?
+			if (not gDoSlowScan and (x % chunk_size) == 0 and x < numBatchAuctions) then			-- analyze fast scan data in chunks so as not to cause client to timeout?
 				gFullScanPosition = x + 1;
 				return;
 			end
@@ -296,7 +308,7 @@ function Atr_FullScanUpdateDB()
 	local numEachQual = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 	local totalItems = 0;
 	local numRemoved = { 0, 0, 0, 0, 0, 0, 0, 0 };
-	
+
 	for name,newprice in pairs (gLowPrices) do
 		
 		if (newprice < BIGNUM) then

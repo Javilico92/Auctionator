@@ -955,6 +955,8 @@ function Atr_ShowTipWithPricing (tip, link, num)
 	-- if (link == nil or zc.IsBattlePetLink(link)) then
 		-- return;
 	-- end
+
+	--	zc.printstack();
 	
 	if link == nil then
 		return;
@@ -1023,6 +1025,27 @@ end
 
 -----------------------------------------
 
+function Atr_InitToolTips ()
+
+end
+
+
+-----------------------------------------
+
+
+--hooksecurefunc (GameTooltip, "SetMerchantItem",
+--	function(tip, index)
+--		Atr_ShowTipWithPricing (tip, GetMerchantItemLink(index));		
+--	end
+--);
+
+hooksecurefunc (GameTooltip, "SetBuybackItem",
+	function(tip, index)
+		Atr_ShowTipWithPricing (tip, GetBuybackItemLink(index));		
+	end
+);
+
+
 hooksecurefunc (GameTooltip, "SetBagItem",
 	function(tip, bag, slot)
 		local _, num = GetContainerItemInfo(bag, slot);
@@ -1067,6 +1090,7 @@ hooksecurefunc (GameTooltip, "SetInventoryItem",
 		Atr_ShowTipWithPricing (tip, GetInventoryItemLink(unit, slot), GetInventoryItemCount(unit, slot));
 	end
 );
+
 
 hooksecurefunc (GameTooltip, "SetGuildBankItem",
 	function (tip, tab, slot)
@@ -1141,12 +1165,5 @@ hooksecurefunc (GameTooltip, "SetHyperlink",
 	function (tip, itemstring, num)
 		local name, link = GetItemInfo (itemstring);
 		Atr_ShowTipWithPricing (tip, link, num);
-	end
-);
-
-hooksecurefunc (ItemRefTooltip, "SetHyperlink",
-	function (tip, itemstring)
-		local name, link = GetItemInfo (itemstring);
-		Atr_ShowTipWithPricing (tip, link);
 	end
 );

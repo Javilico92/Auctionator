@@ -42,11 +42,11 @@ AtrSearch.__index = AtrSearch;
 
 -----------------------------------------
 
-local function GetExactMatchText (searchText)
+function Atr_GetExactMatchText (searchText)
 
 	local emtext = nil;
 	
-	if (zc.StringStartsWith (searchText, "\"") and zc.StringEndsWith (searchText, "\"")) then
+	if (zc.IsTextQuoted (searchText)) then
 		emtext = string.sub (searchText, 2, searchText:len()-1);
 	end
 
@@ -78,7 +78,7 @@ function AtrSearch:Init (searchText, IDstring, itemLink, rescanThreshold)
 	self.searchText		= searchText
 	
 	if (IDstring == nil) then
-		self.exactMatchText = GetExactMatchText(searchText)
+		self.exactMatchText = Atr_GetExactMatchText(searchText)
 		if (self.exactMatchText) then
 			self.searchText = self.exactMatchText
 		end
@@ -744,11 +744,10 @@ function AtrSearch:Continue()
 		elseif (self.shplist) then
 			queryString = Atr_GetShoppingListItem (self)
 			
-			self.exactMatchText = GetExactMatchText(queryString)
+			self.exactMatchText = Atr_GetExactMatchText(queryString)
 			if (self.exactMatchText) then
 				queryString = self.exactMatchText
 			end
-
 
 			-- skip nested shopping lists or compound searches
 			while (Atr_IsShoppingListSearch(queryString) or Atr_IsCompoundSearch(queryString)) do
@@ -767,9 +766,13 @@ function AtrSearch:Continue()
 			queryString = self.searchText;
 		end
 
+		local exactMatch = (self.exactMatchText ~= nil or self.IDstring ~= nil)
+
 		queryString = zc.UTF8_Truncate (queryString,63);	-- attempting to reduce number of disconnects
 
-		--zz (queryString, "  page:", self.current_page);
+		zz ("Exact: ", exactMatch)
+
+		--QueryAuctionItems (queryString, minLevel, maxLevel, nil, itemClass, itemSubclass, self.current_page, nil, nil, false, exactMatch);
 		
 		QueryAuctionItems (queryString, minLevel, maxLevel, 0, itemClass, itemSubclass, self.current_page, 0, qualityIndex);
 
@@ -1027,16 +1030,12 @@ function AtrScan:CondenseAndSort ()
 
 		if (conddata[key]) then
 			conddata[key].count		= conddata[key].count + 1;
-			conddata[key].minpage 	= zc.Min (conddata[key].minpage, sd.pagenum);
-			conddata[key].maxpage 	= zc.Max (conddata[key].maxpage, sd.pagenum);
 		else
 			local data = {};
 
 			data.stackSize 		= sd.stackSize;
 			data.buyoutPrice	= sd.buyoutPrice;
 			data.itemPrice		= sd.buyoutPrice / sd.stackSize;
-			data.minpage		= sd.pagenum;
-			data.maxpage		= sd.pagenum;
 			data.count			= 1;
 			data.type			= dataType;
 			data.yours			= (ownerCode == "y");

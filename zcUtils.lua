@@ -952,6 +952,25 @@ end
 
 -----------------------------------------
 
+function zc.IsTextQuoted (s)
+	return (zc.StringStartsWith (s, "\"") and zc.StringEndsWith (s, "\""))
+
+end
+
+-----------------------------------------
+
+function zc.QuoteString (s)
+
+	if (zc.IsTextQuoted(s)) then
+		return s
+	end
+	
+	return ("\""..s.."\"")
+
+end
+
+-----------------------------------------
+
 function zc.TrimQuotes (s)
 
 	local start = 1
@@ -1096,9 +1115,9 @@ function zc.printstack (options)
 				elseif (not options.silent) then
 					if (funcname) then
 						if (x == 2) then
-							cstr = cstr.." > |cFFFFaa88"..funcname;
+							cstr = cstr.." < |cFFFFaa88"..funcname;
 						else
-							cstr = cstr.." > "..funcname;
+							cstr = cstr.." < "..funcname;
 						end
 						x = x + 1;
 					end
