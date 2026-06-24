@@ -1,5 +1,6 @@
 
 local addonName, addonTable = ...
+local ZT = addonTable.ztt.ZT;
 local zc = addonTable.zc
 local zz = zc.md
 local _
@@ -451,6 +452,9 @@ function AtrSearch:AnalyzeResultsPage()
 			if (itemLink) then
 				local IDstring = zc.ItemIDStrfromLink (itemLink);
 				
+--zz (IDstring, itemLink)
+--zz (zc.printableLink(itemLink), IDstring)	
+
 				if (Atr_ILevelHist_Update) then
 					Atr_ILevelHist_Update(itemLink)
 				end
@@ -768,7 +772,8 @@ function AtrSearch:Continue()
 
 		local exactMatch = (self.exactMatchText ~= nil or self.IDstring ~= nil)
 
-		queryString = zc.UTF8_Truncate (queryString,63);	-- attempting to reduce number of disconnects
+		queryString = zc.UTF8_Truncate (queryString,127);	-- attempting to reduce number of disconnects
+		--queryString = zc.UTF8_Truncate (queryString,63);	-- 335 compat ??
 
 		zz ("Exact: ", exactMatch)
 

@@ -1,5 +1,6 @@
 
 local addonName, addonTable = ...; 
+local ZT = addonTable.ztt.ZT;
 local zc = addonTable.zc;
 local zz = zc.md;
 local _
@@ -55,7 +56,7 @@ function Atr_BuildHints (itemName, itemLink)
 	
 	if (TUJMarketInfo) then
 	
-		local id = zc.ItemIDfromLink (itemLink);
+		local id = zc.RawItemIDfromLink (itemLink);
 
 		local tujData = {}
 		TUJMarketInfo (tonumber(id), tujData)
@@ -94,7 +95,7 @@ function Atr_BuildHints (itemName, itemLink)
 	
 		-- GoingPrice Wowhead
 		
-		local id = zc.ItemIDfromLink (itemLink);
+		local id = zc.RawItemIDfromLink (itemLink);
 		
 		id = tonumber(id);
 
@@ -888,7 +889,7 @@ function Atr_STWP_AddAuctionInfo (tip, xstring, link, auctionPrice, lastScan)
 	
 		
 		
-		local itemID = zc.ItemIDfromLink (link);
+		local itemID = zc.RawItemIDfromLink (link);
 		itemID = tonumber(itemID);
 	
 		local bondtype = Atr_GetBondType (itemID);
@@ -1033,11 +1034,11 @@ end
 -----------------------------------------
 
 
---hooksecurefunc (GameTooltip, "SetMerchantItem",
---	function(tip, index)
---		Atr_ShowTipWithPricing (tip, GetMerchantItemLink(index));		
---	end
---);
+hooksecurefunc (GameTooltip, "SetMerchantItem",
+	function(tip, index)
+		Atr_ShowTipWithPricing (tip, GetMerchantItemLink(index));		
+	end
+);
 
 hooksecurefunc (GameTooltip, "SetBuybackItem",
 	function(tip, index)

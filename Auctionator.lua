@@ -1,8 +1,8 @@
--- 3.2.1
+-- 3.2.3
 
--- Improved buy performance by sorting
--- Changed full scan message about disconnects
--- Fixed slow scan to save results
+-- change truncate length to 127
+-- fixed a couple of possible taints on local variables
+-- 
 
 AuctionatorVersion = "???";		-- set from toc upon loading
 AuctionatorAuthor  = "Zirco";
@@ -11,6 +11,7 @@ AuctionatorLoaded = false;
 AuctionatorInited = false;
 
 local addonName, addonTable = ...; 
+local ZT = addonTable.ztt.ZT;
 local zc = addonTable.zc;
 local zz = zc.md;
 local _
@@ -650,6 +651,8 @@ local function Atr_OnClickTradeSkillButton()
 
 	local index = GetTradeSkillSelectionIndex()
 	local link = GetTradeSkillItemLink(index)
+
+	local _, _, _, _, _, itemType = GetItemInfo (link);
 	
 	local numReagents = GetTradeSkillNumReagents (index)
 	local reagentId
@@ -4730,16 +4733,7 @@ function Atr_AddHistoricalPrice (itemName, price, stacksize, itemLink, testwhen)
 		AUCTIONATOR_PRICING_HISTORY[itemName] = {};
 	end
 
-	local itemId, suffixId, uniqueId = zc.ItemIDfromLink (itemLink);
-
-	local is = itemId;
-
-	if (suffixId ~= 0) then
-		is = is..":"..suffixId;
-		if (tonumber(suffixId) < 0) then
-			is = is..":"..uniqueId;
-		end
-	end
+	local is = zc.ItemIDStrfromLink (itemLink);
 
 	AUCTIONATOR_PRICING_HISTORY[itemName]["is"]  = is;
 

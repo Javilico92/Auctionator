@@ -66,6 +66,17 @@ end
 
 -----------------------------------------
 
+function zc.ToNumberVal (val)
+
+	if (val == nil) then
+		return 0;
+	end
+	
+	return tonumber(val);
+end
+
+-----------------------------------------
+
 function zc.Min (a, b)
 
 	if (a == nil) then
@@ -255,6 +266,7 @@ end
 
 -----------------------------------------
 
+--[[
 function ZF (s)
 	BuildDecTable();
 
@@ -278,6 +290,7 @@ function ZF (s)
 	return s2;
 
 end
+]]--
 
 -----------------------------------------
 
@@ -447,24 +460,12 @@ end
 
 -----------------------------------------
 
-function zc.ItemIDfromLink (itemLink)
+function zc.RawItemIDfromLink (itemLink)
+	
+	local found, _, itemString = string.find(itemLink, "^|c%x+|H(.+)|h%[.*%]")
+	local _, itemId = strsplit(":", itemString)
 
-	if (itemLink == nil) then
-		return 0,0,0;
-	end
-	
-	-- if (zc.IsBattlePetLink (itemLink)) then
-		-- local speciesID, level, breedQuality, maxHealth, power, speed, battlePetID, name = zc.ParseBattlePetLink(itemLink)
-		
-		-- return "BP_"..tostring(speciesID), breedQuality
-	
-	-- else
-	
-		local found, _, itemString = string.find(itemLink, "^|c%x+|H(.+)|h%[.*%]")
-		local _, itemId, _, _, _, _, _, suffixId, uniqueId = strsplit(":", itemString)
-
-		return itemId, suffixId, uniqueId;
-	-- end
+	return itemId
 end
 
 -----------------------------------------
@@ -489,15 +490,57 @@ end
 
 -----------------------------------------
 
-function zc.ItemIDStrfromLink (itemLink)
+function zc.ItemIDStrfromLink (itemLink)		-- important function that should generate a unique identifier for a particular item
 
-	local itemID, suffix = zc.ItemIDfromLink (itemLink);
-
-	if (suffix == 0 or suffix == "0" or suffix == nil) then
-		return tostring (itemID)
-	end
+	if (itemLink == nil) then
+		return "";
 	
-	return itemID..":"..suffix
+	--elseif (zc.IsBattlePetLink (itemLink)) then
+	--	local speciesID, level, breedQuality, maxHealth, power, speed, battlePetID, name = zc.ParseBattlePetLink(itemLink)
+		
+	--	return "BP_"..tostring(speciesID)..level, breedQuality
+	
+	else
+	
+		local found, _, itemString = string.find(itemLink, "^|c%x+|H(.+)|h%[.*%]")
+		local _, itemId, _, _, _, _, _, suffixId, uniqueId, charLevel, upgradeID, instanceDifficultyID,
+			bonusIDcount, bonus1, bonus2, bonus3, bonus4, bonus5, bonus6, bonus7, bonus8, bonus9, bonus10 = strsplit(":", itemString)
+
+		local idString = tostring (itemId)
+		
+		suffixId		= zc.ToNumberVal (suffixId)
+		bonusIDcount	= zc.ToNumberVal (bonusIDcount)
+
+		local bonus = {};
+
+		if (bonusIDcount >=  1) then	bonus[1]  = bonus1;		end;
+		if (bonusIDcount >=  2) then	bonus[2]  = bonus2;		end;
+		if (bonusIDcount >=  3) then	bonus[3]  = bonus3;		end;
+		if (bonusIDcount >=  4) then	bonus[4]  = bonus4;		end;
+		if (bonusIDcount >=  5) then	bonus[5]  = bonus5;		end;
+		if (bonusIDcount >=  6) then	bonus[6]  = bonus6;		end;
+		if (bonusIDcount >=  7) then	bonus[7]  = bonus7;		end;
+		if (bonusIDcount >=  8) then	bonus[8]  = bonus8;		end;
+		if (bonusIDcount >=  9) then	bonus[9]  = bonus9;		end;
+		if (bonusIDcount >= 10) then	bonus[10] = bonus10;	end;
+
+		table.sort (bonus)
+	
+		if (suffixId ~= 0 or bonusIDcount > 0) then
+		
+			idString = idString..":"..suffixId..":"..bonusIDcount
+
+			local b;
+			for b = 1,bonusIDcount do
+				if (bonus[b] == nil) then 
+				else
+				idString = idString..":"..bonus[b]
+				end
+			end
+		end
+
+		return idString
+	end
 
 end
 
@@ -752,7 +795,7 @@ function zc.msg_ex (options, ...)
 
 	local msg = "";
 
-	local i;
+	local i, m;
 	local num = select("#", ...);
 	
 	for i = 1, num do
@@ -1035,7 +1078,7 @@ end
 
 -----------------------------------------
 
-function zc.printableLink (link)
+function zc.printableLink (link)			-- return a raw version of the link
 
 	if (link == nil) then
 		return "nil";
