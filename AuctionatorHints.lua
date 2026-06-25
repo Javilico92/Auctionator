@@ -61,15 +61,23 @@ function Atr_BuildHints (itemName, itemLink)
 		local tujData = {}
 		TUJMarketInfo (tonumber(id), tujData)
 
-		local stddevRaw = tujData['marketstddev']
-		
-		local stddev = "???"
-		if (stddevRaw) then
-			stddev = zc.priceToString (stddevRaw)
+		local rawStdDevServer = tujData['stddev']
+		local rawStdDevGlobal = tujData['globalStdDev']
+
+		local stdDevServer = "???"
+		if (rawStdDevServer) then
+			stdDevServer = zc.priceToString (rawStdDevServer)
 		end
-		
-		Atr_AppendHint (results, tujData['marketmedian'],  ZT("UnderMine Journal (median)"));
-		Atr_AppendHint (results, tujData['marketaverage'], ZT("UnderMine Journal (average) standard deviation "..stddev));
+
+		local stdDevGlobal = "???"
+		if (rawStdDevGlobal) then
+			stdDevGlobal = zc.priceToString (rawStdDevGlobal)
+		end
+
+		Atr_AppendHint (results, tujData['globalMean'], ZT("Undermine global avg (deviation: "..stdDevGlobal.." )"));
+		Atr_AppendHint (results, tujData['recent'], ZT("Undermine 3-day server avg"));
+		Atr_AppendHint (results, tujData['market'], ZT("Undermine 14-day server avg (deviation: "..stdDevServer.." )"));
+		Atr_AppendHint (results, tujData['globalMedian'], ZT("Undermine global median"));
 	end
 
 	-- Wowecon
@@ -950,14 +958,44 @@ function Atr_STWP_GetPrices (link, num, showStackPrices, itemVendorPrice, itemNa
 end
 
 -----------------------------------------
+local item_links = {}
+local pet_links = {}
 
 function Atr_ShowTipWithPricing (tip, link, num)
 
 	-- if (link == nil or zc.IsBattlePetLink(link)) then
+		--if link and not pet_links[ link ] then
+			--pet_links[ link ] = Auctionator.ItemLink:new({ item_link = link })
+			--Auctionator.Debug.Message( pet_links[ link ]:GetField( Auctionator.Constants.ItemLink.TYPE ),
+			--pet_links[ link ]:IdString() )
+		--end
 		-- return;
 	-- end
 
-	--	zc.printstack();
+	if Auctionator.Debug.IsOn() then
+    if not item_links[ link ] then
+      item_links[ link ] = Auctionator.ItemLink:new({ item_link = link })
+    end
+
+    tip:AddDoubleLine( "Auctionator ID", item_links[ link ]:IdString() )
+    tip:AddDoubleLine( '-', item_links[ link ].item_string )
+    tip:AddDoubleLine( 'ID', item_links[ link ]:GetField( Auctionator.Constants.ItemLink.ID ))
+    tip:AddDoubleLine( 'ENCHANT', item_links[ link ]:GetField( Auctionator.Constants.ItemLink.ENCHANT ))
+    tip:AddDoubleLine( 'GEM_1', item_links[ link ]:GetField( Auctionator.Constants.ItemLink.GEM_1 ))
+    tip:AddDoubleLine( 'GEM_2', item_links[ link ]:GetField( Auctionator.Constants.ItemLink.GEM_2 ))
+    tip:AddDoubleLine( 'GEM_3', item_links[ link ]:GetField( Auctionator.Constants.ItemLink.GEM_3 ))
+    tip:AddDoubleLine( 'GEM_4', item_links[ link ]:GetField( Auctionator.Constants.ItemLink.GEM_4 ))
+    tip:AddDoubleLine( 'SUFFIX_ID', item_links[ link ]:GetField( Auctionator.Constants.ItemLink.SUFFIX_ID ))
+    tip:AddDoubleLine( 'UNIQUE_ID', item_links[ link ]:GetField( Auctionator.Constants.ItemLink.UNIQUE_ID ))
+    tip:AddDoubleLine( 'LEVEL', item_links[ link ]:GetField( Auctionator.Constants.ItemLink.LEVEL ))
+    tip:AddDoubleLine( 'UPGRADE_ID', item_links[ link ]:GetField( Auctionator.Constants.ItemLink.UPGRADE_ID ))
+    tip:AddDoubleLine( 'INSTANCE_DIFFICULTY_ID', item_links[ link ]:GetField( Auctionator.Constants.ItemLink.INSTANCE_DIFFICULTY_ID ))
+    tip:AddDoubleLine( 'BONUS_ID_COUNT', item_links[ link ]:GetField( Auctionator.Constants.ItemLink.BONUS_ID_COUNT ))
+    tip:AddDoubleLine( 'BONUS_ID_1', item_links[ link ]:GetField( Auctionator.Constants.ItemLink.BONUS_ID_1 ))
+    tip:AddDoubleLine( 'BONUS_ID_2', item_links[ link ]:GetField( Auctionator.Constants.ItemLink.BONUS_ID_2 ))
+    tip:AddDoubleLine( 'BONUS_ID_3', item_links[ link ]:GetField( Auctionator.Constants.ItemLink.BONUS_ID_3 ))
+    tip:AddDoubleLine( 'BONUS_ID_4', item_links[ link ]:GetField( Auctionator.Constants.ItemLink.BONUS_ID_4 ))
+  end
 	
 	if link == nil then
 		return;

@@ -73,75 +73,94 @@ local Atr_excludes = { Cancel=1, Okay=1, Done=1, Close=1 }
 -----------------------------------------
 
 local function Atr_LocalizeChildText (frame)
+	if ( Atr_IsAuctionatorFrame( frame ) ) then
 
-	local child;
-	local subregions = { frame:GetRegions() };
-	for _, child in ipairs(subregions) do
+		local child;
+		local subregions = { frame:GetRegions() };
+		for _, child in ipairs(subregions) do
 
-		if  (type (child.GetText) == "function") then
-			local ftext = child:GetText();
-			local fname = tostring(child:GetName());
-			
-			if (ftext and ftext ~= "" and not Atr_excludes[ftext] and not zc.StringStartsWith (fname, "AuctionatorEntry")) then
-				testt[ftext] = 1;
-				child:SetText (ZT(ftext));
-			end
-		end
-	end
-	
-	local kids = { frame:GetChildren() };
-	for _, child in ipairs(kids) do
-		
-		if  (type (child.GetText) == "function") then
-			local ftext = child:GetText();
-			local fname = tostring(child:GetName());
-			
-			if (ftext and ftext ~= "" and not Atr_excludes[ftext] and not zc.StringStartsWith (fname, "AuctionatorEntry")) then
-				testt[ftext] = 1;
+			if  (type (child.GetText) == "function") then
+				local ftext = child:GetText();
+				local fname = tostring(child:GetName());
 				
-				if (child:GetObjectType() == "Button") then
-					local oldwid = math.floor(child:GetWidth());
-					child:SetText (ZT(ftext));
-					local newwid = math.floor(child:GetTextWidth()) + 15;
-					if (newwid > oldwid) then
-						child:SetWidth (newwid+20);
-					end
-				else
+				if (ftext and ftext ~= "" and not Atr_excludes[ftext] and not zc.StringStartsWith (fname, "AuctionatorEntry")) then
+					testt[ftext] = 1;
 					child:SetText (ZT(ftext));
 				end
 			end
 		end
+		
+		local kids = { frame:GetChildren() };
+		for _, child in ipairs(kids) do
 			
-		if (child:GetObjectType() ~= "Button") then
-			Atr_LocalizeChildText (child);
-		end
-	end			
-
+			if  (type (child.GetText) == "function") then
+				local ftext = child:GetText();
+				local fname = tostring(child:GetName());
+				
+				if (ftext and ftext ~= "" and not Atr_excludes[ftext] and not zc.StringStartsWith (fname, "AuctionatorEntry")) then
+					testt[ftext] = 1;
+					
+					if (child:GetObjectType() == "Button") then
+						local oldwid = math.floor(child:GetWidth());
+						child:SetText (ZT(ftext));
+						local newwid = math.floor(child:GetTextWidth()) + 15;
+						if (newwid > oldwid) then
+							child:SetWidth (newwid+20);
+						end
+					else
+						child:SetText (ZT(ftext));
+					end
+				end
+			end
+				
+			if (child:GetObjectType() ~= "Button") then
+				Atr_LocalizeChildText (child);
+			end
+		end		
+	end
 end
 
 -----------------------------------------
 
-function Atr_LocalizeFrames ()
+function Atr_LocalizeFrames()
+  Auctionator.Debug.Message( 'Atr_LocalizeFrames' )
 
-	local frame = EnumerateFrames()
-	while frame do
-		local fname		= frame:GetName();
-		local pname		= (frame:GetParent() and frame:GetParent():GetName() or nil);
-		
-		local isAuctionatorFrame = (zc.StringStartsWith (fname, "Atr") or zc.StringStartsWith (fname, "Auctionator")) and zc.StringSame (pname, "UIParent");
-		if (fname == "Atr_Main_Panel") then
-			isAuctionatorFrame = true;
-		end
-		
-		if ( isAuctionatorFrame ) then
-			Atr_LocalizeChildText (frame);
-		end
-		
-		frame = EnumerateFrames(frame)
-	end
+  local frame = EnumerateFrames()
 
---	zc.PrintKeysSorted (testt);
+  while frame do
+    Atr_LocalizeChildText( frame );
+    frame = EnumerateFrames( frame )
+  end
+end
 
+function Atr_IsAuctionatorFrame( frame )
+  if ( Atr_FrameIsAccessible(frame) ) then
+    local frame_name = frame:GetName()
+    local parent_name = frame:GetParent() and frame:GetParent():GetName() or nil
+
+    return frame_name == "Atr_Main_Panel" or
+      ( zc.StringSame (parent_name, "UIParent") and Atr_IsAuctionatorFrameName(frame_name) )
+  else
+    return false
+  end
+end
+
+function Atr_FrameIsAccessible( frame ) -- frame:IsForbidden() added in 5.4.0
+  	--if ( not frame:IsForbidden() ) then 
+    	--local parent_frame = frame:GetParent()
+
+    	--if ( parent_frame ) then
+      		--return not parent_frame:IsForbidden()
+    	--end
+	--end
+
+	--return false
+	return true
+end
+
+function Atr_IsAuctionatorFrameName( frame_name )
+  return zc.StringStartsWith( frame_name, "Atr" ) or
+    zc.StringStartsWith( frame_name, "Auctionator" )
 end
 
 -----------------------------------------

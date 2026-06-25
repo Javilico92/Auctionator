@@ -440,26 +440,21 @@ function AtrSearch:AnalyzeResultsPage()
 		local x;
 
 		for x = 1, q.curPageInfo.numOnPage do
-
-			--local name, texture, count, quality, canUse, level, huh, minBid, minIncrement, buyoutPrice, bidAmount, highBidder, bidderFullName, owner, ownerFullName = GetAuctionItemInfo("list", x);
-
-			--local itemLink = GetAuctionItemLink("list", x);
-			
 			local ax = q.curPageInfo.auctionInfo[x];
 
 			local itemLink = ax.itemLink;
 			
 			if (itemLink) then
-				local IDstring = zc.ItemIDStrfromLink (itemLink);
-				
---zz (IDstring, itemLink)
---zz (zc.printableLink(itemLink), IDstring)	
+				local item_link = Auctionator.ItemLink:new({ item_link = itemLink })
 
 				if (Atr_ILevelHist_Update) then
 					Atr_ILevelHist_Update(itemLink)
 				end
 
 				--local isBattlePet = zc.IsBattlePetLink(itemLink);
+
+				--Auctionator.Debug.Message( 'AtrSearch:AnalyzeResultsPage isBattlePet ', item_link:IdString() )
+          		--Auctionator.Util.Print( item_link, 'Battle Pet Item Link')
 				
 				--if (isBattlePet) then
 				--	ATR_AddToBattlePetIconCache (itemLink, ax.texture);
@@ -481,13 +476,13 @@ function AtrSearch:AnalyzeResultsPage()
 
 					if (self.exactMatchText == nil or zc.StringSame (ax.name, self.exactMatchText)) then
 
-						if (self.items[IDstring] == nil) then
-							self.items[IDstring] = Atr_FindScanAndInit (IDstring, ax.name)
+						if (self.items[ item_link:IdString() ] == nil) then
+              				self.items[ item_link:IdString() ] = Atr_FindScanAndInit( item_link:IdString(), ax.name )
 						end
 						
 						local curpage = (tonumber(self.current_page)-1)
 
-						local scn = self.items[IDstring]
+						local scn = self.items[ item_link:IdString() ]
 
 						if (scn) then
 							scn:AddScanItem (ax.count, ax.buyoutPrice, ax.owner, 1, curpage)
@@ -1271,7 +1266,8 @@ function Atr_UpdateScanDBitemID (itemName, itemLink)
 		gAtr_ScanDB[itemName] = {};
 	end
 
-	gAtr_ScanDB[itemName].id = zc.ItemIDStrfromLink (itemLink);
+	local item_link = Auctionator.ItemLink:new({ item_link = itemLink })
+  	gAtr_ScanDB[itemName].id = item_link:IdString()
 end
 	
 -----------------------------------------

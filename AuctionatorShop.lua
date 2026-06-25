@@ -359,9 +359,13 @@ end
 -----------------------------------------
 
 function Atr_AddToRecents (searchText)
+	Auctionator.Debug.Message( 'Atr_AddToRecents', searchText )
 
 	local recentsList = AUCTIONATOR_SHOPPING_LISTS[1];
-	if (recentsList) then
+
+	-- Added check to ensure recentsList is an AtrList, per issue #1
+	-- Todo: Understand how lists are getting created without the Atr_SList metatable...
+	if (recentsList and getmetatable(recentsList) == Atr_SList) then
 
 		local isRecentsShown = (gCurrentSList == recentsList);
 		
@@ -398,6 +402,7 @@ end
 -----------------------------------------
 
 function Atr_Shop_OnFinishScan ()
+	Auctionator.Debug.Message( 'Atr_Shop_OnFinishScan' )
 	
 	local currentPane = Atr_GetCurrentPane();
 

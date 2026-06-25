@@ -490,62 +490,6 @@ end
 
 -----------------------------------------
 
-function zc.ItemIDStrfromLink (itemLink)		-- important function that should generate a unique identifier for a particular item
-
-	if (itemLink == nil) then
-		return "";
-	
-	--elseif (zc.IsBattlePetLink (itemLink)) then
-	--	local speciesID, level, breedQuality, maxHealth, power, speed, battlePetID, name = zc.ParseBattlePetLink(itemLink)
-		
-	--	return "BP_"..tostring(speciesID)..level, breedQuality
-	
-	else
-	
-		local found, _, itemString = string.find(itemLink, "^|c%x+|H(.+)|h%[.*%]")
-		local _, itemId, _, _, _, _, _, suffixId, uniqueId, charLevel, upgradeID, instanceDifficultyID,
-			bonusIDcount, bonus1, bonus2, bonus3, bonus4, bonus5, bonus6, bonus7, bonus8, bonus9, bonus10 = strsplit(":", itemString)
-
-		local idString = tostring (itemId)
-		
-		suffixId		= zc.ToNumberVal (suffixId)
-		bonusIDcount	= zc.ToNumberVal (bonusIDcount)
-
-		local bonus = {};
-
-		if (bonusIDcount >=  1) then	bonus[1]  = bonus1;		end;
-		if (bonusIDcount >=  2) then	bonus[2]  = bonus2;		end;
-		if (bonusIDcount >=  3) then	bonus[3]  = bonus3;		end;
-		if (bonusIDcount >=  4) then	bonus[4]  = bonus4;		end;
-		if (bonusIDcount >=  5) then	bonus[5]  = bonus5;		end;
-		if (bonusIDcount >=  6) then	bonus[6]  = bonus6;		end;
-		if (bonusIDcount >=  7) then	bonus[7]  = bonus7;		end;
-		if (bonusIDcount >=  8) then	bonus[8]  = bonus8;		end;
-		if (bonusIDcount >=  9) then	bonus[9]  = bonus9;		end;
-		if (bonusIDcount >= 10) then	bonus[10] = bonus10;	end;
-
-		table.sort (bonus)
-	
-		if (suffixId ~= 0 or bonusIDcount > 0) then
-		
-			idString = idString..":"..suffixId..":"..bonusIDcount
-
-			local b;
-			for b = 1,bonusIDcount do
-				if (bonus[b] == nil) then 
-				else
-				idString = idString..":"..bonus[b]
-				end
-			end
-		end
-
-		return idString
-	end
-
-end
-
------------------------------------------
-
 function zc.LinkFromItemID (itemID, suffixID)		-- only works if item is already in memory
 
 	if (suffixID == nil) then
@@ -1064,16 +1008,22 @@ end
 -----------------------------------------
 
 function zc.CopyDeep (dest, src)
+	Auctionator.Debug.Message( 'zc.CopyDeep', dest, src )
+
+	if type(src) == 'table' then
 
 	for n, v in pairs (src) do
 		if (type(v) == "table") then
 			dest[n] = {};
-			zc.CopyDeep(dest[n], v);
-		else
+        	zc.CopyDeep(dest[n], v);
+      	else
 			dest[n] = v;
 		end
 	end
 
+	else
+		dest = src
+	end
 end
 
 -----------------------------------------

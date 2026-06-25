@@ -157,6 +157,7 @@ function Atr_SetupBasicOptionsFrame()
 	AuctionatorOption_Enable_Alt_CB:SetChecked			(zc.NumToBool(AUCTIONATOR_ENABLE_ALT));
 	AuctionatorOption_Open_All_Bags_CB:SetChecked		(zc.NumToBool(AUCTIONATOR_OPEN_ALL_BAGS));
 	AuctionatorOption_Show_StartingPrice_CB:SetChecked	(zc.NumToBool(AUCTIONATOR_SHOW_ST_PRICE));
+	AuctionatorOption_Enable_Debug_CB:SetChecked		(AUCTIONATOR_SAVEDVARS.DEBUG_MODE);
 
 	Atr_SetDurationOptionRB (AUCTIONATOR_DEF_DURATION);
 
@@ -261,6 +262,7 @@ end
 -----------------------------------------
 
 function Atr_Option_OnClick (self)
+	Auctionator.Debug.Message( 'Atr_Option_OnClick', self:GetName() )
 
 	if (zc.StringContains (self:GetName(), "Open_BUY") and self:GetChecked()) then
 		AuctionatorOption_Open_SELL_CB:SetChecked (false);
@@ -269,6 +271,10 @@ function Atr_Option_OnClick (self)
 	if (zc.StringContains (self:GetName(), "Open_SELL") and self:GetChecked()) then
 		AuctionatorOption_Open_BUY_CB:SetChecked (false);
 	end
+
+	if self:GetName():find('AuctionatorOption_Enable_Debug') then
+    	Auctionator.Debug.Toggle()
+  	end
 
 end
 

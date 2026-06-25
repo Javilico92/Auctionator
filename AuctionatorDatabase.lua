@@ -34,11 +34,9 @@ end
 
 function AtrDB:SetItemInfo (itemName, quality, itemLink, itemClass, itemSubclass)
 
-	local itag = InitItemIfNeeded (self, itemName, quality)
+	local item_link = Auctionator.ItemLink:new({ item_link = itemLink })
 
-	local IDstring = zc.ItemIDStrfromLink (itemLink)
-		
-	self[itag]["fo"] = IDstring.."_"..itemClass.."_"..itemSubclass
+	self[itag]["fo"] = item_link:IdString() .. "_" .. itemClass .. "_" .. itemSubclass
 end
 
 -----------------------------------------
