@@ -74,10 +74,11 @@ end
 -----------------------------------------
 
 function Atr_GetDisenchantValue (item)
-
+	-- local itemName, itemLink, quality, iLevel, _, itemType, sSubType, _, _, _, _, itemClass, itemSubClass = GetItemInfo(itemLink);
 	local itemName, itemLink, itemRarity, itemLevel, _, itemType = GetItemInfo (item);
 
 	if (itemLink) then
+		-- return Atr_CalcDisenchantPrice( itemClass, itemRarity, itemLevel )
 		return Atr_CalcDisenchantPrice (itemType, itemRarity, itemLevel);
 	end
 	

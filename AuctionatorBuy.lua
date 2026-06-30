@@ -165,23 +165,20 @@ end
 
 function Atr_Buy_SendQuery ()
 
-	gAtr_NextMatchIndex = 0;
-			
-	if (CanSendAuctionQuery()) then
+  Auctionator.Debug.Message( 'Atr_Buy_SendQuery' )
+  gAtr_NextMatchIndex = 0
 
-		gBuyState = ATR_BUY_QUERY_SENT;
+  if CanSendAuctionQuery() then
+    gBuyState = ATR_BUY_QUERY_SENT
 
-		Atr_Buy_ClearMatchList();
-		
-		local queryString = zc.UTF8_Truncate (gAtr_Buy_ItemName,127);	-- attempting to reduce number of disconnects
-		--local queryString = zc.UTF8_Truncate (gAtr_Buy_ItemName,63);	-- 335, we dont need russian chars ??
+    Atr_Buy_ClearMatchList()
 
-		exactMatch = true
+    -- attempting to reduce number of disconnects
+    local queryString = Auctionator.Util.UTF8_Truncate( gAtr_Buy_ItemName )
 
-		--QueryAuctionItems (queryString, "", "", nil, 0, 0, gAtr_Buy_CurPage, nil, nil, false, exactMatch);
+		-- QueryAuctionItems( queryString, nil, nil, gAtr_Buy_CurPage, nil, nil, false, false, nil )
 		QueryAuctionItems (queryString, nil, nil, 0, 0, 0, gAtr_Buy_CurPage, false, -1);
 	end
-		
 end
 
 -----------------------------------------
