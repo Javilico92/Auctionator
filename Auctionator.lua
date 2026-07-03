@@ -19,7 +19,6 @@ local LE_ITEM_CLASS_ARMOR = AuctionatorCompat.LE_ITEM_CLASS_ARMOR or LE_ITEM_CLA
 local C_TradeSkillUI = AuctionatorCompat.C_TradeSkillUI or C_TradeSkillUI
 
 -----------------------------------------
-
 local recommendElements			= {};
 
 AUCTIONATOR_ENABLE_ALT		= 1;
@@ -894,6 +893,21 @@ function Atr_OnLoad()
 		AUCTIONATOR_OPEN_FIRST = 2;
 	end
 
+	-- Migrate old version of shopping lists to new adv
+	if AUCTIONATOR_SHOPPING_LISTS and AUCTIONATOR_SHOPPING_LISTS_MIGRATED_V2 == nil then
+		for index, list in ipairs( AUCTIONATOR_SHOPPING_LISTS ) do
+		local fixedList = {}
+
+		for itemIndex, itemName in ipairs( list.items ) do
+			local replacement = gsub( "|", ";" ):gsub( "/", ";")
+			table.insert( fixedList, replacement )
+		end
+
+		AUCTIONATOR_SHOPPING_LISTS[ index ].items = fixedList
+		end
+
+		AUCTIONATOR_SHOPPING_LISTS_MIGRATED_V2 = true
+	end
 
 	Atr_SetupHookFunctionsEarly();
 
@@ -914,8 +928,6 @@ function Atr_OnLoad()
 	------------------
 
 	Atr_ShoppingListsInit();
-
-	zc.msg_anm ("Read the FAQ at |cFF4499FF http://auctionatoraddon.com/faq")
 	
 	EnableDisableDElogging ()
 
@@ -1260,10 +1272,10 @@ function Atr_GetSellItemInfo ()
 				return "",0,nil;
 			end
 		-- end
-		
-	end
-	return auctionItemName, auctionCount, auctionItemLink;
 
+	end
+
+	return auctionItemName, auctionCount, auctionItemLink;
 end
 
 -----------------------------------------
@@ -1275,11 +1287,9 @@ function Atr_ResetSavedVars ()
 	zc.CopyDeep (AUCTIONATOR_SAVEDVARS, auctionator_savedvars_defaults);
 end
 
-
 --------------------------------------------------------------------------------
 
 function Atr_FindTabIndex (whichTab)
-
 	local i;
 	for i = 4,20  do
 		local tab = _G['AuctionFrameTab'..i];
@@ -1464,7 +1474,6 @@ function Atr_AuctionFrameTab_OnClick (self, index, down)
 	_G["Atr_Main_Panel"]:Show();
 
 	gCurrentPane.UINeedsUpdate = true;
-
 	end
 end
 
@@ -1668,7 +1677,7 @@ function Atr_CreateAuction_OnClick ()
 	Atr_StackPriceText:SetText (ZT("Buyout Price"));
 	Atr_ItemPriceText:Hide();
 	Atr_ItemPrice:Hide();
-	Atr_ItemsOwned_Text:SetText ("Items owned: 0");
+	Atr_ItemsOwned_Text:SetText (ZT("Items owned")..": 0");
 	gCurrentPane.totalItems = 0
 	gCurrentPane.fullStackSize = 0
 	Atr_Batch_MaxAuctions_Text:SetText (ZT("max")..": 0");
@@ -1880,23 +1889,32 @@ end
 -----------------------------------------
 
 function auctionator_ChatEdit_InsertLink(text)
+  Auctionator.Debug.Message( 'auctionator_ChatEdit_InsertLink', text )
 
-	if (text and AuctionFrame:IsShown() and IsShiftKeyDown() and Atr_IsTabSelected(BUY_TAB)) then	
-		local item;
-		if ( strfind(text, "item:", 1, true) ) then
-			item = GetItemInfo(text);
-		elseif (strfind(text, "Enchant ", 1, true) ) then		
-			local EnchantName = GetSpellInfo(zc.ItemIDStrfromLink(text));
-			item = "Scroll of "..EnchantName;
-		end
-		if ( item ) then
-			Atr_SetSearchText (zc.QuoteString(item));	-- quote to make it exact
-			Atr_Search_Onclick();
-			return true;
-		end
-	end
+  if text and AuctionFrame:IsShown() and Atr_IsTabSelected( BUY_TAB ) then
+    local item
 
-	return auctionator_orig_ChatEdit_InsertLink(text);
+    if strfind( text, "item:", 1, true ) then
+      item = GetItemInfo( text )
+	elseif (strfind(text, "Enchant ", 1, true) ) then		
+	  local EnchantName = GetSpellInfo(zc.ItemIDStrfromLink(text));
+	  item = "Scroll of "..EnchantName;
+    end
+
+    if item then
+      if IsLeftShiftKeyDown() then
+        Atr_SetSearchText( item )
+      elseif IsRightShiftKeyDown() then
+        Atr_SetSearchText( zc.QuoteString( item ) )
+      end
+
+      Atr_Search_Onclick()
+
+      return true
+    end
+  end
+
+  return auctionator_orig_ChatEdit_InsertLink( text )
 
 end
 
@@ -2771,10 +2789,7 @@ function Atr_ShowRecTooltip (owner)
 			-- BattlePetTooltip:SetPoint("BOTTOMLEFT", Atr_RecommendItem_Tex, "BOTTOMRIGHT", 10, 0)
 			
 		-- else
-			if owner ~= nil then
-				LastTooltipOwner = owner
-			end
-			GameTooltip:SetOwner(LastTooltipOwner, "ANCHOR_RIGHT");
+			GameTooltip:SetOwner(Atr_RecommendItem_Tex, "ANCHOR_RIGHT");
 			GameTooltip:SetHyperlink (link, num);
 			gCurrentPane.tooltipvisible = true;
 		-- end
@@ -3072,7 +3087,7 @@ function Atr_OnNewAuctionUpdate()
 	
 	
 	
-	Atr_ItemsOwned_Text:SetText ("Items owned: "..gSellPane.totalItems);
+	Atr_ItemsOwned_Text:SetText (ZT("Items owned")..": "..gSellPane.totalItems);
 	
 	local maxAuctions = 1;
 	if gSellPane.totalItems > prefStackSize then
@@ -3232,7 +3247,7 @@ function Atr_UpdateUI_SellPane (needsUpdate)
 
 			Atr_SetTextureButtonByTexture ("Atr_SellControls_Tex", Atr_StackSize(), auctionTexture);
 	
-			Atr_ItemsOwned_Text:SetText ("Items owned: "..gCurrentPane.totalItems);
+			Atr_ItemsOwned_Text:SetText (ZT("Items owned")..": "..gCurrentPane.totalItems);
 						
 			Atr_SetDepositText();		
 		end		
@@ -5198,8 +5213,6 @@ function Atr_Cancel_One_Undercuts_OnClick ()
 	local itemPrice		= gAtr_MassCancelList[x].itemPrice;
 	local absBestPrice	= gAtr_MassCancelList[x].absBestPrice;
 	
-
-
 	if (not Atr_DoesAuctionMatch ("owner", i, name, buyout, stackSize)) then
 		return false;
 	end

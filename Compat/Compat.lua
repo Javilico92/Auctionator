@@ -46,3 +46,4 @@ end
 
 AuctionatorCompat.LE_ITEM_CLASS_WEAPON = 1 -- LE_ITEM_CLASS_WEAPON = 2 after 7.0.X
 AuctionatorCompat.LE_ITEM_CLASS_ARMOR = 2 -- LE_ITEM_CLASS_ARMOR = 4 after 7.0.X
+AuctionatorCompat.LE_ITEM_CLASS_BATTLEPET = 0 -- Not used in 3.3.5

@@ -17,7 +17,7 @@
 				<Size><AbsDimension x="210" y="22"/></Size>
 				<Anchors><Anchor point="BOTTOM"><Offset><AbsDimension y="65"/></Offset></Anchor></Anchors>
 				<Scripts>
-					<OnClick>Atr_Cancel_Undercuts_OnClick();</OnClick>
+          <OnClick>Atr_Cancel_Undercuts_OnClick()</OnClick>
 				</Scripts>
 			</Button>
 
@@ -25,7 +25,7 @@
 				<Size><AbsDimension x="210" y="22"/></Size>
 				<Anchors><Anchor point="BOTTOM"><Offset><AbsDimension y="30"/></Offset></Anchor></Anchors>
 				<Scripts>
-					<OnClick>Atr_CheckActives_Frame:Hide();</OnClick>
+          <OnClick>Atr_CheckActives_Frame:Hide()</OnClick>
 				</Scripts>
 			</Button>
 		</Frames>

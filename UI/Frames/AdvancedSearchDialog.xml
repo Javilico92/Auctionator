@@ -108,7 +108,7 @@
 				<Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="40" y="25"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
-						Atr_Adv_Search_Reset();
+            Atr_Adv_Search_Reset()
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -118,7 +118,7 @@
 				<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-20" y="25"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
-						Atr_Adv_Search_Dialog:Hide();
+            Atr_Adv_Search_Dialog:Hide()
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -128,7 +128,7 @@
 				<Anchors><Anchor point="RIGHT" relativeTo="Atr_Adv_Search_CancelBut" relativePoint="LEFT"><Offset><AbsDimension x="-10"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
-						Atr_Adv_Search_Do();
+            Atr_Adv_Search_Do()
 					</OnClick>
 				</Scripts>
 			</Button>

@@ -292,6 +292,14 @@ end
 
 -----------------------------------------
 
+function Atr_SList:IsItemOnList (itemName)
+
+  return (self:FindItemIndex(itemName) > 0);
+
+end
+
+-----------------------------------------
+
 local function IsExactChecked ()
 	return Atr_Exact_Search_Button:GetChecked()
 end
@@ -326,22 +334,27 @@ end
 
 -----------------------------------------
 
-function Atr_SList:IsItemOnList (itemName)
+function Atr_Search_Onclick ()
+  	Auctionator.Debug.Message( 'Atr_Search_Onclick')
 
-	return (self:FindItemIndex(itemName) > 0);
-	
+	local currentPane = Atr_GetCurrentPane()
+	local searchText = Atr_Search_Box:GetText()
+
+  Atr_Search_Button:Disable()
+  Atr_Adv_Search_Button:Disable()
+  Atr_Exact_Search_Button:Disable()
+  Atr_Buy1_Button:Disable()
+  Atr_AddToSListButton:Disable()
+  Atr_RemFromSListButton:Disable()
+
+  Atr_ClearAll()
+
+  currentPane:DoSearch( searchText )
+
+  Atr_ClearHistory()
 end
 
------------------------------------------
-
-function Atr_Search_Onclick ()
-
-	local currentPane = Atr_GetCurrentPane();
-
-	local searchText = Atr_Search_Box:GetText();
-
-	if (string.gsub(searchText, "%s+", "") == "" or searchText == nil) then return end
-
+function Auctionator.SearchUI.Disable()
 	Atr_Search_Button:Disable();
 	Atr_Adv_Search_Button:Disable();
 	Atr_Exact_Search_Button:Disable();
@@ -350,10 +363,17 @@ function Atr_Search_Onclick ()
 	Atr_RemFromSListButton:Disable();
 	
 	Atr_ClearAll();
-	
-	currentPane:DoSearch (searchText);
+end
 
-	Atr_ClearHistory();
+function Atr_Search_Onclick_2( search )
+  Auctionator.Debug.Message( 'Atr_Search_Onclick_2' )
+
+  Auctionator.SearchUI.Disable()
+	
+  local currentPane = Atr_GetCurrentPane();
+  currentPane:DoSearch2( search )
+
+  Atr_ClearHistory()
 end
 
 -----------------------------------------
@@ -1024,6 +1044,8 @@ function Atr_Adv_Search_Do()
 	end
 	
 	if (itemRarity ~= nil) then searchText = itemRarity.."/"..searchText end
+
+	searchText = string.gsub(searchText, "/", Auctionator.Constants.AdvancedSearchDivider) -- Make searches compatible with modern Auctionator
 	
 	Atr_SetSearchText(searchText);
 
@@ -1032,6 +1054,36 @@ function Atr_Adv_Search_Do()
 	Atr_Adv_Search_Dialog:Hide();
 
 end
+
+-----------------------------------------
+
+-- function Atr_Adv_Search_Do()
+--   Auctionator.Debug.Message( 'Atr_Adv_Search_Do' )
+
+--   local parentKey = UIDropDownMenu_GetSelectedValue( Atr_ASDD_Class )
+--   local subClassKey = UIDropDownMenu_GetSelectedValue( Atr_ASDD_Subclass )
+
+--   local minLevel = Atr_AS_Minlevel:GetNumber()
+--   local maxLevel = Atr_AS_Maxlevel:GetNumber()
+--   local text = Atr_AS_Searchtext:GetText()
+
+--   local search = Auctionator.SearchQuery:new({
+--     text = text,
+--     minLevel = minLevel,
+--     maxLevel = maxLevel,
+--     parentKey = parentKey,
+--     subClassKey = subClassKey,
+--     advanced = true
+--   })
+
+--   Atr_SetSearchText( search:ToString() )
+
+--   -- TODO: Finish implementing version 2 of search
+--   -- Atr_Search_Onclick();
+--   Atr_Search_Onclick_2( search )
+
+--   Atr_Adv_Search_Dialog:Hide();
+-- end
 
 -----------------------------------------
 

@@ -162,6 +162,7 @@ AtrL["Quest Item"] = "Artículo de misión"
 AtrL["Rare"] = "Raro"
 AtrL["Rare items"] = "Artículos raros"
 AtrL["Really delete the shopping list %s ?"] = "¿Desea realmente eliminar la lista de compra %s ?"
+AtrL["Entry must not be blank"] = "La entrada no debe estar en blanco"
 AtrL["Recent Searches"] = "Búsquedas Recientes"
 AtrL["Recommended Buyout Price"] = "Precio de Venta Recomendado"
 AtrL["Recommended buyout price"] = "Precio de venta recomendado"
@@ -224,6 +225,6 @@ AtrL["your auction on"] = "su subasta en"
 AtrL["your most recent posting"] = "su más reciente subasta"
 AtrL["yours"] = "su subasta"
 AtrL["Spanish translation courtesy of %s"] = "Traducción a español por cortesía de %s"
-
+AtrL["Items owned"] = "En propiedad"
 
 end

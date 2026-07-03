@@ -1010,8 +1010,8 @@ function Atr_ShowTipWithPricing (tip, link, num)
 	end
 
 	local xstring = "";
-	if (num and showStackPrices) then
-		xstring = "|cFFAAAAFF x"..num.."|r";
+	if num and showStackPrices then
+    	xstring = "|cFFAAAAFF x" .. num .. "|r"
 	end
 
 
@@ -1151,6 +1151,24 @@ hooksecurefunc (GameTooltip, "SetTradeSkillItem",
 	end
 );
 
+-- hooksecurefunc( GameTooltip, 'SetRecipeResultItem',
+--    function( tip, itemId )
+--     local link = C_TradeSkillUI.GetRecipeItemLink( itemId )
+--     local count  = C_TradeSkillUI.GetRecipeNumItemsProduced( itemId )
+--
+--     Atr_ShowTipWithPricing( tip, link, count )
+--   end
+--  );
+
+-- hooksecurefunc( GameTooltip, 'SetRecipeReagentItem',
+--   function( tip, itemId, index )
+--     local link = C_TradeSkillUI.GetRecipeReagentItemLink( itemId, index )
+--     local count = select( 3, C_TradeSkillUI.GetRecipeReagentInfo( itemId, index ) )
+--
+--     Atr_ShowTipWithPricing( tip, link, count )
+--   end
+-- );
+
 hooksecurefunc (GameTooltip, "SetTradePlayerItem",
 	function (tip, id)
 		local _, _, num = GetTradePlayerItemInfo(id);
@@ -1187,9 +1205,38 @@ hooksecurefunc (GameTooltip, "SetQuestLogItem",
 
 hooksecurefunc (GameTooltip, "SetInboxItem",
 	function (tip, index, attachIndex)
+	  if AUCTIONATOR_SHOW_MAILBOX_TIPS == 1 then
 		local _, _, num = GetInboxItem(index, attachIndex);
 		Atr_ShowTipWithPricing (tip, GetInboxItemLink(index, attachIndex), num);
 	end
+  end
+);
+
+hooksecurefunc ( "InboxFrameItem_OnEnter",
+  function ( self )
+    local itemCount = select( 8, GetInboxHeaderInfo( self.index ) )
+    local tooltipEnabled = AUCTIONATOR_SHOW_MAILBOX_TIPS == 1 and  (
+      AUCTIONATOR_V_TIPS == 1 or AUCTIONATOR_A_TIPS == 1 or AUCTIONATOR_D_TIPS == 1
+    )
+
+    if tooltipEnabled and itemCount and itemCount > 1 then
+      for numIndex = 1, ATTACHMENTS_MAX_RECEIVE do
+        local name, _, _, num = GetInboxItem( self.index, numIndex )
+
+        if name then
+          local attachLink = GetInboxItemLink( self.index, numIndex ) or name
+
+          GameTooltip:AddLine( attachLink )
+
+          if num > 1 then
+            Atr_ShowTipWithPricing( GameTooltip, attachLink, num )
+          else
+            Atr_ShowTipWithPricing( GameTooltip, attachLink )
+          end
+        end
+      end
+    end
+  end
 );
 
 hooksecurefunc (GameTooltip, "SetSendMailItem",

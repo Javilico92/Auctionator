@@ -142,6 +142,7 @@ AtrL["Quest Item"] = ""
 AtrL["Rare"] = ""
 AtrL["Rare items"] = ""
 AtrL["Really delete the shopping list %s ?"] = ""
+AtrL["Entry must not be blank"] = ""
 AtrL["Recent Searches"] = ""
 AtrL["Recommended Buyout Price"] = ""
 AtrL["Recommended buyout price"] = ""
@@ -203,6 +204,6 @@ AtrL["You may have no more than\n\n%d items on a shopping list."] = ""
 AtrL["your auction on"] = ""
 AtrL["your most recent posting"] = ""
 AtrL["yours"] = ""
-
+AtrL["Items owned"] = ""
 
 end

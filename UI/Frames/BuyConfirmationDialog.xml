@@ -104,7 +104,7 @@
 				<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-20" y="25"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
-						Atr_Buy_Cancel();
+            Atr_Buy_Cancel()
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -114,7 +114,7 @@
 				<Anchors><Anchor point="RIGHT" relativeTo="Atr_Buy_Confirm_CancelBut" relativePoint="LEFT"><Offset><AbsDimension x="-10"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
-						Atr_Buy_Confirm_OK();
+            Atr_Buy_Confirm_OK()
 					</OnClick>
 				</Scripts>
 			</Button>

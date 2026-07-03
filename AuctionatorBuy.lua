@@ -83,6 +83,7 @@ end
 local FocusTime;
 function Atr_Buy1_Onclick ()
 
+
 	if (not Atr_IsSelectedTab_Current()) then
 		return;
 	end
@@ -244,6 +245,8 @@ end
 function Atr_Buy_OnAuctionUpdate()
 
 	if (gBuyState == ATR_BUY_QUERY_SENT) then
+
+zz ("curpage", gAtr_Buy_CurPage);
 
 		gAtr_Buy_Query:CapturePageInfo(gAtr_Buy_CurPage)
 

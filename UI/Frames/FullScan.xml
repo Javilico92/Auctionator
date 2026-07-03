@@ -44,7 +44,7 @@
 				<Anchors><Anchor point="TOPRIGHT"><Offset><AbsDimension x="-30" y="-140"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
-						Atr_FullScanFrame:Hide();
+            Atr_FullScanFrame:Hide()
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -54,7 +54,7 @@
 				<Anchors><Anchor point="RIGHT" relativeTo="Atr_FullScanDone" relativePoint="LEFT"><Offset><AbsDimension x="-4" y="0"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
-						Atr_FullScanStart();
+            Atr_FullScanStart()
 					</OnClick>
 				</Scripts>
 			</Button>

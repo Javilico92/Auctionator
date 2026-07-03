@@ -9,12 +9,12 @@
 
 		<Scripts>
 			<OnLoad>
-				self:SetBackdropColor(0.2, 0.2, 0.2);
+        self:SetBackdropColor( 0.2, 0.2, 0.2 )
 			</OnLoad>
 			<OnShow>
-				self:SetPoint("TOPLEFT", "AuctionFrame", "TOPLEFT");
-				self:SetPoint("BOTTOMRIGHT", "AuctionFrame", "BOTTOMRIGHT", 0, -20);
-				self:SetFrameStrata ("HIGH")
+        self:SetPoint( "TOPLEFT", "AuctionFrame", "TOPLEFT" )
+        self:SetPoint( "BOTTOMRIGHT", "AuctionFrame", "BOTTOMRIGHT", 0, -20 )
+		self:SetFrameStrata ("HIGH")
 			</OnShow>
 		</Scripts>
 	</Frame>

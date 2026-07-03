@@ -35,7 +35,6 @@
 				</Layers>
 			</Frame>
 			
-
 			<Frame>
 				<Size><AbsDimension x="120" y="16" /></Size>
 				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="440" y="0"/></Offset></Anchor></Anchors>
@@ -44,8 +43,7 @@
 						<FontString name="$parent_StackPrice" inherits="GameFontHighlightSmall" justifyH="RIGHT"/>
 					</Layer>
 				</Layers>
-			</Frame>
-			
+			</Frame>			
 		</Frames>
 
 		<PushedTexture file="Interface\HelpFrame\HelpFrameButton-Highlight">
