@@ -4,6 +4,8 @@ local ZT = addonTable.ztt.ZT;
 local zc = addonTable.zc
 local zz = zc.md
 local _
+local ItemUpgradeInfo = LibStub( 'LibItemUpgradeInfo-1.0' )
+
 
 local gAllScans = {};
 
@@ -215,6 +217,7 @@ function AtrScan:UpdateItemLink (itemLink)
 	      -- 13: subClass int
 	      
 			_, _, quality, iLevel, _, sType, sSubType = GetItemInfo(itemLink);
+			-- iLevel = ItemUpgradeInfo:GetUpgradedItemLevel( itemLink )
 
 			self.itemClass		= Atr_ItemType2AuctionClass (sType);
 			self.itemSubclass	= Atr_SubType2AuctionSubclass (self.itemClass, sSubType);	

@@ -10,6 +10,7 @@ local ZT = addonTable.ztt.ZT;
 local zc = addonTable.zc;
 local zz = zc.md;
 local _
+local ItemUpgradeInfo = LibStub( 'LibItemUpgradeInfo-1.0' )
 
 gAtrZC = addonTable.zc;		-- share with AuctionatorDev
 
@@ -70,7 +71,6 @@ local auctionator_orig_ChatFrame_OnEvent;
 
 local gForceMsgAreaUpdate = true;
 local gAtr_ClickAuctionSell = false;
-local gAtr_echoAddonChat = false
 
 local gTimeZero;
 local gTimeTightZero;
@@ -167,8 +167,7 @@ end
 -----------------------------------------
 
 function Atr_EventHandler(self, event, ...)
-
-	Auctionator.Debug.Message( 'Atr_EventHandler', event, ... )
+  -- Auctionator.Debug.Message( 'Atr_EventHandler', event, ... )
 
 	if (event == "VARIABLES_LOADED")			then	Atr_OnLoad(); 						end;
 	if (event == "ADDON_LOADED")				then	Atr_OnAddonLoaded(...); 			end;
@@ -297,25 +296,33 @@ local versionReminderCalled	= false;	-- make sure we don't bug user more than on
 
 -----------------------------------------
 
-local function CheckVersion (verString)
-	Auctionator.Debug.Message( 'CheckVersion', verString )
-	
-	if (checkVerString == nil) then
-		checkVerString = AuctionatorVersion;
-	end
-	
-	local a,b,c = strsplit (".", verString);
+local function VersionStringToInt( versionString )
+  Auctionator.Debug.Message( 'VersionStringToInt', versionString )
+  local major, minor, patch = strsplit( '.', versionString )
 
-	if (tonumber(a) == nil or tonumber(b) == nil or tonumber(c) == nil) then
-		return false;
+  return ( tonumber( major ) or -1 ),
+    ( tonumber( minor ) or -1 ),
+    ( tonumber( patch ) or -1 )
+end
+
+local function CheckVersion (verString)
+  if checkVerString == nil then
+    checkVerString = AuctionatorVersion
 	end
 	
-	if (verString > checkVerString) then
-		checkVerString = verString;
-		return true;	-- out of date
+  Auctionator.Debug.Message( 'CheckVersion', verString, checkVerString )
+
+  local userMajor, userMinor, userPatch = VersionStringToInt( checkVerString )
+  local otherMajor, otherMinor, otherPatch = VersionStringToInt( verString )
+	
+  -- TODO is this needed? kept it in, not sure if it was here for backwards compatibility?
+  if userMajor == nil or userMinor == nil or userPatch == nil then
+    return false
 	end
 	
-	return false;
+  return userMajor < otherMajor or
+    ( userMajor == otherMajor and userMinor < otherMinor ) or
+    ( userMajor == otherMajor and userMinor == otherMinor and userPatch < otherPatch )
 end
 
 -----------------------------------------
@@ -341,60 +348,50 @@ local VREQ_sent = 0;
 function Atr_SendAddon_VREQ (type, target)
 	Auctionator.Debug.Message( 'Atr_SendAddon_VREQ', type, target )
 
-	VREQ_sent = time();
+  VREQ_sent = time()
 
 	if (not zc.StringSame (type, "WHISPER")) then
 		zz ("sending vreq to", type)
 	end
 	
-	SendAddonMessage ("ATR", "VREQ_"..AuctionatorVersion, type, target);
-	
+  SendAddonMessage( "ATR", "VREQ_"..AuctionatorVersion, type, target )
 end
 
 -----------------------------------------
 
 function Atr_OnChatMsgAddon (...)
+  local prefix, msg, distribution, sender = ...
+
+  if prefix == "ATR" then
 	Auctionator.Debug.Message( 'Atr_OnChatMsgAddon', ... )
 
-	local	prefix, msg, distribution, sender = ...;
-	
+    local s = string.format(
+      "%s %s |cff88ffff %s |cffffffaa %s|r", prefix, distribution, sender, msg
+    )
 
-	if (prefix == "ATR") then
-	
-		local s = string.format ("%s %s |cff88ffff %s |cffffffaa %s|r", prefix, distribution, sender, msg);
-		
-		if (gAtr_echoAddonChat) then
-			zz (s);
+    if zc.StringStartsWith( msg, "VREQ_" ) then
+      SendAddonMessage( "ATR", "V_"..AuctionatorVersion, "WHISPER", sender )
 		end
 		
-		if (zc.StringStartsWith (msg, "VREQ_")) then
-			SendAddonMessage ("ATR", "V_"..AuctionatorVersion, "WHISPER", sender);
+    if zc.StringStartsWith (msg, "IREQ_") then
+      collectgarbage( "collect" )
+      UpdateAddOnMemoryUsage()
+      local mem  = math.floor( GetAddOnMemoryUsage("Auctionator") )
+      SendAddonMessage( "ATR", "I_" .. Atr_GetDBsize() .. "_" .. mem .. "_" .. #AUCTIONATOR_SHOPPING_LISTS.."_"..GetRealmFacInfoString(), "WHISPER", sender)
 		end
 		
-		if (zc.StringStartsWith (msg, "IREQ_")) then
-			collectgarbage  ("collect");
-			UpdateAddOnMemoryUsage();
-			local mem  = math.floor(GetAddOnMemoryUsage("Auctionator"));
-			SendAddonMessage ("ATR", "I_"..Atr_GetDBsize().."_"..mem.."_"..#AUCTIONATOR_SHOPPING_LISTS.."_"..GetRealmFacInfoString(), "WHISPER", sender)
-		end
+    if zc.StringStartsWith( msg, "V_" ) and time() - VREQ_sent < 5 then
 
-		if (zc.StringStartsWith (msg, "V_") and time() - VREQ_sent < 5) then
+      local herVerString = string.sub( msg, 3 )
+      local outOfDate = CheckVersion( herVerString )
 
-			local herVerString = string.sub (msg, 3);
-		--	zc.md ("version found:", herVerString, "   ", sender, "     response time:", time() - VREQ_sent);
-			local outOfDate = CheckVersion (herVerString);
-			if (outOfDate) then
-				zc.AddDeferredCall (3, "Atr_VersionReminder", nil, nil, "VR");
+      if outOfDate then
+        zc.AddDeferredCall( 3, "Atr_VersionReminder", nil, nil, "VR" )
 			end
 		end
 	end
 
 	Atr_OnChatMsgAddon_ShoppingListCmds (prefix, msg, distribution, sender)
-
-	if (Atr_OnChatMsgAddon_Dev) then
-		Atr_OnChatMsgAddon_Dev (prefix, msg, distribution, sender);
-	end
-	
 end
 
 
@@ -462,11 +459,6 @@ local function Atr_DumpDElog()
 	for n = 1,#AUCTIONATOR_DE_DATA_BAK do
 		msg = msg..AUCTIONATOR_DE_DATA_BAK[n].."\n"
 	end
-	
-	-- Atr_LUA_ErrorMsg:SetText (msg)
-
-	-- Atr_LUA_Error:Show()
-	
 end
 	
 -----------------------------------------
@@ -481,8 +473,6 @@ function Atr_ClearItemStackingPrefs ()
 			AUCTIONATOR_STACKING_PREFS[text] = nil
 		end
 	end
-
-
 end
 
 -----------------------------------------
@@ -552,6 +542,7 @@ local function Atr_SlashCmdFunction(msg)
 			zc.msg_anm ("full scan chunk size: ", AUCTIONATOR_FS_CHUNK);
 		end
 
+
 	elseif (cmd == "generr") then
 		
 		local y = 5 + nil;
@@ -559,10 +550,6 @@ local function Atr_SlashCmdFunction(msg)
 	elseif (cmd == "vsl") then
 		
 		Atr_ShpList_Validate()
-
-	elseif (cmd == "eac") then
-		gAtr_echoAddonChat = not gAtr_echoAddonChat
-		zz ("gAtr_echoAddonChat is now", gAtr_echoAddonChat)
 
 	elseif (cmd == "delog") then
 	
@@ -693,20 +680,15 @@ end
 -----------------------------------------
 
 local function Atr_ModTradeSkillFrame()
-    Auctionator.Debug.Message("Atr_ModTradeSkillFrame")
+  Auctionator.Debug.Message( 'Atr_ModTradeSkillFrame' )
 
-    if gTradeSkillFrameModded then
+  if (gTradeSkillFrameModded) then
         return
     end
 
-	if not TradeSkillFrame then
-        zz("TradeSkillFrame not loaded")
-        return
-    end
-
+  if (TradeSkillFrame) then
 	gTradeSkillFrameModded = true
---		local button = CreateFrame("BUTTON", "Auctionator_Search", TradeSkillFrame, "UIPanelButtonTemplate2");
---		button:SetPoint("TOPRIGHT", "TradeSkillFrameCloseButton", "TOPLEFT", 0, -8);
+
 	local button = CreateFrame("BUTTON", "Auctionator_Search", TradeSkillDetailScrollChildFrame, "UIPanelButtonTemplate2")
 	button:SetPoint("TOPRIGHT", TradeSkillDetailScrollChildFrame, "TOPRIGHT", -4, -4)
 	button:SetHeight (32)
@@ -728,8 +710,13 @@ local function Atr_ModTradeSkillFrame()
     end)
 
     zz("TradeSkillFrame modded")
-end
+    else
+    zz ("TradeSkillFrame not loaded")
+  end
 
+
+
+end
 -----------------------------------------
 
 function Atr_InitScanDB()
@@ -1013,6 +1000,7 @@ function Atr_ScanBags (mats, gear)
 
 				-- local itemName, _, itemRarity, itemLevel, _, itemType, itemSubType, _, _, _, _, itemClassID, itemSubClassID = GetItemInfo( itemLink )
 				local itemName, _, itemRarity, itemLevel, _, itemType, itemSubType = GetItemInfo (itemLink); -- 335
+				-- local itemLevel = ItemUpgradeInfo:GetUpgradedItemLevel( itemLink )
 
 				-- if ( Atr_IsWeaponType( itemClassID ) or Atr_IsArmorType( itemClassID ) ) and itemLevel > 271 then
 				if ((itemType == "Armor" or itemType == "Weapon") and itemLevel > 271) then
@@ -1336,7 +1324,7 @@ function Atr_AuctionFrameTab_OnClick (self, index, down)
 		AuctionFrameAuctions:Hide();
 		AuctionFrameBrowse:Hide();
 		AuctionFrameBid:Hide();
-		PlaySound("igCharacterInfoTab");
+		PlaySound(SOUNDKIT.IG_CHARACTER_INFO_TAB);
 
 		PanelTemplates_SetTab(AuctionFrame, index);
 
@@ -3329,14 +3317,14 @@ function Atr_BuildActiveAuctions ()
 
 		if (count > 0) then		-- count is 0 for sold items
 		
-			local link		= GetAuctionItemLink ("owner", i);
-      local item_link = Auctionator.ItemLink:new({ item_link = link })
+		  local link		= GetAuctionItemLink ("owner", i);
+      	  local item_link = Auctionator.ItemLink:new({ item_link = link })
 			
-      if (gActiveAuctions[ item_link:IdString() ] == nil) then
-        gActiveAuctions[ item_link:IdString() ] = { link=link, name=name, count=1 }
-			else
-        gActiveAuctions[ item_link:IdString() ].count = gActiveAuctions[ item_link:IdString() ].count + 1;
-			end
+      	if (gActiveAuctions[ item_link:IdString() ] == nil) then
+		  gActiveAuctions[ item_link:IdString() ] = { link=link, name=name, count=1 }
+		else
+          gActiveAuctions[ item_link:IdString() ].count = gActiveAuctions[ item_link:IdString() ].count + 1;
+		end
 		end
 		
 		i = i + 1;
@@ -3488,33 +3476,6 @@ function Atr_HEntryOnClick(self)
 		return;
 	end
 
---[[	This was only used when the "All Item" list was supported
-	if (itemLink == nil and AUCTIONATOR_PRICING_HISTORY[itemName]) then
-		local itemId, suffixId, uniqueId = strsplit(":", AUCTIONATOR_PRICING_HISTORY[itemName]["is"])
-
-		local itemId	= tonumber(itemId);
-
-		if (suffixId == nil) then	suffixId = 0;
-		else		 				suffixId = tonumber(suffixId);
-		end
-
-		if (uniqueId == nil) then	uniqueId = 0;
-		else		 				uniqueId = tonumber(suffixId);
-		end
-
-		local itemString = "item:"..itemId..":0:0:0:0:0:"..suffixId..":"..uniqueId;
-		
-		_, itemLink = GetItemInfo(itemString);
-
-		if (itemLink == nil) then		-- pull it into the cache and go back to the idle loop to wait for it to appear
-			AtrScanningTooltip:SetHyperlink(itemString);
-			gHentryTryAgain = line;
-			zc.md ("pulling "..itemName.." into the local cache");
-			return;
-		end
-	end
-]]--
-	
 	gCurrentPane.UINeedsUpdate = true;
 	
 	Atr_ClearAll();
@@ -3531,7 +3492,7 @@ function Atr_HEntryOnClick(self)
     Atr_OnSearchComplete()
 	end
 
-  PlaySound("igMainMenuOptionCheckBoxOn")
+  PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 end
 
 -----------------------------------------
@@ -3543,7 +3504,7 @@ function Atr_ListTabOnClick (id)
 		return;
 	end
 
-	PlaySound("igMainMenuOptionCheckBoxOn");
+	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 
 	Atr_SetToShowTab (id);
 	
@@ -4237,7 +4198,7 @@ function Atr_EntryOnClick(entry)
 		Atr_UpdateRecommendation(true);
 	end
 
-	PlaySound ("igMainMenuOptionCheckBoxOn");
+	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 end
 
 -----------------------------------------
@@ -5188,7 +5149,7 @@ function Atr_Cancel_Undercuts_OnClick ()
 
 	-- if (#gAtr_MassCancelList == 0) then
 		-- Atr_CheckActives_Yes_Button:Disable();
-		-- PlaySound ("AuctionWindowClose");
+		-- PlaySound(SOUNDKIT.AUCTION_WINDOW_CLOSE);
 	-- else
 		-- Atr_CheckActives_Yes_Button:Enable();
 	-- end

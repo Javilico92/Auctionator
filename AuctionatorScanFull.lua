@@ -92,6 +92,11 @@ function Atr_FullScanStart()
 			gAtr_FullScanState = ATR_FS_STARTED;
 			QueryAuctionItems ("", nil, nil, 0, 0, 0, 0, false, -1, true);
 
+      if not ITEM_QUALITY_COLORS[-1] then
+        ITEM_QUALITY_COLORS[-1] = {r=0, b=0, g=0}
+      end
+
+      QueryAuctionItems( "", nil, nil, 0, nil, nil, true, false, nil )
 		end
 		
 	end
@@ -161,7 +166,7 @@ function Atr_FullScanFrameIdle()
 	if (gAtr_FullScanState == ATR_FS_CLEANING_UP) then
 
 		if (Atr_GetNumAuctionItems("list") < 100) then
-			PlaySound("AuctionWindowClose");
+			PlaySound(SOUNDKIT.AUCTION_WINDOW_CLOSE);
 			Atr_PurgeObsoleteItems ();
 			gAtr_FullScanState = ATR_FS_NULL;
 		end

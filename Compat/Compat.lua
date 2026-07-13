@@ -47,3 +47,20 @@ end
 AuctionatorCompat.LE_ITEM_CLASS_WEAPON = 1 -- LE_ITEM_CLASS_WEAPON = 2 after 7.0.X
 AuctionatorCompat.LE_ITEM_CLASS_ARMOR = 2 -- LE_ITEM_CLASS_ARMOR = 4 after 7.0.X
 AuctionatorCompat.LE_ITEM_CLASS_BATTLEPET = 0 -- Not used in 3.3.5
+
+if not SOUNDKIT then
+    SOUNDKIT = {
+        IG_MAINMENU_OPTION_CHECKBOX_ON  = "igMainMenuOptionCheckBoxOn",
+        IG_MAINMENU_OPTION_CHECKBOX_OFF = "igMainMenuOptionCheckBoxOff",
+
+        IG_QUEST_LIST_OPEN  = "igQuestListOpen",
+        IG_QUEST_LIST_CLOSE = "igQuestListClose",
+
+        AUCTION_WINDOW_OPEN  = "AuctionWindowOpen",
+        AUCTION_WINDOW_CLOSE = "AuctionWindowClose",
+
+        IG_CHARACTER_INFO_TAB = "igCharacterInfoTab",
+
+        GS_TITLE_OPTION_OK = "gsTitleOptionOK",
+    }
+end
