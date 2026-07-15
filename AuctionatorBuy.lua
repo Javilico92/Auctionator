@@ -73,8 +73,7 @@ local function Atr_Set_BuyConfirm_Progress ()
 	end
 	
 	Atr_Buy_NumAvail_Text:SetText (s);
-	Atr_Buy_Continue_Text:SetText (string.format (ZT("%d of %d bought so far"), gAtr_Buy_NumBought, gAtr_Buy_NumUserWants));
-	--Atr_Buy_Continue_Text:SetText (string.format (ZT("%d bought so far"), gAtr_Buy_NumBought));
+  Atr_Buy_Continue_Text:SetText (string.format (ZT("%d bought so far"), gAtr_Buy_NumBought));
 
 end
 
@@ -156,7 +155,6 @@ function Atr_Buy_QueueQuery (page)
 
 	gAtr_Buy_CurPage = page;
 
-
 	gBuyState = ATR_BUY_WAITING_FOR_AH_CAN_SEND;
 	gAtr_Buy_Waiting_Start = time();
 	
@@ -165,7 +163,6 @@ end
 -----------------------------------------
 
 function Atr_Buy_SendQuery ()
-
   Auctionator.Debug.Message( 'Atr_Buy_SendQuery' )
   gAtr_NextMatchIndex = 0
 

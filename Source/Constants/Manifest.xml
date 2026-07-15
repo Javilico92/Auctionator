@@ -11,4 +11,7 @@
   <Script file="DisenchantingMaterialMapping.lua" />
   <Script file="DisenchantingItemNames.lua" />
   <Script file="DisenchantingProbabilities.lua" />
+
+  <Script file="Tabs.lua" />
+  <Script file="DialogNames.lua" />
 </Ui>

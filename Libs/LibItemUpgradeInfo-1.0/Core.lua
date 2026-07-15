@@ -171,8 +171,8 @@ local patterns={
   [soulboundPattern]="soulbound",
   [boePattern]="boe",
   [bopPattern]="bop",
-  [boaPattern1]="boa",
-  [boaPattern2]="boa",
+  --[boaPattern1]="boa",
+  --[boaPattern2]="boa",
 }
 
 local scanningTooltip

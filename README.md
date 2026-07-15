@@ -1,11 +1,9 @@
 # Auctionator
 Auctionator for 3.3.5 client
 
-NOTE 3: 8.2.0 is the last version for old wow client, 8.3.0 completly rewrites code and resets everything previously.
+WARNING: This is a BETA version for 8.3.0 of Auctionator, due to Refactoring and changes to use Modern C_API this version is not fully functionally.
 
-NOTE 2: We are going to migrate Auctionator shopping list format!! Instead of '/' slash we are going to use separator from constants file of Auctionator (actually is semicolon (;)).
-
-NOTE: If you are using AuctionatorMiniFeatures, disable it! It's not compatible anymore and can cause issues, most of features are part of Auctionator now!.
+Use only for test purposes
 
 [![Stars](https://img.shields.io/github/stars/Javilico92/Auctionator)](https://img.shields.io/github/stars/Javilico92/Auctionator)
 

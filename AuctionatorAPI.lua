@@ -73,20 +73,6 @@ end
 
 -----------------------------------------
 
-function Atr_GetDisenchantValue (item)
-	-- local itemName, itemLink, quality, iLevel, _, itemType, sSubType, _, _, _, _, itemClass, itemSubClass = GetItemInfo(itemLink);
-	local itemName, itemLink, itemRarity, itemLevel, _, itemType = GetItemInfo (item);
-
-	if (itemLink) then
-		-- return Atr_CalcDisenchantPrice( itemClass, itemRarity, itemLevel )
-		return Atr_CalcDisenchantPrice (itemType, itemRarity, itemLevel);
-	end
-	
-	return nil;
-end
-
------------------------------------------
-
 function Atr_SearchAH (shoppingListName, items, itemType)
 
 	if (shoppingListName == nil) then
@@ -104,8 +90,8 @@ function Atr_SearchAH (shoppingListName, items, itemType)
 		end
 	end
 
-	if (not Atr_IsTabSelected(SELL_TAB)) then
-		Atr_SelectPane (SELL_TAB);
+	if (not Atr_IsTabSelected(Auctionator.Constants.Tabs.SELL_TAB)) then
+		Atr_SelectPane (Auctionator.Constants.Tabs.SELL_TAB);
 	end
 
 	Atr_SetSearchText ("{ "..shoppingListName.." }");

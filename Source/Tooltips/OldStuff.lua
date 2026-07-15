@@ -1,9 +1,10 @@
-
 local addonName, addonTable = ...; 
 local ZT = addonTable.ztt.ZT;
 local zc = addonTable.zc;
 local zz = zc.md;
 local _
+
+local ItemUpgradeInfo = LibStub( 'LibItemUpgradeInfo-1.0' )
 
 -----------------------------------------
 
@@ -186,43 +187,27 @@ end
 
 -----------------------------------------
 
-local function Atr_CalcTextWid (price)
+-- local function Atr_CalcTextWid (price)
 
-	local wid = 15;
-	
-	if (price > 9)			then wid = wid + 12;	end;
-	if (price > 99)			then wid = wid + 44;	end;
-	if (price > 999)		then wid = wid + 12;	end;
-	if (price > 9999)		then wid = wid + 44;	end;
-	if (price > 99999)		then wid = wid + 12;	end;
-	if (price > 999999)		then wid = wid + 12;	end;
-	if (price > 9999999)	then wid = wid + 12;	end;
-	if (price > 99999999)	then wid = wid + 12;	end;
-	
-	return wid;
-end
+--   local wid = 15;
 
------------------------------------------
+--   if (price > 9)      then wid = wid + 12;  end;
+--   if (price > 99)     then wid = wid + 44;  end;
+--   if (price > 999)    then wid = wid + 12;  end;
+--   if (price > 9999)   then wid = wid + 44;  end;
+--   if (price > 99999)    then wid = wid + 12;  end;
+--   if (price > 999999)   then wid = wid + 12;  end;
+--   if (price > 9999999)  then wid = wid + 12;  end;
+--   if (price > 99999999) then wid = wid + 12;  end;
 
-local function Atr_CalcTTpadding (price1, price2)
+--   return wid;
+-- end
 
-	local padding = "";
+-- local function Atr_GetDEitemName( itemID )
+--   local itemName = GetItemInfo( itemID )
 
-	if (price1 and price2) then
-		local vpwidth = Atr_CalcTextWid (price1);
-		local apwidth = Atr_CalcTextWid (price2);
-
-		local padlen = math.floor ((apwidth - vpwidth)/6);
-		local k;
-		
-		for k = 1,padlen do
-			padding = padding.." ";
-		end
-	end
-
-	return padding;
-
-end
+--   return itemName or Auctionator.Constants.DisenchantingItemName[ itemID ]
+-- end
 
 -----------------------------------------
 
@@ -496,52 +481,52 @@ end
 
 -----------------------------------------
 
-local deItemNames = {};
+--local deItemNames = {};
 
-local function Atr_GetDEitemName (itemID)
-
-	if (deItemNames[itemID] == nil) then
-		local itemName = GetItemInfo (itemID);
-		if (itemName == nil) then
-			zc.md ("defaulting to english DE mat name: "..engDEnames [itemID]);
-			return engDEnames [itemID];
-		end
-		
-		deItemNames[itemID] = itemName;
-	end
-	
-	return deItemNames[itemID];
-
-end
+-- local function Atr_GetDEitemName (itemID)
+--
+--	if (deItemNames[itemID] == nil) then
+--		local itemName = GetItemInfo (itemID);
+--		if (itemName == nil) then
+--			zc.md ("defaulting to english DE mat name: "..engDEnames [itemID]);
+--			return engDEnames [itemID];
+--		end
+--		
+--		deItemNames[itemID] = itemName;
+--	end
+--	
+--	return deItemNames[itemID];
+--
+-- end
 
 -----------------------------------------
 
-function Atr_GetAuctionPriceDE (itemID)  -- same as Atr_GetAuctionPrice but understands that some "lesser" essences are convertible with "greater"
-
-	local lesserPrice;
-	local greaterPrice;
-	
-	if (itemID == LESSER_CEL) then
-		lesserPrice  = Atr_GetAuctionPrice (Atr_GetDEitemName (LESSER_CEL));
-		greaterPrice = Atr_GetAuctionPrice (Atr_GetDEitemName (GREATER_CEL));
-	end
-	
-	if (itemID == LESSER_COSMIC) then
-		lesserPrice  = Atr_GetAuctionPrice (Atr_GetDEitemName (LESSER_COSMIC));
-		greaterPrice = Atr_GetAuctionPrice (Atr_GetDEitemName (GREATER_COSMIC));
-	end
-	
-	if (itemID == LESSER_PLANAR) then
-		lesserPrice  = Atr_GetAuctionPrice (Atr_GetDEitemName (LESSER_PLANAR));
-		greaterPrice = Atr_GetAuctionPrice (Atr_GetDEitemName (GREATER_PLANAR));
-	end
-	
-	if (lesserPrice ~= nil and greaterPrice ~= nil and lesserPrice * 3 > greaterPrice) then
-		return math.floor (greaterPrice / 3);
-	end
-	
-	return Atr_GetAuctionPrice (Atr_GetDEitemName (itemID));
-end
+-- function Atr_GetAuctionPriceDE (itemID)  -- same as Atr_GetAuctionPrice but understands that some "lesser" essences are convertible with "greater"
+--
+--	local lesserPrice;
+--	local greaterPrice;
+--	
+--	if (itemID == LESSER_CEL) then
+--		lesserPrice  = Atr_GetAuctionPrice (Atr_GetDEitemName (LESSER_CEL));
+--		greaterPrice = Atr_GetAuctionPrice (Atr_GetDEitemName (GREATER_CEL));
+--	end
+--	
+--	if (itemID == LESSER_COSMIC) then
+--		lesserPrice  = Atr_GetAuctionPrice (Atr_GetDEitemName (LESSER_COSMIC));
+--		greaterPrice = Atr_GetAuctionPrice (Atr_GetDEitemName (GREATER_COSMIC));
+--	end
+--	
+--	if (itemID == LESSER_PLANAR) then
+--		lesserPrice  = Atr_GetAuctionPrice (Atr_GetDEitemName (LESSER_PLANAR));
+--		greaterPrice = Atr_GetAuctionPrice (Atr_GetDEitemName (GREATER_PLANAR));
+--	end
+--	
+--	if (lesserPrice ~= nil and greaterPrice ~= nil and lesserPrice * 3 > greaterPrice) then
+--		return math.floor (greaterPrice / 3);
+--	end
+--	
+--	return Atr_GetAuctionPrice (Atr_GetDEitemName (itemID));
+-- end
 
 -----------------------------------------
 
@@ -802,29 +787,27 @@ end
 
 -----------------------------------------
 
-function Atr_AddDEDetailsToTip (tip, itemType, itemRarity, itemLevel)
-
-	local ta = Atr_FindDEentry (itemType, itemRarity, itemLevel);
-
-	if (ta) then
-		local x;
-		for x = 3,#ta,3 do
-			local percent = math.floor (ta[x]*100) / 100;
-
-			local deitem = Atr_GetDEitemName(ta[x+2]);
-			if (deitem == nil) then
-				deitem = "???";
-			end
-
-			if (percent > 0) then
-				tip:AddLine ("  |cFFFFFFFF"..percent.."%|r   "..ta[x+1].." "..deitem)
-			end
-		end
-	end
-
-end
-
------------------------------------------
+-- function Atr_AddDEDetailsToTip (tip, itemType, itemRarity, itemLevel)
+--
+--	local ta = Atr_FindDEentry (itemType, itemRarity, itemLevel);
+--
+--	if (ta) then
+--		local x;
+--		for x = 3,#ta,3 do
+--			local percent = math.floor (ta[x]*100) / 100;
+--
+--			local deitem = Atr_GetDEitemName(ta[x+2]);
+--			if (deitem == nil) then
+--				deitem = "???";
+--			end
+--
+--			if (percent > 0) then
+--				tip:AddLine ("  |cFFFFFFFF"..percent.."%|r   "..ta[x+1].." "..deitem)
+--			end
+--		end
+--	end
+--
+-- end
 
 function Atr_DumpDETable (itemType, itemRarity)
 
@@ -873,48 +856,36 @@ function Atr_CalcDisenchantPrice (itemType, itemRarity, itemLevel)
 end
 
 -----------------------------------------
-
 function Atr_STWP_AddVendorInfo (tip, xstring, vendorPrice, auctionPrice)
 	
-	
 	if (AUCTIONATOR_V_TIPS == 1 and vendorPrice > 0) then
-		local vpadding = Atr_CalcTTpadding (vendorPrice, auctionPrice);
-		tip:AddDoubleLine (ZT("Vendor")..xstring, "|cFFFFFFFF"..zc.priceToMoneyString (vendorPrice))
-	end
+    tip:AddDoubleLine (ZT("Vendor")..xstring, "|cFFFFFFFF"..zc.priceToMoneyString (vendorPrice))
+  end
 	
 end
 	
 -----------------------------------------
 
-function Atr_STWP_AddAuctionInfo (tip, xstring, link, auctionPrice, lastScan)
-	
-	
-	if (AUCTIONATOR_A_TIPS == 1) then
-	
-		if lastScan then
-			tip:AddDoubleLine ("Last Scanned", lastScan);
-		end
-	
-		
-		
-		local itemID = zc.RawItemIDfromLink (link);
-		itemID = tonumber(itemID);
-	
-		local bondtype = Atr_GetBondType (itemID);
-		
-		if (bondtype == ATR_BIND_ON_PICKUP) then
-			tip:AddDoubleLine (ZT("Auction")..xstring, "|cFFFFFFFF"..ZT("BOP").."  ");		
-		elseif (bondtype == ATR_BINDS_TO_ACCOUNT) then
-			tip:AddDoubleLine (ZT("Auction")..xstring, "|cFFFFFFFF"..ZT("BOA").."  ");		
-		elseif (bondtype == ATR_QUEST_ITEM) then
-			tip:AddDoubleLine (ZT("Auction")..xstring, "|cFFFFFFFF"..ZT("Quest Item").."  ");		
-		elseif (auctionPrice ~= nil) then
-			tip:AddDoubleLine (ZT("Auction")..xstring, "|cFFFFFFFF"..zc.priceToMoneyString (auctionPrice));
-		else
-			tip:AddDoubleLine (ZT("Auction")..xstring, "|cFFFFFFFF"..ZT("unknown").."  ");
-		end
-	end
-		
+function Atr_STWP_AddAuctionInfo (tip, xstring, link, auctionPrice)
+  if AUCTIONATOR_A_TIPS == 1 then
+
+    local itemID = zc.RawItemIDfromLink (link);
+    itemID = tonumber(itemID);
+
+    local bondtype = Atr_GetBondType (itemID);
+
+    if (bondtype == ATR_BIND_ON_PICKUP) then
+      tip:AddDoubleLine (ZT("Auction")..xstring, "|cFFFFFFFF"..ZT("BOP").."  ");
+    elseif (bondtype == ATR_BINDS_TO_ACCOUNT) then
+      tip:AddDoubleLine (ZT("Auction")..xstring, "|cFFFFFFFF"..ZT("BOA").."  ");
+    elseif (bondtype == ATR_QUEST_ITEM) then
+      tip:AddDoubleLine (ZT("Auction")..xstring, "|cFFFFFFFF"..ZT("Quest Item").."  ");
+    elseif (auctionPrice ~= nil) then
+      tip:AddDoubleLine (ZT("Auction")..xstring, "|cFFFFFFFF"..zc.priceToMoneyString (auctionPrice));
+    else
+      tip:AddDoubleLine (ZT("Auction")..xstring, "|cFFFFFFFF"..ZT("unknown").."  ");
+    end
+  end
 end
 	
 -----------------------------------------
@@ -961,16 +932,15 @@ end
 local item_links = {}
 local pet_links = {}
 
-function Atr_ShowTipWithPricing (tip, link, num)
-
-	-- if (link == nil or zc.IsBattlePetLink(link)) then
-		--if link and not pet_links[ link ] then
-			--pet_links[ link ] = Auctionator.ItemLink:new({ item_link = link })
-			--Auctionator.Debug.Message( pet_links[ link ]:GetField( Auctionator.Constants.ItemLink.TYPE ),
-			--pet_links[ link ]:IdString() )
-		--end
-		-- return;
-	-- end
+function Atr_ShowTipWithPricing (tip, link, num, itemId)
+	-- if link == nil or zc.IsBattlePetLink( link ) then
+    --	if link and not pet_links[ link ] then
+    --	  pet_links[ link ] = Auctionator.ItemLink:new({ item_link = link })
+    --	end
+	-- TODO: Once search functionality is updated to include battle pet levels,
+    -- add tooltip here
+	-- return
+  	-- end
 
 	if Auctionator.Debug.IsOn() then
     if not item_links[ link ] then
@@ -996,69 +966,69 @@ function Atr_ShowTipWithPricing (tip, link, num)
     tip:AddDoubleLine( 'BONUS_ID_3', item_links[ link ]:GetField( Auctionator.Constants.ItemLink.BONUS_ID_3 ))
     tip:AddDoubleLine( 'BONUS_ID_4', item_links[ link ]:GetField( Auctionator.Constants.ItemLink.BONUS_ID_4 ))
   end
-	
-	if link == nil then
-		return;
-	end
-	
-	local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, _, _, _, _, itemVendorPrice = GetItemInfo (link);
-		
+      -- TODO: Capture this knowledge somewhere
+      -- 1: name
+      -- 2: itemLink
+      -- 3: quality
+      -- 4: iLevel
+      -- 5: required Level
+      -- 6: itemClass String
+      -- 7: subClass String
+      -- 8: ? (int)
+      -- 9: WTF String
+      -- 10: big int
+      -- 11: itemVendorPrice? (big int)
+      -- 12: itemClass int
+      -- 13: subClass int
+  local itemName, itemLink, itemRarity, _, itemMinLevel, itemType, _, _, _, _, itemVendorPrice, classID = GetItemInfo (link);
+  local itemLevel = ItemUpgradeInfo:GetUpgradedItemLevel( itemLink )
 
-	local showStackPrices = IsShiftKeyDown();
-	if (AUCTIONATOR_SHIFT_TIPS == 2) then
-		showStackPrices = not IsShiftKeyDown();
-	end
+  local showStackPrices = IsShiftKeyDown();
+  if (AUCTIONATOR_SHIFT_TIPS == 2) then
+    showStackPrices = not IsShiftKeyDown();
+  end
 
-	local xstring = "";
-	if num and showStackPrices then
-    	xstring = "|cFFAAAAFF x" .. num .. "|r"
-	end
+  local xstring = "";
+  if num and showStackPrices then
+    xstring = "|cFFAAAAFF x" .. num .. "|r"
+  end
+
+  local vendorPrice, _, dePrice = Atr_STWP_GetPrices (link, num, showStackPrices, itemVendorPrice, itemName, classID, itemRarity, itemLevel);
+
+  local auctionPrice = "Unknown"
+  if Auctionator.State.LiveDB[itemId] == nil then
+
+  else
+    auctionPrice = Auctionator.State.LiveDB[itemId].mr
+  end
+
+  -- vendor info
+
+  Atr_STWP_AddVendorInfo (tip, xstring, vendorPrice, auctionPrice)
+
+  -- auction info
+
+  Atr_STWP_AddAuctionInfo (tip, xstring, link, auctionPrice)
 
 
-	local vendorPrice, auctionPrice, dePrice = Atr_STWP_GetPrices (link, num, showStackPrices, itemVendorPrice, itemName, itemType, itemRarity, itemLevel);
+  -- disenchanting info
 
-	-- vendor info
+  Atr_STWP_AddBasicDEInfo (tip, xstring, dePrice)
 
-	Atr_STWP_AddVendorInfo (tip, xstring, vendorPrice, auctionPrice)
-	
-	-- auction info
+  local showDetails = true;
 
-	local TimeDiff = time()
-	if ((type(gAtr_ScanDB) == "table") and gAtr_ScanDB[itemName] and gAtr_ScanDB[itemName].lastScan) then
-		TimeDiff = TimeDiff - gAtr_ScanDB[itemName].lastScan
-		
-		local timeColor = "|cffff0000"
-		if TimeDiff < 60 * 60 * 3 then
-			timeColor = "|cff00ff00"
-		elseif TimeDiff < 60 * 60 * 12 then
-			timeColor = "|cffffff00"
-		end
-		local MakeTimeString = format(timeColor.."%s ago".."|r", SecondsToTime(TimeDiff))
-		
-		Atr_STWP_AddAuctionInfo (tip, xstring, link, auctionPrice, MakeTimeString)
-		
-	else
-		Atr_STWP_AddAuctionInfo (tip, xstring, link, auctionPrice)
-	end
+  if (AUCTIONATOR_DE_DETAILS_TIPS == 1) then showDetails = IsShiftKeyDown(); end;
+  if (AUCTIONATOR_DE_DETAILS_TIPS == 2) then showDetails = IsControlKeyDown(); end;
+  if (AUCTIONATOR_DE_DETAILS_TIPS == 3) then showDetails = IsAltKeyDown(); end;
+  if (AUCTIONATOR_DE_DETAILS_TIPS == 4) then showDetails = false; end;
+  if (AUCTIONATOR_DE_DETAILS_TIPS == 5) then showDetails = true; end;
 
-	-- disenchanting info
+  if (showDetails and dePrice ~= nil) then
+    Atr_AddDEDetailsToTip (tip, classID, itemRarity, itemLevel)
+  end
 
-	Atr_STWP_AddBasicDEInfo (tip, xstring, dePrice)
 
-	local showDetails = true;
-	
-	if (AUCTIONATOR_DE_DETAILS_TIPS == 1) then showDetails = IsShiftKeyDown(); end;
-	if (AUCTIONATOR_DE_DETAILS_TIPS == 2) then showDetails = IsControlKeyDown(); end;
-	if (AUCTIONATOR_DE_DETAILS_TIPS == 3) then showDetails = IsAltKeyDown(); end;
-	if (AUCTIONATOR_DE_DETAILS_TIPS == 4) then showDetails = false; end;
-	if (AUCTIONATOR_DE_DETAILS_TIPS == 5) then showDetails = true; end;
-	
-	if (showDetails and dePrice ~= nil) then
-		Atr_AddDEDetailsToTip (tip, itemType, itemRarity, itemLevel)
-	end
-	
-
-	tip:Show()
+  tip:Show()
 
 end
 
@@ -1070,188 +1040,3 @@ end
 
 
 -----------------------------------------
-
-
-hooksecurefunc (GameTooltip, "SetMerchantItem",
-	function(tip, index)
-		local _, _, _, num = GetMerchantItemInfo(index);
-    	Atr_ShowTipWithPricing (tip, GetMerchantItemLink(index), num)
-	end
-);
-
-hooksecurefunc (GameTooltip, "SetBuybackItem",
-	function(tip, index)
-		local _, _, _, num = GetBuybackItemInfo(index);
-    	Atr_ShowTipWithPricing (tip, GetBuybackItemLink(index), num);
-	end
-);
-
-
-hooksecurefunc (GameTooltip, "SetBagItem",
-	function(tip, bag, slot)
-		local _, num = GetContainerItemInfo(bag, slot);
-		Atr_ShowTipWithPricing (tip, GetContainerItemLink(bag, slot), num);
-	end
-);
-
-hooksecurefunc (GameTooltip, "SetAuctionItem",
-	function (tip, type, index)
-		local _, _, num = GetAuctionItemInfo(type, index);
-		Atr_ShowTipWithPricing (tip, GetAuctionItemLink(type, index), num);
-	end
-);
-
-hooksecurefunc (GameTooltip, "SetAuctionSellItem",
-	function (tip)
-		local name, _, count = GetAuctionSellItemInfo();
-		local __, link = GetItemInfo(name);
-		Atr_ShowTipWithPricing (tip, link, num);
-	end
-);
-
-hooksecurefunc (GameTooltip, "SetLootItem",
-	function (tip, slot)
-		if LootSlotIsItem(slot) then
-			local link, _, num = GetLootSlotLink(slot);
-			Atr_ShowTipWithPricing (tip, link, num);
-		end
-	end
-);
-
-hooksecurefunc (GameTooltip, "SetLootRollItem",
-	function (tip, slot)
-		local _, _, num = GetLootRollItemInfo(slot);
-		Atr_ShowTipWithPricing (tip, GetLootRollItemLink(slot), num);
-	end
-);
-
-
-hooksecurefunc (GameTooltip, "SetInventoryItem",
-	function (tip, unit, slot)
-		Atr_ShowTipWithPricing (tip, GetInventoryItemLink(unit, slot), GetInventoryItemCount(unit, slot));
-	end
-);
-
-
-hooksecurefunc (GameTooltip, "SetGuildBankItem",
-	function (tip, tab, slot)
-		local _, num = GetGuildBankItemInfo(tab, slot);
-		Atr_ShowTipWithPricing (tip, GetGuildBankItemLink(tab, slot), num);
-	end
-);
-
-hooksecurefunc (GameTooltip, "SetTradeSkillItem",
-	function (tip, skill, id)
-		local link = GetTradeSkillItemLink(skill);
-		local num  = GetTradeSkillNumMade(skill);
-		if id then
-			link = GetTradeSkillReagentItemLink(skill, id);
-			num = select (3, GetTradeSkillReagentInfo(skill, id));
-		end
-
-		Atr_ShowTipWithPricing (tip, link, num);
-	end
-);
-
--- hooksecurefunc( GameTooltip, 'SetRecipeResultItem',
---    function( tip, itemId )
---     local link = C_TradeSkillUI.GetRecipeItemLink( itemId )
---     local count  = C_TradeSkillUI.GetRecipeNumItemsProduced( itemId )
---
---     Atr_ShowTipWithPricing( tip, link, count )
---   end
---  );
-
--- hooksecurefunc( GameTooltip, 'SetRecipeReagentItem',
---   function( tip, itemId, index )
---     local link = C_TradeSkillUI.GetRecipeReagentItemLink( itemId, index )
---     local count = select( 3, C_TradeSkillUI.GetRecipeReagentInfo( itemId, index ) )
---
---     Atr_ShowTipWithPricing( tip, link, count )
---   end
--- );
-
-hooksecurefunc (GameTooltip, "SetTradePlayerItem",
-	function (tip, id)
-		local _, _, num = GetTradePlayerItemInfo(id);
-		Atr_ShowTipWithPricing (tip, GetTradePlayerItemLink(id), num);
-	end
-);
-
-hooksecurefunc (GameTooltip, "SetTradeTargetItem",
-	function (tip, id)
-		local _, _, num = GetTradeTargetItemInfo(id);
-		Atr_ShowTipWithPricing (tip, GetTradeTargetItemLink(id), num);
-	end
-);
-
-hooksecurefunc (GameTooltip, "SetQuestItem",
-	function (tip, type, index)
-		local _, _, num = GetQuestItemInfo(type, index);
-		Atr_ShowTipWithPricing (tip, GetQuestItemLink(type, index), num);
-	end
-);
-
-hooksecurefunc (GameTooltip, "SetQuestLogItem",
-	function (tip, type, index)
-		local num, _;
-		if type == "choice" then
-			_, _, num = GetQuestLogChoiceInfo(index);
-		else
-			_, _, num = GetQuestLogRewardInfo(index)
-		end
-
-		Atr_ShowTipWithPricing (tip, GetQuestLogItemLink(type, index), num);
-	end
-);
-
-hooksecurefunc (GameTooltip, "SetInboxItem",
-	function (tip, index, attachIndex)
-	  if AUCTIONATOR_SHOW_MAILBOX_TIPS == 1 then
-		local _, _, num = GetInboxItem(index, attachIndex);
-		Atr_ShowTipWithPricing (tip, GetInboxItemLink(index, attachIndex), num);
-	end
-  end
-);
-
-hooksecurefunc ( "InboxFrameItem_OnEnter",
-  function ( self )
-    local itemCount = select( 8, GetInboxHeaderInfo( self.index ) )
-    local tooltipEnabled = AUCTIONATOR_SHOW_MAILBOX_TIPS == 1 and  (
-      AUCTIONATOR_V_TIPS == 1 or AUCTIONATOR_A_TIPS == 1 or AUCTIONATOR_D_TIPS == 1
-    )
-
-    if tooltipEnabled and itemCount and itemCount > 1 then
-      for numIndex = 1, ATTACHMENTS_MAX_RECEIVE do
-        local name, _, _, num = GetInboxItem( self.index, numIndex )
-
-        if name then
-          local attachLink = GetInboxItemLink( self.index, numIndex ) or name
-
-          GameTooltip:AddLine( attachLink )
-
-          if num > 1 then
-            Atr_ShowTipWithPricing( GameTooltip, attachLink, num )
-          else
-            Atr_ShowTipWithPricing( GameTooltip, attachLink )
-          end
-        end
-      end
-    end
-  end
-);
-
-hooksecurefunc (GameTooltip, "SetSendMailItem",
-	function (tip, id)
-		local name, _, num = GetSendMailItem(id)
-		local name, link = GetItemInfo(name);
-		Atr_ShowTipWithPricing (tip, link, num);
-	end
-);
-
-hooksecurefunc (GameTooltip, "SetHyperlink",
-	function (tip, itemstring, num)
-		local name, link = GetItemInfo (itemstring);
-		Atr_ShowTipWithPricing (tip, link, num);
-	end
-);
