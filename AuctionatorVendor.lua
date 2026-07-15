@@ -1,14 +1,14 @@
-local addonName, addonTable = ...; 
-local ZT = addonTable.ztt.ZT;
-local zc = addonTable.zc;
-local zz = zc.md;
+local addonName, addonTable = ...
+local ZT = addonTable.ztt.ZT
+local zc = addonTable.zc
+local zz = zc.md
 local _
 
 ATR_CAN_BE_AUCTIONED	= 0
 ATR_BIND_ON_PICKUP		= 1
 ATR_BINDS_TO_ACCOUNT	= 2
 ATR_QUEST_ITEM			= 4
-ATR_BINDTYPE_UNKNOWN	= -1;
+ATR_BINDTYPE_UNKNOWN	= -1
 
 local AtrBindTypeCache = {}
 
@@ -20,21 +20,20 @@ function AtrReadBindText (itemID, txt)
 
 	if (txt) then
 	
-		if txt == ITEM_BIND_ON_EQUIP		then	return ATR_CAN_BE_AUCTIONED;		end;
-		if txt == ITEM_BIND_ON_USE			then	return ATR_CAN_BE_AUCTIONED;		end;
-		if txt == ITEM_BIND_ON_PICKUP		then	return ATR_BIND_ON_PICKUP;			end;
-		if txt == ITEM_BIND_TO_ACCOUNT		then	return ATR_BINDS_TO_ACCOUNT;		end;
-		if txt == ITEM_BIND_TO_BNETACCOUNT	then	return ATR_BINDS_TO_ACCOUNT;		end;
-		if txt == ITEM_BIND_QUEST			then	return ATR_QUEST_ITEM;				end;
+		if txt == ITEM_BIND_ON_EQUIP		then	return ATR_CAN_BE_AUCTIONED		end
+		if txt == ITEM_BIND_ON_USE			then	return ATR_CAN_BE_AUCTIONED		end
+		if txt == ITEM_BIND_ON_PICKUP		then	return ATR_BIND_ON_PICKUP		end
+		if txt == ITEM_BIND_TO_ACCOUNT		then	return ATR_BINDS_TO_ACCOUNT		end
+		if txt == ITEM_BIND_TO_BNETACCOUNT	then	return ATR_BINDS_TO_ACCOUNT		end
+		if txt == ITEM_BIND_QUEST			then	return ATR_QUEST_ITEM			end
 	end
 	
-	return ATR_BINDTYPE_UNKNOWN;
+	return ATR_BINDTYPE_UNKNOWN
 end
 
 -----------------------------------------
 
 function Atr_AddBondTypeToCache (itemID)
-
 
 	if not AtrBindTypeToolTip then
 		CreateFrame('GameTooltip', 'AtrBindTypeToolTip', UIParent, 'GameTooltipTemplate')
@@ -47,9 +46,9 @@ function Atr_AddBondTypeToCache (itemID)
 	local result = ATR_BINDTYPE_UNKNOWN
 	
 	if AtrBindTypeToolTip:NumLines() > 1 then
-		result = AtrReadBindText (itemID, AtrBindTypeToolTipTextLeft2:GetText());
+		result = AtrReadBindText (itemID, AtrBindTypeToolTipTextLeft2:GetText())
 		if (result == ATR_BINDTYPE_UNKNOWN) then
-			result = AtrReadBindText (itemID, AtrBindTypeToolTipTextLeft3:GetText());
+			result = AtrReadBindText (itemID, AtrBindTypeToolTipTextLeft3:GetText())
 		end
 		
 	end
@@ -70,9 +69,8 @@ end
 function Atr_GetBondType (itemID)
 
 	if (AtrBindTypeCache[itemID] == nil) then
-		Atr_AddBondTypeToCache (itemID);
+		Atr_AddBondTypeToCache (itemID)
 	end
 	
 	return AtrBindTypeCache[itemID]
 end
-

@@ -64,3 +64,26 @@ if not SOUNDKIT then
         GS_TITLE_OPTION_OK = "gsTitleOptionOK",
     }
 end
+
+C_ChatInfo = C_ChatInfo or {}
+
+if not C_ChatInfo.SendAddonMessage then
+    function C_ChatInfo.SendAddonMessage(prefix, message, channel, target)
+        if not prefix or not message or not channel then
+            return false
+        end
+
+        SendAddonMessage(prefix, message, channel, target)
+        return true
+    end
+end
+
+if not C_ChatInfo.RegisterAddonMessagePrefix then
+    function C_ChatInfo.RegisterAddonMessagePrefix(prefix)
+        if RegisterAddonMessagePrefix then
+            return RegisterAddonMessagePrefix(prefix)
+        end
+
+        return prefix ~= nil and prefix ~= ""
+    end
+end
