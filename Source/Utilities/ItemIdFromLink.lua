@@ -1,14 +1,15 @@
-function Auctionator.Utilities.ItemIdFromLink(link) -- 335 ATM this is mixing Quest, Items and Spells in Hyperlink, do a better handle for items
-    -- local _, _, itemString = string.find(itemLink, "^|c%x+|H(.+)|h%[.*%]")
-    -- local _, itemId = strsplit(":", itemString)
-    if type(link) ~= "string" then
-        return nil
-    end
+function Auctionator.Utilities.ItemIdFromLink(itemLink)
+  if itemLink ~= nil then
+    local _, _, itemString = string.find(itemLink, "^|c%x+|H(.+)|h%[.*%]")
+    local linkType, itemId = strsplit(":", itemString)
 
-    local itemId = link:match("item:(%d+)")
-    if itemId then
-        return tonumber(itemId)
+    --Only return an id if it is attached to an item
+    if linkType == "item" then
+      return tonumber(itemId)
+    else
+      return nil
     end
-
+  else
     return nil
+  end
 end
