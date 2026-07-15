@@ -1,56 +1,34 @@
 function Auctionator.Events.OnAuctionHouseShow()
-  Auctionator.Debug.Message("Auctionator.Events.OnAuctionHouseShow()")
+    Auctionator.Debug.Message("Auctionator.Events.OnAuctionHouseShow()")
 
-  local frame
-  if Auctionator.State.ShoppingListFrameRef == nil then
-    frame = CreateFrame(
-      "FRAME",
-      "AuctionatorShoppingLists",
-      AuctionHouseFrame,
-      "AuctionatorShoppingListFrameTemplate"
-    )
+    local frame = _G.AuctionatorAHFrame
 
-    Auctionator.State.ShoppingListFrameRef = frame
-  else
-    frame = Auctionator.State.ShoppingListFrameRef
-  end
+    if not frame then
+        frame = CreateFrame(
+            "Frame",
+            "AuctionatorAHFrame",
+            AuctionHouseFrame or AuctionFrame,
+            "AuctionatorAHFrameTemplate"
+        )
 
-  frame:SetPoint("TOPLEFT", AuctionHouseFrame, "TOPRIGHT", -2, 0)
-  frame:SetPoint("BOTTOMLEFT", AuctionHouseFrame, "BOTTOMRIGHT", -2, 0)
-  frame:Show()
+        FrameUtil.RegisterFrameForEvents(frame, {
+            "AUCTION_HOUSE_SHOW",
+            "AUCTION_HOUSE_CLOSED",
+        })
 
-  Auctionator.FullScan.Initialize()
-  Auctionator.FullScan.State.Completed = false
-end
+        frame:Show()
 
------------------------------------------
+        local onEvent = frame:GetScript("OnEvent")
+        if onEvent then
+            onEvent(frame, "AUCTION_HOUSE_SHOW")
+        end
+    else
+        frame:Show()
+    end
 
-function Atr_OnAuctionHouseShow()
-  Auctionator.Debug.Message( 'Atr_OnAuctionHouseShow' );
-
-  -- if (AUCTIONATOR_DEFTAB == 1) then
-  --   Auctionator.Debug.Message('AUCTIONATOR_DEFTAB == 1');
-  --   Atr_SelectPane (Auctionator.Constants.Tabs.SELL_TAB);
-  -- end
-
-  -- if (AUCTIONATOR_DEFTAB == 2) then
-  --   Auctionator.Debug.Message('AUCTIONATOR_DEFTAB == 2');
-  --   Atr_SelectPane (Auctionator.Constants.Tabs.BUY_TAB);
-  -- end
-
-  -- if (AUCTIONATOR_DEFTAB == 3) then
-  --   Auctionator.Debug.Message('AUCTIONATOR_DEFTAB == 3');
-  --   Atr_SelectPane (Auctionator.Constants.Tabs.MORE_TAB);
-  -- end
-
-
-  -- Atr_ResetDuration();
-
-  -- -- TODO need to put this on the global object in state....
-  -- -- gJustPosted.ItemName = nil;
-  -- -- gSellPane:ClearSearch();
-
-  -- if (Auctionator.State.CurrentPane) then
-  --   Auctionator.State.CurrentPane.UINeedsUpdate = true;
-  -- end
+    print("Width:", frame:GetWidth())
+print("Height:", frame:GetHeight())
+print("Points:", frame:GetNumPoints())
+print("Children:", frame:GetNumChildren())
+print("Regions:", frame:GetNumRegions())
 end

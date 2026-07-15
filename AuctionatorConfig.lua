@@ -977,47 +977,71 @@ end
 -----------------------------------------
 
 function Atr_ShpLists_Display()
-
-  local sllist = AUCTIONATOR_SHOPPING_LISTS
-
-  kShpLists_NumShpLists = #AUCTIONATOR_SHOPPING_LISTS
-
-  local totalRows = #sllist - 1;    -- minus Recents
-
-  local line;             -- 1 through NN of our window to scroll
-  local dataOffset;         -- an index into our data calculated from the scroll offset
-
-  FauxScrollFrame_Update (Atr_ShpList_ScrollFrame, totalRows, kShpLists_LinesToDisplay, 16);
-
-  for line = 1,kShpLists_LinesToDisplay do
-
-    dataOffset = line + FauxScrollFrame_GetOffset (Atr_ShpList_ScrollFrame);
-
-    local lineEntry = _G["Atr_ShpList"..line];
-
-    lineEntry:SetID (dataOffset);
-
-    if (dataOffset <= totalRows and sllist[dataOffset]) then
-
-      local lineEntry_text = _G["Atr_ShpList"..line.."_text"];
-
-      lineEntry_text:SetText (sllist[dataOffset+1].name)      -- +1 to skip Recents
-
-      if (Atr_ShpLists_IsSelected (dataOffset) > 0) then
-        lineEntry:SetButtonState ("PUSHED", true);
-      else
-        lineEntry:SetButtonState ("NORMAL", false);
-      end
-
-      lineEntry:Show();
-    else
-      lineEntry:Hide();
+    if _G["Atr_ShpList1"] == nil then
+        Atr_SetupShpListsFrame()
     end
-  end
 
-  zc.EnableDisable (Atr_ShpList_DeleteButton,   #kShpLists_SelectedIndices == 1);
-  zc.EnableDisable (Atr_ShpList_EditButton,   #kShpLists_SelectedIndices == 1);
-  zc.EnableDisable (Atr_ShpList_RenameButton,   #kShpLists_SelectedIndices == 1);
+    local sllist = AUCTIONATOR_SHOPPING_LISTS or {}
+
+    kShpLists_NumShpLists = #sllist
+
+    local totalRows = math.max(0, #sllist - 1)
+    local dataOffset
+
+    FauxScrollFrame_Update(
+        Atr_ShpList_ScrollFrame,
+        totalRows,
+        kShpLists_LinesToDisplay,
+        kShpLists_LineHeight
+    )
+
+    for line = 1, kShpLists_LinesToDisplay do
+        dataOffset =
+            line + FauxScrollFrame_GetOffset(Atr_ShpList_ScrollFrame)
+
+        local lineEntry = _G["Atr_ShpList" .. line]
+
+        if lineEntry then
+            lineEntry:SetID(dataOffset)
+
+            -- dataOffset representa la fila visible sin "Recent Searches".
+            local shoppingList = sllist[dataOffset + 1]
+
+            if dataOffset <= totalRows and shoppingList then
+                local lineEntryText =
+                    _G["Atr_ShpList" .. line .. "_text"]
+
+                if lineEntryText then
+                    lineEntryText:SetText(shoppingList.name or "")
+                end
+
+                if Atr_ShpLists_IsSelected(dataOffset) > 0 then
+                    lineEntry:SetButtonState("PUSHED", true)
+                else
+                    lineEntry:SetButtonState("NORMAL", false)
+                end
+
+                lineEntry:Show()
+            else
+                lineEntry:Hide()
+            end
+        end
+    end
+
+    zc.EnableDisable(
+        Atr_ShpList_DeleteButton,
+        #kShpLists_SelectedIndices == 1
+    )
+
+    zc.EnableDisable(
+        Atr_ShpList_EditButton,
+        #kShpLists_SelectedIndices == 1
+    )
+
+    zc.EnableDisable(
+        Atr_ShpList_RenameButton,
+        #kShpLists_SelectedIndices == 1
+    )
 end
 
 -----------------------------------------

@@ -1,0 +1,89 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <Frame name="AuctionatorAHFrameTemplate" virtual="true">
+    <Scripts>
+      <OnLoad>
+        Mixin(self, AuctionatorAHFrameMixin)
+
+        if AuctionatorButtonFrame then
+          Mixin(AuctionatorButtonFrame, AuctionatorButtonFrameMixin)
+        end
+
+        if self.OnLoad then
+          self:OnLoad()
+        end
+      </OnLoad>
+
+      <OnEvent>
+        if self.OnEvent then
+          self:OnEvent(event, ...)
+        end
+      </OnEvent>
+    </Scripts>
+
+    <Frames>
+      <Frame name="AuctionatorButtonFrame">
+        <Frames>
+          <Button
+            name="AuctionatorShoppingListsToggle"
+            inherits="UIPanelButtonTemplate"
+            text="Shopping Lists">
+
+            <Size>
+              <AbsDimension x="110" y="22"/>
+            </Size>
+
+            <Anchors>
+              <Anchor
+                point="TOPRIGHT"
+                relativeTo="AuctionFrame"
+                relativePoint="TOPRIGHT">
+
+                <Offset>
+                  <AbsDimension x="-24" y="-1"/>
+                </Offset>
+              </Anchor>
+            </Anchors>
+
+            <Scripts>
+              <OnClick>
+                if self:GetParent().ToggleShoppingLists then
+                  self:GetParent():ToggleShoppingLists()
+                end
+              </OnClick>
+            </Scripts>
+          </Button>
+
+          <Button
+            name="AuctionatorFullScanToggle"
+            inherits="UIPanelButtonTemplate"
+            text="Full Scan">
+
+            <Size>
+              <AbsDimension x="90" y="22"/>
+            </Size>
+
+            <Anchors>
+              <Anchor
+                point="TOPRIGHT"
+                relativeTo="AuctionatorShoppingListsToggle"
+                relativePoint="TOPLEFT">
+
+                <Offset>
+                  <AbsDimension x="-4" y="0"/>
+                </Offset>
+              </Anchor>
+            </Anchors>
+
+            <Scripts>
+              <OnClick>
+                if self:GetParent().AutoScan then
+                  self:GetParent():AutoScan()
+                end
+              </OnClick>
+            </Scripts>
+          </Button>
+        </Frames>
+      </Frame>
+    </Frames>
+  </Frame>
+</Ui>

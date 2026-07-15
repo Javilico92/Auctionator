@@ -1,6 +1,7 @@
 function Auctionator.Events.AddonLoaded(...)
   Auctionator.Debug.Message("Auctionator.Events.AddonLoaded", ...)
 
+  Auctionator.ShoppingLists.InitializeDialogs()
 end
 
 local gPrevTime = 0;
@@ -99,7 +100,7 @@ function Atr_AddSellTab (tabtext, whichTab)
 
   local n = AuctionHouseFrame.numTabs + 1;
 
-  Auctionator.Util.Print(AuctionHouseFrame.numTabs)
+  Auctionator.Utilities.TablePrint(AuctionHouseFrame.numTabs)
   local framename = "AuctionHouseFrameTab"..n;
 
   local frame = CreateFrame("Button", framename, AuctionHouseFrame, "AuctionHouseFrameTabTemplate");

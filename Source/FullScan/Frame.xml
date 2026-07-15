@@ -1,0 +1,24 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <Frame
+    name="AuctionatorFullScanFrameTemplate"
+    parent="UIParent"
+    hidden="true"
+    virtual="true">
+
+    <Scripts>
+      <OnLoad>
+        Mixin(self, AuctionatorFullScanFrameMixin)
+
+        if self.OnLoad then
+          self:OnLoad()
+        end
+      </OnLoad>
+
+      <OnEvent>
+        if self.OnEvent then
+          self:OnEvent(event, ...)
+        end
+      </OnEvent>
+    </Scripts>
+  </Frame>
+</Ui>

@@ -176,6 +176,39 @@ if not C_Item.GetStackCount then
     end
 end
 
+if not C_Item.GetItemLink then
+    function C_Item.GetItemLink(itemLocation)
+        if not itemLocation then
+            return nil
+        end
+
+        if type(itemLocation) == "number"
+            or type(itemLocation) == "string"
+        then
+            local _, itemLink = GetItemInfo(itemLocation)
+            return itemLink
+        end
+
+        if type(itemLocation) ~= "table" then
+            return nil
+        end
+
+        if itemLocation.bag ~= nil and itemLocation.slot ~= nil then
+            return GetContainerItemLink(
+                itemLocation.bag,
+                itemLocation.slot
+            )
+        end
+
+        if itemLocation.itemID then
+            local _, itemLink = GetItemInfo(itemLocation.itemID)
+            return itemLink
+        end
+
+        return nil
+    end
+end
+
 if not LootSlotHasItem then
     function LootSlotHasItem(slot)
         if not slot then
@@ -296,24 +329,54 @@ C_AuctionHouse = C_AuctionHouse or {}
 -- https://wowpedia.fandom.com/wiki/API_C_AuctionHouse.ReplicateItems
 if not C_AuctionHouse.ReplicateItems then
     function C_AuctionHouse.ReplicateItems()
-        if not QueryAuctionItems then
+        if not QueryAuctionItems or not CanSendAuctionQuery then
             return false
         end
 
-        AuctionatorCompat = AuctionatorCompat or {}
+        local canQuery, canQueryAll = CanSendAuctionQuery()
+
+        print(
+            "CanSendAuctionQuery:",
+            tostring(canQuery),
+            tostring(canQueryAll)
+        )
+
+        if not canQuery or not canQueryAll then
+            return false
+        end
+
         AuctionatorCompat.ReplicatePending = true
 
-        -- name, minLevel, maxLevel, page, usable, qualityIndex, getAll
-        QueryAuctionItems("", nil, nil, 0, false, 0, true)
+        QueryAuctionItems(
+            "",     -- name
+            nil,    -- minLevel
+            nil,    -- maxLevel
+            0,      -- inventoryTypeIndex
+            0,      -- classIndex
+            0,      -- subclassIndex
+            0,      -- page
+            false,  -- usable
+            0,      -- quality
+            true    -- getAll
+        )
 
+        print("GetAll query sent")
         return true
     end
 end
 
 if not C_AuctionHouse.GetNumReplicateItems then
     function C_AuctionHouse.GetNumReplicateItems()
-        local numBatchAuctions = GetNumAuctionItems("list")
-        return tonumber(numBatchAuctions) or 0
+        local shown, total = GetNumAuctionItems("list")
+
+        print(
+            "Replicate results:",
+            tostring(shown),
+            "/",
+            tostring(total)
+        )
+
+        return tonumber(shown) or 0
     end
 end
 
@@ -461,5 +524,82 @@ if not CreateFromMixins then
         end
 
         return object
+    end
+end
+
+function AuctionatorCompat.SetupAuctionFrame()
+    if not AuctionFrame then
+        return false
+    end
+
+    AuctionHouseFrame = AuctionHouseFrame or AuctionFrame
+
+    AuctionHouseFrameTab1 = AuctionHouseFrameTab1 or AuctionFrameTab1
+    AuctionHouseFrameTab2 = AuctionHouseFrameTab2 or AuctionFrameTab2
+    AuctionHouseFrameTab3 = AuctionHouseFrameTab3 or AuctionFrameTab3
+
+    AuctionHouseFrameBrowseFrame =
+        AuctionHouseFrameBrowseFrame or AuctionFrameBrowse
+
+    AuctionHouseFrameBidFrame =
+        AuctionHouseFrameBidFrame or AuctionFrameBid
+
+    AuctionHouseFrameAuctionsFrame =
+        AuctionHouseFrameAuctionsFrame or AuctionFrameAuctions
+
+        print("AuctionatorCompat.SetupAuctionFrame")
+
+    return true
+end
+
+function AuctionatorCompat.CreateAuctionTab(frameName)
+    local parent = AuctionHouseFrame or AuctionFrame
+
+    if not parent then
+        return nil
+    end
+
+    local template
+
+    if AuctionHouseFrameTabTemplate then
+        template = "AuctionHouseFrameTabTemplate"
+    else
+        template = "AuctionTabTemplate"
+    end
+
+    return CreateFrame(
+        "Button",
+        frameName,
+        parent,
+        template
+    )
+end
+
+AuctionHouseFrameTab_OnClick =
+    AuctionHouseFrameTab_OnClick or AuctionFrameTab_OnClick
+
+FrameUtil = FrameUtil or {}
+
+if not FrameUtil.RegisterFrameForEvents then
+    function FrameUtil.RegisterFrameForEvents(frame, events)
+        if not frame or type(events) ~= "table" then
+            return
+        end
+
+        for _, eventName in ipairs(events) do
+            frame:RegisterEvent(eventName)
+        end
+    end
+end
+
+if not FrameUtil.UnregisterFrameForEvents then
+    function FrameUtil.UnregisterFrameForEvents(frame, events)
+        if not frame or type(events) ~= "table" then
+            return
+        end
+
+        for _, eventName in ipairs(events) do
+            frame:UnregisterEvent(eventName)
+        end
     end
 end
