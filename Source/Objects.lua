@@ -36,6 +36,10 @@ Auctionator = {
     -- Completed = false
     }
   },
+  Search = {
+    Filters = {},
+    FilterLookup = {}
+  },
   Tooltip = {},
   Localization = {},
   Config = {},

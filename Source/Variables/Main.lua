@@ -13,12 +13,12 @@ local VERSION_8_3 = 5
 --   AUCTIONATOR_DB_MAXHIST_AGE, AUCTIONATOR_DB_MAXHIST_DAYS, AUCTIONATOR_FS_CHUNK, AUCTIONATOR_DE_DATA,
 --   AUCTIONATOR_DE_DATA_BAK, ITEM_ID_VERSION
 
+
 function Auctionator.Variables.Initialize()
 
   if AUCTIONATOR_SAVEDVARS == nil then
     AUCTIONATOR_SAVEDVARS = {}
   end
-
   Auctionator.Config.Initialize()
 
   Auctionator.Variables.InitializeFullScanVariables()
@@ -40,8 +40,6 @@ function Auctionator.Variables.InitializeFullScanVariables()
   end
 
   Auctionator.FullScan.State = AUCTIONATOR_SAVEDVARS.FULL_SCAN_DATA
-
-  Auctionator.Util.Print(Auctionator.FullScan.State, "Auctionator.Variables.InitializeFullScanVariables")
 end
 
 function Auctionator.Variables.InitializeDatabase()

@@ -1,17 +1,17 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
   <Frame name="AuctionatorAHFrameTemplate" virtual="true">
     <Scripts>
-      <OnLoad>
+      <OnShow>
         Mixin(self, AuctionatorAHFrameMixin)
 
         if AuctionatorButtonFrame then
           Mixin(AuctionatorButtonFrame, AuctionatorButtonFrameMixin)
         end
 
-        if self.OnLoad then
-          self:OnLoad()
+        if self.OnShow then
+          self:OnShow()
         end
-      </OnLoad>
+      </OnShow >
 
       <OnEvent>
         if self.OnEvent then

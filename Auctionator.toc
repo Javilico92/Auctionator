@@ -25,11 +25,7 @@ AuctionatorObjects.lua
 
 Source\Manifest.xml
 
-AuctionatorFilters.lua
-
 AuctionatorItemLink.lua
-AuctionatorSearch.lua
-AuctionatorSearchQuery.lua
 
 Auctionator.lua
 AuctionatorShop.lua

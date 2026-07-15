@@ -7,6 +7,7 @@
       <OnLoad method="OnLoad"/>
       <OnShow method="OnShow"/>
     </Scripts>
+    
       <Frames>
       <Frame name="$parent_TitleArea" inherits="AuctionatorConfigurationTitleFrame" parentKey="TitleArea">
         <KeyValues>

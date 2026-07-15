@@ -1,6 +1,6 @@
 AuctionatorShoppingListTableBuilderMixin = CreateFromMixins(TableBuilderMixin)
 
-AuctionatorScrollListMixin = CreateFromMixins(AuctionatorEventBus, AuctionatorKeywordSearchProviderMixin)
+AuctionatorScrollListMixin = CreateFromMixins(AuctionatorEventBus, AuctionatorAdvancedSearchProviderMixin)
 
 function AuctionatorScrollListMixin:OnLoad()
   Auctionator.Debug.Message("AuctionatorScrollListMixin:OnLoad()")
@@ -82,7 +82,7 @@ end
 
 function AuctionatorScrollListMixin:EndSearch(results)
   self.multiSearchComplete = true
-  C_AuctionHouse.SearchForItemKeys(results, {sortOrder = 1, reverseSort = false})
+  Auctionator.Search.SafeItemKeysSearch(results)
 end
 
 function AuctionatorScrollListMixin:HideSpinner()
