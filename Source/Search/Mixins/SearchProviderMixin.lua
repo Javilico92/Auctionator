@@ -5,6 +5,11 @@ function AuctionatorSearchProviderMixin:OnSearchEventReceived(eventName, ...)
 end
 
 -- Derive
+function AuctionatorSearchProviderMixin:InitializeNewSearchGroup()
+  self:SearchGroupReady()
+end
+
+-- Derive
 function AuctionatorSearchProviderMixin:CreateSearchTerm(term)
 end
 
@@ -22,6 +27,10 @@ end
 
 -- Derive
 function AuctionatorSearchProviderMixin:HasCompleteTermResults()
+end
+
+-- Derive
+function AuctionatorSearchProviderMixin:GetCurrentEmptyResult()
 end
 
 function AuctionatorSearchProviderMixin:RegisterEvents(events)
@@ -71,4 +80,8 @@ function AuctionatorSearchProviderMixin:GetNextSearchParameter()
   else
     error("You requested a term that does not exist: " .. (self.index == nil and "nil" or self.index))
   end
+end
+
+function AuctionatorSearchProviderMixin:GetCurrentSearchParameter()
+  return self.terms[self.index - 1]
 end

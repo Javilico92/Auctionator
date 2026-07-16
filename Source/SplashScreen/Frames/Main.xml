@@ -2,131 +2,62 @@
   <Frame
     name="AuctionatorSplashScreenTemplate"
     virtual="true"
-    inherits="SimplePanelTemplate"
+    inherits="AuctionatorSimplePanelTemplate"
+    mixin="AuctionatorSplashScreenMixin"
     frameStrata="DIALOG"
-    hidden="true">
-
+    hidden="true"
+  >
     <Scripts>
-      <OnLoad>
-        Mixin(self, AuctionatorSplashScreenMixin)
-
-        self.Close = _G[self:GetName() .. "Close"]
-        self.ScrollFrame = _G[self:GetName() .. "ScrollFrame"]
-        self.HideCheckbox = _G[self:GetName() .. "HideCheckbox"]
-
-        if self.ScrollFrame then
-          self.ScrollFrame.Content =
-            _G[self.ScrollFrame:GetName() .. "Content"]
-        end
-
-        if self.OnLoad then
-          self:OnLoad()
-        end
-      </OnLoad>
-
-      <OnShow>
-        if self.OnShow then
-          self:OnShow()
-        end
-      </OnShow>
+      <OnLoad method="OnLoad"/>
+      <OnShow method="OnShow"/>
     </Scripts>
 
-    <Size>
-      <AbsDimension x="600" y="600"/>
-    </Size>
+    <Size x="600" y="600" />
 
     <Anchors>
-      <Anchor point="CENTER"/>
+      <Anchor point="CENTER" />
     </Anchors>
 
     <Frames>
-      <Button
-        name="$parentClose"
-        inherits="UIStaticPopupSpecialCloseButton">
-
+      <Frame parentKey="Inset" inherits="AuctionatorInsetTemplate">
         <Anchors>
-          <Anchor
-            point="TOPRIGHT"
-            relativeTo="$parent"
-            relativePoint="TOPRIGHT">
-
-            <Offset>
-              <AbsDimension x="2" y="1"/>
-            </Offset>
-          </Anchor>
+          <Anchor point="TOPLEFT" x="4" y="-26"/>
+          <Anchor point="BOTTOMRIGHT" x="-6" y="26"/>
+        </Anchors>
+      </Frame>
+      <!-- Frame Close Button -->
+      <Button parentKey="Close" inherits="AuctionatorRetailImportUIStaticPopupSpecialCloseButton">
+        <Anchors>
+          <Anchor point="TOPRIGHT" relativeTo="$parent" relativePoint="TOPRIGHT" x="2" y="1"/>
         </Anchors>
       </Button>
 
-      <ScrollFrame
-        name="$parentScrollFrame"
-        inherits="UIPanelScrollFrameTemplate">
-
+      <ScrollFrame parentKey="ScrollFrame" inherits="UIPanelScrollFrameTemplate">
         <Anchors>
-          <Anchor
-            point="TOPLEFT"
-            relativeTo="$parentInset"
-            relativePoint="TOPLEFT">
-
-            <Offset>
-              <AbsDimension x="10" y="-7"/>
-            </Offset>
-          </Anchor>
-
-          <Anchor
-            point="BOTTOMRIGHT"
-            relativeTo="$parentInset"
-            relativePoint="BOTTOMRIGHT">
-
-            <Offset>
-              <AbsDimension x="-23" y="3"/>
-            </Offset>
-          </Anchor>
+          <Anchor point="TOPLEFT" relativeKey="$parent.Inset" relativePoint="TOPLEFT" x="10" y="-7"/>
+          <Anchor point="BOTTOMRIGHT" relativeKey="$parent.Inset" relativePoint="BOTTOMRIGHT" x="-23" y="3"/>
         </Anchors>
 
         <ScrollChild>
-          <Frame name="$parentContent">
-            <Size>
-              <AbsDimension x="540" y="1"/>
-            </Size>
-          </Frame>
+          <Frame parentKey="Content" />
         </ScrollChild>
       </ScrollFrame>
 
-      <Frame
-        name="$parentHideCheckbox"
-        inherits="AuctionatorConfigurationCheckbox">
-
+      <Frame inherits="AuctionatorConfigurationCheckbox" parentKey="HideCheckbox">
+        <KeyValues>
+          <KeyValue key="labelText" value="AUCTIONATOR_L_SPLASH_HIDE_MESSAGE" type="global"/>
+        </KeyValues>
         <Anchors>
-          <Anchor
-            point="TOPLEFT"
-            relativeTo="$parentInset"
-            relativePoint="BOTTOMLEFT">
-
-            <Offset>
-              <AbsDimension x="-20" y="2"/>
-            </Offset>
-          </Anchor>
+          <Anchor point="TOPLEFT" relativeKey="$parent.Inset" relativePoint="BOTTOMLEFT" x="-20" y="2"/>
         </Anchors>
       </Frame>
     </Frames>
 
     <Layers>
       <Layer>
-        <FontString
-          name="$parentHeader"
-          text="AUCTIONATOR_L_SPLASH_SCREEN_HEADER"
-          inherits="GameFontHighlight">
-
+        <FontString text="AUCTIONATOR_L_SPLASH_SCREEN_HEADER" inherits="GameFontHighlight">
           <Anchors>
-            <Anchor
-              point="TOP"
-              relativeTo="$parent"
-              relativePoint="TOP">
-
-              <Offset>
-                <AbsDimension x="0" y="-10"/>
-              </Offset>
-            </Anchor>
+            <Anchor point="TOP" relativeTo="$parent" relativePoint="TOP" y="-10" />
           </Anchors>
         </FontString>
       </Layer>

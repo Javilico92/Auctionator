@@ -1,5 +1,5 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
-  <Frame name="AuctionatorConfigAdvancedFrame" mixin="AuctionatorConfigAdvancedFrameMixin" parent="InterfaceOptionsFrame">
+  <Frame name="AuctionatorConfigAdvancedFrameTemplate" mixin="AuctionatorConfigAdvancedFrameMixin" parent="InterfaceOptionsFrame" virtual="true">
     <Scripts>
       <OnLoad method="OnLoad"/>
       <OnShow method="OnShow"/>
@@ -13,21 +13,14 @@
         </KeyValues>
       </Frame>
 
-      <Frame inherits="AuctionatorConfigurationHeadingFrame" parentKey="ScanHeading">
+      <Frame inherits="AuctionatorConfigurationCheckbox" parentKey="NotReplicateScan">
         <KeyValues>
-          <KeyValue key="headingText" value="AUCTIONATOR_L_CONFIG_SCAN_SETTINGS" type="global"/>
+          <KeyValue key="labelText" value="AUCTIONATOR_L_CONFIG_ALTERNATE_SCAN" type="global" />
+          <KeyValue key="tooltipTitleText" value="AUCTIONATOR_L_CONFIG_ALTERNATE_SCAN_HEADER" type="global" />
+          <KeyValue key="tooltipText" value="AUCTIONATOR_L_CONFIG_ALTERNATE_SCAN_TEXT" type="global"/>
         </KeyValues>
         <Anchors>
-          <Anchor point="TOPLEFT" relativeKey="$parent.TitleArea" relativePoint="BOTTOMLEFT"/>
-        </Anchors>
-      </Frame>
-
-      <Frame inherits="AuctionatorConfigurationNumericInput" parentKey="FullScanStep">
-        <KeyValues>
-          <KeyValue key="labelText" value="AUCTIONATOR_L_CONFIG_FULL_SCAN_STEP_SIZE" type="global"/>
-        </KeyValues>
-        <Anchors>
-          <Anchor point="TOPLEFT" relativeKey="$parent.ScanHeading" relativePoint="BOTTOMLEFT"/>
+          <Anchor point="TOPLEFT" relativeKey="$parent.TitleArea" relativePoint="BOTTOMLEFT" />
         </Anchors>
       </Frame>
 
@@ -36,7 +29,7 @@
           <KeyValue key="headingText" value="AUCTIONATOR_L_CONFIG_DEVELOPER" type="global"/>
         </KeyValues>
         <Anchors>
-          <Anchor point="TOPLEFT" relativeKey="$parent.FullScanStep" relativePoint="BOTTOMLEFT"/>
+          <Anchor point="TOPLEFT" relativeKey="$parent.NotReplicateScan" relativePoint="BOTTOMLEFT"/>
         </Anchors>
       </Frame>
 

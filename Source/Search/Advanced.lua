@@ -1,18 +1,24 @@
-function Auctionator.Search.IsAdvancedSearch(searchString)
-  return Auctionator.Utilities.StringContains(searchString, Auctionator.Constants.AdvancedSearchDivider);
-end
-
--- Extract components of an advanced search string. Assumes searchString is an
--- advanced search.
-function Auctionator.Search.SplitAdvancedSearch(searchString)
+-- Extract components of an advanced search string.
+-- Assumes searchParametersString is an advanced search.
+function Auctionator.Search.SplitAdvancedSearch(searchParametersString)
   local queryString, categoryKey, minItemLevel, maxItemLevel, minLevel, maxLevel,
     minCraftedLevel, maxCraftedLevel, minPrice, maxPrice =
-    strsplit( Auctionator.Constants.AdvancedSearchDivider, searchString )
+    strsplit( Auctionator.Constants.AdvancedSearchDivider, searchParametersString )
 
   -- A nil queryString causes a disconnect if searched for, but an empty one
-  -- doesn't
+  -- doesn't, this ensures searchString ~= nil.
   if queryString == nil then
     queryString = ""
+  end
+
+  -- Remove "" that are used in exact searches as it causes some searches to
+  -- fail when they would otherwise work, example "Steak a la Mode"
+  local searchString = string.gsub(queryString, "^\"(.*)\"$", "%1")
+
+  local isExact = string.match(queryString, "^\"(.*)\"$") ~= nil
+
+  if categoryKey == nil then
+    categoryKey = ""
   end
 
   minLevel = tonumber( minLevel )
@@ -59,7 +65,8 @@ function Auctionator.Search.SplitAdvancedSearch(searchString)
   end
 
   return {
-    queryString = queryString,
+    searchString = searchString,
+    isExact = isExact,
     categoryKey = categoryKey,
     minLevel = minLevel,
     maxLevel = maxLevel,
@@ -83,6 +90,20 @@ local function RangeOptionString(name, min, max)
     return name .. " <= " .. tostring(max)
   else
     return ""
+  end
+end
+
+local function TooltipRangeString(min, max)
+  if min ~= nil and min == max then
+    return tostring(max)
+  elseif min ~= nil and max ~= nil then
+    return tostring(min) .. "-" ..  tostring(max)
+  elseif min ~= nil then
+    return ">= " .. tostring(min)
+  elseif max ~= nil then
+    return "<= " .. tostring(max)
+  else
+    return AUCTIONATOR_L_ANY_LOWER
   end
 end
 
@@ -115,8 +136,7 @@ local function LevelRange(splitSearch)
     splitSearch.maxLevel
   ) .. separator
 end
-
-local function PriceRange(splitSearch)
+local function ConvertMoneyStrings(splitSearch)
   -- Convert to money strings
   -- Some padding " " is necessary
   local min = splitSearch.minPrice
@@ -126,8 +146,14 @@ local function PriceRange(splitSearch)
 
   local max = splitSearch.maxPrice
   if max ~= nil then
-    max = " " .. Auctionator.Utilities.CreateMoneyString(splitSearch.maxPrice) .. " "
+    max = Auctionator.Utilities.CreateMoneyString(splitSearch.maxPrice) .. " "
   end
+
+  return min, max
+end
+
+local function PriceRange(splitSearch)
+  local min, max = ConvertMoneyStrings(splitSearch)
 
   return RangeOptionString(
     "price",
@@ -136,28 +162,96 @@ local function PriceRange(splitSearch)
   ) .. separator
 end
 
-function Auctionator.Search.PrettifySearchString(searchString)
-  if Auctionator.Search.IsAdvancedSearch(searchString) then
-    local splitSearch = Auctionator.Search.SplitAdvancedSearch(searchString)
-
-    local result = splitSearch.queryString
-      .. " ["
-      .. CategoryKey(splitSearch)
-      .. PriceRange(splitSearch)
-      .. LevelRange(splitSearch)
-      .. ItemLevelRange(splitSearch)
-      .. CraftedLevelRange(splitSearch)
-      .. "]"
-
-    -- Clean up string removing empty stuff
-    result = string.gsub(result ," ,", "")
-    result = string.gsub(result ,"%[, ", "[")
-    result = string.gsub(result ,"^ %[", "[")
-    result = string.gsub(result ,", %]", "]")
-    result = string.gsub(result ," %[%]$", "")
-
-    return result
+local function WrapExactSearch(splitSearch)
+  if splitSearch.isExact then
+    return "\"" .. splitSearch.searchString .. "\""
   else
-    return searchString
+    return splitSearch.searchString
   end
+end
+
+function Auctionator.Search.PrettifySearchString(searchString)
+  local splitSearch = Auctionator.Search.SplitAdvancedSearch(searchString)
+
+  result = WrapExactSearch(splitSearch)
+    .. " ["
+    .. CategoryKey(splitSearch)
+    .. PriceRange(splitSearch)
+    .. LevelRange(splitSearch)
+    .. ItemLevelRange(splitSearch)
+    .. CraftedLevelRange(splitSearch)
+    .. "]"
+
+  -- Clean up string removing empty stuff
+  result = string.gsub(result ," ,", "")
+  result = string.gsub(result ,"%[, ", "[")
+  result = string.gsub(result ,"^ %[", "[")
+  result = string.gsub(result ,", %]", "]")
+  result = string.gsub(result ," %[%]$", "")
+
+  return result
+end
+
+local function TooltipCategory(splitSearch)
+  local key = splitSearch.categoryKey
+
+  if splitSearch.categoryKey == nil or splitSearch.categoryKey == "" then
+    key = AUCTIONATOR_L_ANY_LOWER
+  end
+
+  return {
+    AUCTIONATOR_L_ITEM_CLASS,
+    key
+  }
+end
+
+local function TooltipPriceRange(splitSearch)
+  local minPrice, maxPrice = ConvertMoneyStrings(splitSearch)
+
+  return {
+    AUCTIONATOR_L_PRICE,
+    TooltipRangeString(minPrice, maxPrice)
+  }
+end
+
+local function TooltipLevelRange(splitSearch)
+  return {
+    AUCTIONATOR_L_LEVEL,
+    TooltipRangeString(splitSearch.minLevel, splitSearch.maxLevel)
+  }
+end
+
+local function TooltipItemLevelRange(splitSearch)
+  return {
+    AUCTIONATOR_L_ITEM_LEVEL,
+    TooltipRangeString(splitSearch.minItemLevel, splitSearch.maxItemLevel)
+  }
+end
+
+local function TooltipCraftedLevelRange(splitSearch)
+  return {
+    AUCTIONATOR_L_CRAFTED_LEVEL,
+    TooltipRangeString(splitSearch.minCraftedLevel, splitSearch.maxCraftedLevel)
+  }
+end
+
+function Auctionator.Search.ComposeTooltip(searchString)
+  local splitSearch = Auctionator.Search.SplitAdvancedSearch(searchString)
+
+  local lines = {}
+
+  table.insert(lines, TooltipCategory(splitSearch))
+  table.insert(lines, TooltipPriceRange(splitSearch))
+  table.insert(lines, TooltipLevelRange(splitSearch))
+  table.insert(lines, TooltipItemLevelRange(splitSearch))
+  table.insert(lines, TooltipCraftedLevelRange(splitSearch))
+
+  if splitSearch.searchString == "" then
+    splitSearch.searchString = " "
+  end
+
+  return {
+    title = splitSearch.searchString,
+    lines = lines
+  }
 end

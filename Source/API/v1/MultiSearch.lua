@@ -1,16 +1,3 @@
-local function InitializeAPIv1MultiSearchFrame()
-  if Auctionator.State.APIv1MultiSearchFrameRef == nil then
-    local frame = CreateFrame(
-      "FRAME",
-      "AuctionatorAPIv1MultiSearchFrame",
-      AuctionHouseFrame,
-      "AuctionatorAPIv1MultiSearchFrameTemplate"
-    )
-
-    Auctionator.State.AuctionAPIv1MultiSearchFrameRef = frame
-  end
-end
-
 local function ValidateState(callerID, searchTerms)
   Auctionator.API.InternalVerifyID(callerID)
 
@@ -23,36 +10,56 @@ local function ValidateState(callerID, searchTerms)
   end
 
   for _, term in ipairs(cloned) do
-    if string.match(term, "\"") or string.match(term, ";") then
+    if string.match(term, "^%s*\".*\"%s*$") or string.match(term, ";") then
       Auctionator.API.ComposeError(
-        callerID, "Search term contains \" or ;"
+        callerID, "Search term contains ; or is wrapped in \""
       )
     end
   end
 
   -- Validate state
-  if not AuctionHouseFrame or not AuctionHouseFrame:IsShown() then
+  if (not AuctionHouseFrame or not AuctionHouseFrame:IsShown()) and
+     (not AuctionFrame      or not AuctionFrame:IsShown()) then
     Auctionator.API.ComposeError(callerID, "Auction house is not open")
   end
 
   return cloned
 end
 
+local function StartSearch(callerID, cloned)
+  -- Show the shopping list tab for results
+  AuctionatorTabs_ShoppingLists:Click()
+
+  local listName = callerID .. " (" .. AUCTIONATOR_L_TEMPORARY_LOWER_CASE .. ")"
+
+  -- Remove any old searches
+  if Auctionator.ShoppingLists.ListIndex(listName) ~= nil then
+    Auctionator.ShoppingLists.Delete(listName)
+  end
+
+  Auctionator.ShoppingLists.CreateTemporary(listName)
+
+  local list = Auctionator.ShoppingLists.GetListByName(listName)
+
+  list.items = cloned
+
+  Auctionator.EventBus:RegisterSource(StartSearch, "API v1 Multi search start")
+    :Fire(StartSearch, Auctionator.ShoppingLists.Events.ListCreated, list)
+    :Fire(StartSearch, Auctionator.ShoppingLists.Events.ListSearchRequested, list)
+    :UnregisterSource(StartSearch)
+end
+
 function Auctionator.API.v1.MultiSearch(callerID, searchTerms)
   local cloned = ValidateState(callerID, searchTerms)
-
-  InitializeAPIv1MultiSearchFrame()
-  Auctionator.State.AuctionAPIv1MultiSearchFrameRef:StartSearch(cloned)
+  StartSearch(callerID, cloned)
 end
 
 function Auctionator.API.v1.MultiSearchExact(callerID, searchTerms)
   local cloned = ValidateState(callerID, searchTerms)
-
   -- Make all the terms advanced search terms  which are exact
   for index, term in ipairs(cloned) do
     cloned[index] = '"' .. term .. '"'
   end
 
-  InitializeAPIv1MultiSearchFrame()
-  Auctionator.State.AuctionAPIv1MultiSearchFrameRef:StartSearch(cloned)
+  StartSearch(callerID, cloned)
 end

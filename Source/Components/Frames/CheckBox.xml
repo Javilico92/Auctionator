@@ -1,77 +1,41 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
-  <Frame
-    name="AuctionatorConfigurationCheckbox"
-    inherits="AuctionatorConfigurationTooltip"
-    virtual="true">
-
-    <Size>
-      <AbsDimension x="300" y="40"/>
-    </Size>
-
+  <!-- Template for a single option "box" containing a checkbox -->
+  <Frame name="AuctionatorConfigurationCheckbox" mixin="AuctionatorConfigCheckboxMixin" inherits="AuctionatorConfigurationTooltip" virtual="true">
+    <!--
+      <KeyValues>
+        <KeyValue key="labelText" value="" type="string"/>
+        <KeyValue key="tooltipTitleText" value="" type="string"/>
+        <KeyValue key="tooltipText" value="" type="string"/>
+      </KeyValues>
+    -->
+    <Size y="40" />
     <Scripts>
-      <OnLoad>
-        Mixin(self, AuctionatorConfigTooltipMixin)
-        Mixin(self, AuctionatorConfigCheckboxMixin)
-
-        self.CheckBox = self.CheckBox or select(1, self:GetChildren())
-
-        if self.CheckBox and not self.CheckBox.Label then
-          local regions = { self.CheckBox:GetRegions() }
-
-          for _, region in ipairs(regions) do
-            if region and region.GetObjectType
-                and region:GetObjectType() == "FontString"
-            then
-              self.CheckBox.Label = region
-              break
-            end
-          end
-        end
-
-        if self.OnLoad then
-          self:OnLoad()
-        end
-      </OnLoad>
+      <OnLoad method="OnLoad"/>
+      <OnMouseUp method="OnMouseUp"/>
+      <OnEnter method="OnEnter"/>
+      <OnLeave method="OnLeave"/>
     </Scripts>
-
+    <Anchors>
+      <Anchor point="LEFT" relativeKey="$parent" relativePoint="LEFT" />
+      <Anchor point="RIGHT" relativeKey="$parent" relativePoint="RIGHT" />
+    </Anchors>
     <Frames>
-      <CheckButton inherits="UICheckButtonTemplate">
+      <CheckButton inherits="UICheckButtonTemplate" parentKey="CheckBox">
         <Anchors>
-          <Anchor point="TOPLEFT">
-            <Offset>
-              <AbsDimension x="20" y="0"/>
-            </Offset>
-          </Anchor>
+          <Anchor point="TOPLEFT" x="20" />
         </Anchors>
-
         <Layers>
           <Layer level="BACKGROUND">
-            <FontString inherits="GameFontHighlight">
+            <FontString inherits="GameFontHighlight" parentKey="Label">
               <Anchors>
-                <Anchor point="TOPLEFT" relativePoint="TOPLEFT">
-                  <Offset>
-                    <AbsDimension x="58" y="-8"/>
-                  </Offset>
-                </Anchor>
+                <Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeKey="$parent" x="58" y="-8" />
               </Anchors>
             </FontString>
           </Layer>
         </Layers>
-
         <Scripts>
-          <OnEnter>
-            local parent = self:GetParent()
-            if parent and parent.OnEnter then
-              parent:OnEnter()
-            end
-          </OnEnter>
-
-          <OnLeave>
-            local parent = self:GetParent()
-            if parent and parent.OnLeave then
-              parent:OnLeave()
-            end
-          </OnLeave>
+          <OnEnter>self:GetParent():OnEnter()</OnEnter>
+          <OnLeave>self:GetParent():OnLeave()</OnLeave>
         </Scripts>
       </CheckButton>
     </Frames>

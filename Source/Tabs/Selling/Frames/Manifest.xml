@@ -1,4 +1,7 @@
-<!-- Tabs/Sell/Frames directory manifest -->
+<!-- Tabs directory manifest -->
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
-  <Include file="Main.xml"/>
+  <Include file="Bag.xml" />
+  <Include file="BagScrollFrame.xml" />
+  <Include file="BagItem.xml" />
+  <Include file="ItemIconDropDown.xml" />
 </Ui>

@@ -17,15 +17,27 @@ function AuctionatorFilterKeySelectorMixin:OnLoad()
     elseif level == 3 then
       self:InitializeArmorSlots(menuList)
     end
-  end)
+  end, "taint prevention")
 end
 
 function AuctionatorFilterKeySelectorMixin:GetValue()
   return self.displayText
 end
 
+function AuctionatorFilterKeySelectorMixin:SetValue(value)
+  if value == nil then
+    value = ""
+  end
+
+  self.displayText = value
+  self.onEntrySelected(value)
+  self.selectedCategory = {strsplit("/", value)}
+  UIDropDownMenu_SetText(self, value)
+end
+
 function AuctionatorFilterKeySelectorMixin:Reset()
   self.displayText = ""
+  self.selectedCategory = {}
   UIDropDownMenu_SetText(self, "")
 end
 
@@ -34,9 +46,7 @@ function AuctionatorFilterKeySelectorMixin:SetOnEntrySelected(callback)
 end
 
 function AuctionatorFilterKeySelectorMixin:EntrySelected(displayText)
-  self.displayText = displayText
-  self.onEntrySelected(displayText)
-  UIDropDownMenu_SetText(self, displayText)
+  self:SetValue(displayText)
   CloseDropDownMenus()
 end
 
@@ -49,18 +59,24 @@ function AuctionatorFilterKeySelectorMixin:InitializePrimaryClasses()
     self:EntrySelected(displayText)
   end
 
-  for _, classId in ipairs(Auctionator.Constants.ITEM_CLASS_IDS) do
+  for _, classId in ipairs(Auctionator.Constants.ValidItemClassIDs) do
     name = GetItemClassInfo(classId)
+    if name ~= nil then
+      info.text = name
+      info.arg1 = name
+      info.menuList = {
+        name = name,
+        classId = classId,
+        subClasses = Auctionator.AH.GetAuctionItemSubClasses(classId)
+      }
+      if self.selectedCategory[1] ~= nil then
+        info.checked = info.arg1 == self.selectedCategory[1]
+      else
+        info.checked = false
+      end
 
-    info.text = name
-    info.arg1 = name
-    info.menuList = {
-      name = name,
-      classId = classId,
-      subClasses = C_AuctionHouse.GetAuctionItemSubClasses(classId)
-    }
-
-    UIDropDownMenu_AddButton(info)
+      UIDropDownMenu_AddButton(info)
+    end
   end
 end
 
@@ -78,7 +94,7 @@ function AuctionatorFilterKeySelectorMixin:InitializeSecondaryClasses(menuList)
     info.text = name
     info.arg1 = menuList.name .. "/" .. name
 
-    if menuList.classId == LE_ITEM_CLASS_ARMOR then
+    if menuList.classId == Enum.ItemClass.Armor then
       info.hasArrow = true
       info.menuList = {
         name = menuList.name .. "/" .. name,
@@ -86,6 +102,12 @@ function AuctionatorFilterKeySelectorMixin:InitializeSecondaryClasses(menuList)
         subClassId = subClassId,
         slots = Auctionator.Constants.INVENTORY_TYPE_IDS
       }
+    end
+
+    if self.selectedCategory[2] ~= nil then
+      info.checked = info.arg1 == (self.selectedCategory[1] .. "/" .. self.selectedCategory[2])
+    else
+      info.checked = false
     end
 
     UIDropDownMenu_AddButton(info, 2)
@@ -111,6 +133,12 @@ function AuctionatorFilterKeySelectorMixin:InitializeArmorSlots(menuList)
       subClassId = menuList.subClassId,
       armorSlotId = armorSlotId
     }
+
+    if self.selectedCategory[3] ~= nil then
+      info.checked = info.arg1 == (self.selectedCategory[1] .. "/" .. self.selectedCategory[2] .. "/" .. self.selectedCategory[3])
+    else
+      info.checked = false
+    end
 
     UIDropDownMenu_AddButton(info, 3)
   end

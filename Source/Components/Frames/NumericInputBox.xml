@@ -1,102 +1,45 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
-  <Frame
-    name="AuctionatorConfigurationNumericInput"
-    inherits="AuctionatorConfigurationTooltip"
-    virtual="true">
-
-    <Size>
-      <AbsDimension x="300" y="40"/>
-    </Size>
-
+  <!-- Template for a simple input box -->
+  <Frame name="AuctionatorConfigurationNumericInput" mixin="AuctionatorConfigNumericInputMixin"  inherits="AuctionatorConfigurationTooltip" virtual="true">
+    <!--
+      <KeyValues>
+        <KeyValue key="labelText" value="" type="string"/>
+        <KeyValue key="tooltipTitleText" value="" type="string"/>
+        <KeyValue key="tooltipText" value="" type="string"/>
+      </KeyValues>
+    -->
+    <Size y="40" />
     <Scripts>
-      <OnLoad>
-        Mixin(self, AuctionatorConfigTooltipMixin)
-        Mixin(self, AuctionatorConfigNumericInputMixin)
-
-        self.InputBox = select(1, self:GetChildren())
-
-        if self.InputBox and not self.InputBox.Label then
-          local regions = { self.InputBox:GetRegions() }
-
-          for _, region in ipairs(regions) do
-            if region
-              and region.GetObjectType
-              and region:GetObjectType() == "FontString"
-            then
-              self.InputBox.Label = region
-              break
-            end
-          end
-        end
-
-        if self.OnLoad then
-          self:OnLoad()
-        end
-      </OnLoad>
+      <OnLoad method="OnLoad"/>
+      <OnMouseUp method="OnMouseUp"/>
     </Scripts>
-
     <Anchors>
-      <Anchor point="LEFT" relativeTo="$parent" relativePoint="LEFT"/>
-      <Anchor point="RIGHT" relativeTo="$parent" relativePoint="RIGHT"/>
+      <Anchor point="LEFT" relativeKey="$parent" relativePoint="LEFT" />
+      <Anchor point="RIGHT" relativeKey="$parent" relativePoint="RIGHT" />
     </Anchors>
-
     <Frames>
-      <EditBox
-        autoFocus="false"
-        inherits="InputBoxTemplate"
-        numeric="true"
-        letters="3">
-
-        <Size>
-          <AbsDimension x="50" y="20"/>
-        </Size>
-
+      <EditBox autoFocus="false" inherits="AuctionatorRetailImportLargeInputBoxTemplate" parentKey="InputBox" letters="10">
+        <Size x="70" y="20" />
         <Anchors>
-          <Anchor point="TOPLEFT">
-            <Offset>
-              <AbsDimension x="25" y="0"/>
-            </Offset>
-          </Anchor>
+          <Anchor point="TOPLEFT" x="25" />
         </Anchors>
-
-        <FontString inherits="ChatFontNormal" justifyH="CENTER"/>
-
+        <FontString inherits="ChatFontNormal" justifyH="CENTER" />
         <Layers>
           <Layer level="BACKGROUND">
-            <FontString inherits="GameFontHighlight">
+            <FontString inherits="GameFontHighlight" parentKey="Label">
               <Anchors>
-                <Anchor
-                  point="TOPLEFT"
-                  relativeTo="$parent"
-                  relativePoint="TOPLEFT">
-
-                  <Offset>
-                    <AbsDimension x="58" y="-4"/>
-                  </Offset>
-                </Anchor>
+                <Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeKey="$parent" x="78" y="-4" />
               </Anchors>
             </FontString>
           </Layer>
         </Layers>
-
         <Scripts>
-          <OnEnter>
-            local parent = self:GetParent()
-            if parent and parent.OnEnter then
-              parent:OnEnter()
-            end
-          </OnEnter>
-
-          <OnLeave>
-            local parent = self:GetParent()
-            if parent and parent.OnLeave then
-              parent:OnLeave()
-            end
-          </OnLeave>
-
-          <OnEscapePressed>
-            self:ClearFocus()
-          </OnEscapePressed>
+          <OnEnter>self:GetParent():OnEnter()</OnEnter>
+          <OnLeave>self:GetParent():OnLeave()</OnLeave>
+          <OnEscapePressed>self:ClearFocus()</OnEscapePressed>
+          <OnEnterPressed>Auctionator.Components.ReportEnterPressed()</OnEnterPressed>
+          <OnTextChanged function="Auctionator_EditBox_OnTextChanged"/>
+          <OnKeyDown function="Auctionator_EditBox_OnKeyDown" />
         </Scripts>
       </EditBox>
     </Frames>

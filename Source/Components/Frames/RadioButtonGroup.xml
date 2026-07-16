@@ -1,32 +1,22 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
-  <Frame
-    name="AuctionatorConfigurationRadioButtonGroup"
-    virtual="true">
-
+<!-- Template for a radio button with label -->
+  <Frame name="AuctionatorConfigurationRadioButtonGroup" mixin="AuctionatorConfigRadioButtonGroupMixin" virtual="true">
+    <!--
+      <KeyValues>
+        <KeyValue key="subHeadingText" value="" type="string"/>
+      </KeyValues>
+    -->
     <Scripts>
-      <OnLoad>
-        Mixin(self, AuctionatorConfigRadioButtonGroupMixin)
-
-        self.GroupHeading = select(1, self:GetChildren())
-
-        if self.InitializeRadioButtonGroup then
-          self:InitializeRadioButtonGroup()
-        end
-      </OnLoad>
+      <OnLoad method="InitializeRadioButtonGroup"/>
     </Scripts>
-
     <Anchors>
-      <Anchor point="LEFT" relativeTo="$parent" relativePoint="LEFT"/>
-      <Anchor point="RIGHT" relativeTo="$parent" relativePoint="RIGHT"/>
+      <Anchor point="LEFT" relativeKey="$parent" relativePoint="LEFT"/>
+      <Anchor point="RIGHT" relativeKey="$parent" relativePoint="RIGHT"/>
     </Anchors>
-
     <Frames>
-      <Frame
-        name="$parentGroupHeading"
-        inherits="AuctionatorConfigurationSubHeadingFrame">
-
+      <Frame inherits="AuctionatorConfigurationSubHeadingFrame" parentKey="GroupHeading">
         <Anchors>
-          <Anchor point="TOPLEFT" relativeTo="$parent" relativePoint="TOPLEFT"/>
+          <Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="TOPLEFT"/>
         </Anchors>
       </Frame>
     </Frames>

@@ -7,6 +7,7 @@ Auctionator.Constants = {
   AdvancedSearchDivider = ';',
 
   PET_CAGE_ID = 82800,
+  WOW_TOKEN_ID = 122270,
 
   SCAN_DAY_0 = time({year=2020, month=1, day=1, hour=0}),
 
@@ -14,28 +15,37 @@ Auctionator.Constants = {
     ASCENDING = 1,
     DESCENDING = 0
   },
-  ITEM_CLASS_IDS = {
-    LE_ITEM_CLASS_WEAPON,
-    LE_ITEM_CLASS_ARMOR,
-    LE_ITEM_CLASS_CONTAINER,
-    LE_ITEM_CLASS_GEM,
-    LE_ITEM_CLASS_ITEM_ENHANCEMENT,
-    LE_ITEM_CLASS_CONSUMABLE,
-    LE_ITEM_CLASS_GLYPH,
-    LE_ITEM_CLASS_TRADEGOODS,
-    LE_ITEM_CLASS_RECIPE,
-    LE_ITEM_CLASS_BATTLEPET,
-    LE_ITEM_CLASS_QUESTITEM,
-    LE_ITEM_CLASS_MISCELLANEOUS
+  ITEM_TYPES = {
+    ITEM = 1,
+    COMMODITY = 2
   },
   INVENTORY_TYPE_IDS = {
-    LE_INVENTORY_TYPE_HEAD_TYPE,
-    LE_INVENTORY_TYPE_SHOULDER_TYPE,
-    LE_INVENTORY_TYPE_CHEST_TYPE,
-    LE_INVENTORY_TYPE_WAIST_TYPE,
-    LE_INVENTORY_TYPE_LEGS_TYPE,
-    LE_INVENTORY_TYPE_FEET_TYPE,
-    LE_INVENTORY_TYPE_WRIST_TYPE,
-    LE_INVENTORY_TYPE_HAND_TYPE,
-  }
+    Enum.InventoryType.IndexHeadType,
+    Enum.InventoryType.IndexShoulderType,
+    Enum.InventoryType.IndexChestType,
+    Enum.InventoryType.IndexWaistType,
+    Enum.InventoryType.IndexLegsType,
+    Enum.InventoryType.IndexFeetType,
+    Enum.InventoryType.IndexWristType,
+    Enum.InventoryType.IndexHandType,
+  },
+  EXPORT_TYPES = {
+    STRING = 0,
+    WHISPER = 1
+  },
+  NO_LIST = "",
+  ITEM_LEVEL_THRESHOLD = 168,
+
+  ShoppingListViews = {
+    Lists = 1,
+    Recents = 2,
+  },
+
+  RecentsListLimit = 30,
+
+  Durations = {
+    Short = 12,
+    Medium = 24,
+    Long = 48,
+  },
 }

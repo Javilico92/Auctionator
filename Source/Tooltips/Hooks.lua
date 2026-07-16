@@ -1,15 +1,17 @@
--- hooksecurefunc (_G, "BattlePetToolTip_Show",
---  function(speciesID, ...)
---    Auctionator.Tooltip.AddPetTip(speciesID)
---  end
--- )
+if BattlePetToolTip_Show ~= nil then -- not Auctionator.Constants.IsTBC
+  hooksecurefunc (_G, "BattlePetToolTip_Show",
+    function(speciesID, ...)
+      Auctionator.Tooltip.AddPetTip(speciesID)
+    end
+  )
+end
 
 -- This is called when mousing over an item in your bags
 hooksecurefunc (GameTooltip, "SetBagItem",
   function(tip, bag, slot)
     local itemLocation = ItemLocation:CreateFromBagAndSlot(bag, slot)
 
-    if itemLocation:IsValid() then
+    if C_Item.DoesItemExist(itemLocation) then
       local itemLink = C_Item.GetItemLink(itemLocation);
       local itemCount = C_Item.GetStackCount(itemLocation)
 
@@ -60,51 +62,49 @@ hooksecurefunc (GameTooltip, "SetGuildBankItem",
   end
 );
 
--- This is how it works in 335, neither SetRecipeResultItem nor SetRecipeReagentItem are from this version
-hooksecurefunc (GameTooltip, "SetTradeSkillItem",
-	function (tip, skill, id)
-		local itemLink = GetTradeSkillItemLink(skill);
-		local num  = GetTradeSkillNumMade(skill);
-		if id then
-			itemLink = GetTradeSkillReagentItemLink(skill, id);
-			num = select (3, GetTradeSkillReagentInfo(skill, id));
-		end
+if GameTooltip.SetRecipeResultItem and GameTooltip.SetRecipeReagentItem then -- not Auctionator.Constants.IsTBC
+  -- This is called when mousing over the result item on a recipe page in the tradeskill window
+  hooksecurefunc( GameTooltip, 'SetRecipeResultItem',
+    function(tip, recipeResultItemId)
+      local itemLink = C_TradeSkillUI.GetRecipeItemLink(recipeResultItemId)
 
-		Auctionator.Tooltip.ShowTipWithPricing(tip, itemLink, num)
-	end
-);
+      local itemCount  = C_TradeSkillUI.GetRecipeNumItemsProduced(recipeResultItemId)
 
--- This is called when mousing over the result item on a recipe page in the tradeskill window
---hooksecurefunc( GameTooltip, 'SetRecipeResultItem',
---  function(tip, recipeResultItemId)
---    local itemLink = C_TradeSkillUI.GetRecipeItemLink(recipeResultItemId)
---    local itemKey = Auctionator.Utilities.ItemKeyFromLink(itemLink)
---
---    local itemCount  = C_TradeSkillUI.GetRecipeNumItemsProduced(recipeResultItemId)
---
---    Auctionator.Tooltip.ShowTipWithPricing(tip, itemKey, itemCount)
---  end
---);
+      Auctionator.Tooltip.ShowTipWithPricing(tip, itemLink, itemCount)
+    end
+  );
 
--- This is called when mousing over a reagant item on a recipe page in the tradeskill window
---hooksecurefunc( GameTooltip, 'SetRecipeReagentItem',
---  function( tip, reagentId, index )
---    local itemLink = C_TradeSkillUI.GetRecipeReagentItemLink(reagentId, index)
---    local itemKey = Auctionator.Utilities.ItemKeyFromLink(itemLink)
---
---    local itemCount = select(3, C_TradeSkillUI.GetRecipeReagentInfo(reagentId, index))
---
---    Auctionator.Tooltip.ShowTipWithPricing(tip, itemKey, itemCount)
---  end
---);
+  -- This is called when mousing over a reagant item on a recipe page in the tradeskill window
+  hooksecurefunc( GameTooltip, 'SetRecipeReagentItem',
+    function( tip, reagentId, index )
+      local itemLink = C_TradeSkillUI.GetRecipeReagentItemLink(reagentId, index)
+
+      local itemCount = select(3, C_TradeSkillUI.GetRecipeReagentInfo(reagentId, index))
+
+      Auctionator.Tooltip.ShowTipWithPricing(tip, itemLink, itemCount)
+    end
+  );
+else
+  hooksecurefunc( GameTooltip, 'SetTradeSkillItem',
+    function(tip, recipeIndex, reagentIndex)
+      local itemLink, itemCount
+      if reagentIndex ~= nil then
+        itemLink = GetTradeSkillReagentItemLink(recipeIndex, reagentIndex)
+        itemCount = select(3, GetTradeSkillReagentInfo(recipeIndex, reagentIndex))
+      else
+        itemLink = GetTradeSkillItemLink(recipeIndex);
+        itemCount  = GetTradeSkillNumMade(recipeIndex);
+      end
+      Auctionator.Tooltip.ShowTipWithPricing(tip, itemLink, itemCount)
+    end
+  );
+end
 
 -- This is called when mousing over an item in the loot window
 hooksecurefunc (GameTooltip, "SetLootItem",
   function (tip, slot)
     if LootSlotHasItem(slot) then
-      local itemLink = GetLootSlotLink(slot); -- 335 returns only itemLink
-      local _, _, itemCount = GetLootSlotInfo(slot) -- In 335 this is the way to obtain itemCount
-      itemCount = tonumber(itemCount) or 1
+      local itemLink, _, itemCount = GetLootSlotLink(slot);
 
       Auctionator.Tooltip.ShowTipWithPricing(tip, itemLink, itemCount)
     end
@@ -244,49 +244,59 @@ hooksecurefunc (GameTooltip, "SetTradeTargetItem",
   end
 );
 
--- No idea when this thing is fired :shrug:
-hooksecurefunc (GameTooltip, "SetHyperlink",
-  function (tip, itemstring, num)
-    local _, itemLink = GetItemInfo(itemstring);
+-- Occurs when mousing over items in the Refer-a-Friend frame, and a few other places
+hooksecurefunc (GameTooltip, "SetItemByID",
+  function (tip, itemID)
+    if not itemID then
+      return
+    end
+
+    local itemLink = select(2, GetItemInfo(itemID))
 
     Auctionator.Tooltip.ShowTipWithPricing(tip, itemLink, 1)
   end
 );
 
-function Auctionator.Tooltip.LateHooks()
-    -- AuctionHouseUtil pertenece a la casa de subastas moderna.
-    -- No existe en WoW 3.3.5.
-    if not AuctionHouseUtil
-        or type(AuctionHouseUtil.SetAuctionHouseTooltip) ~= "function"
-    then
-        return
+-- Occurs mainly with addons (Blizzard and otherwise)
+hooksecurefunc (GameTooltip, "SetHyperlink",
+  function (tip, itemID)
+    if not itemID then
+      return
     end
 
-    hooksecurefunc(
-        AuctionHouseUtil,
-        "SetAuctionHouseTooltip",
-        function(owner, rowData)
-            if not rowData then
-                return
-            end
+    local itemLink = select(2, GetItemInfo(itemID))
 
-            if rowData.itemLink then
-                Auctionator.Tooltip.ShowTipWithPricing(
-                    GameTooltip,
-                    rowData.itemLink,
-                    1
-                )
-            elseif rowData.itemKey and rowData.itemKey.itemID then
-                local _, itemLink = GetItemInfo(rowData.itemKey.itemID)
+    Auctionator.Tooltip.ShowTipWithPricing(tip, itemLink, 1)
+  end
+);
 
-                if itemLink then
-                    Auctionator.Tooltip.ShowTipWithPricing(
-                        GameTooltip,
-                        itemLink,
-                        1
-                    )
-                end
-            end
+function Auctionator.Tooltip.MainlineLateHooks()
+  -- As AuctionHouseUtil doesn't exist until the AH is opened this cannot be
+  -- called before the AH opens.
+  -- Only shows disenchant information as the auction price is already displayed
+  -- and an itemKey is too inaccurate to use for a vendor price.
+  hooksecurefunc(AuctionHouseUtil, "SetAuctionHouseTooltip",
+    function(owner, rowData)
+      if rowData.itemLink then
+        -- Already set with SetHyperlink
+        return
+
+      elseif rowData.itemKey then
+        if rowData.itemKey.battlePetSpeciesID ~= 0 then
+          return
         end
-    )
+        local itemInfo = { GetItemInfo(rowData.itemKey.itemID) }
+
+        if #itemInfo ~= 0 then
+          local disenchantStatus = Auctionator.Enchant.DisenchantStatus(itemInfo)
+          local disenchantPrice = Auctionator.Enchant.GetDisenchantAuctionPrice(itemInfo[2])
+
+          if disenchantStatus ~= nil then
+            Auctionator.Tooltip.AddDisenchantTip(GameTooltip, disenchantPrice, disenchantStatus)
+            GameTooltip:Show()
+          end
+        end
+      end
+    end
+  )
 end
