@@ -1,5 +1,7 @@
 function Auctionator.Events.OnAuctionHouseShow()
     Auctionator.Debug.Message("Auctionator.Events.OnAuctionHouseShow()")
+    
+    Auctionator.AH.Initialize()
 
     Auctionator.State.AuctionatorFrame = _G.AuctionatorAHFrame
 

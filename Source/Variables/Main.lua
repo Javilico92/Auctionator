@@ -1,6 +1,6 @@
 -- TODO Initialize all the things here!
 -- TODO Document all of our saved vars (started in Objects, should aggregate somewhere)
-local VERSION_8_3 = 5
+local VERSION_8_3 = 6
 
 -- All the saved variables from the TOC
 -- SavedVariablesPerCharacter:
@@ -15,31 +15,24 @@ local VERSION_8_3 = 5
 
 
 function Auctionator.Variables.Initialize()
+  Auctionator.Variables.InitializeSavedState()
 
-  if AUCTIONATOR_SAVEDVARS == nil then
-    AUCTIONATOR_SAVEDVARS = {}
-  end
   Auctionator.Config.Initialize()
 
-  Auctionator.Variables.InitializeFullScanVariables()
+  Auctionator.State.CurrentVersion = GetAddOnMetadata("Auctionator", "Version")
+  Auctionator.Utilities.PrintVersion()
+
   Auctionator.Variables.InitializeDatabase()
   Auctionator.Variables.InitializeShoppingLists()
 
-  Auctionator.State.CurrentVersion = GetAddOnMetadata("Auctionator", "Version")
   Auctionator.State.Loaded = true
 end
 
-function Auctionator.Variables.InitializeFullScanVariables()
-  if AUCTIONATOR_SAVEDVARS.FULL_SCAN_DATA == nil then
-    AUCTIONATOR_SAVEDVARS.FULL_SCAN_DATA = {
-      TimeOfLastScan = nil,
-      Completed = false,
-      InProgress = false,
-      ReceivedInitialEvent = false
-    }
+function Auctionator.Variables.InitializeSavedState()
+  if AUCTIONATOR_SAVEDVARS == nil then
+    AUCTIONATOR_SAVEDVARS = {}
   end
-
-  Auctionator.FullScan.State = AUCTIONATOR_SAVEDVARS.FULL_SCAN_DATA
+  Auctionator.SavedState = AUCTIONATOR_SAVEDVARS
 end
 
 function Auctionator.Variables.InitializeDatabase()
@@ -73,12 +66,11 @@ function Auctionator.Variables.InitializeDatabase()
   local count = 0
   for _ in pairs(Auctionator.State.LiveDB) do count = count + 1 end
 
-  Auctionator.Utilities.Message("Database loaded with " .. count .. " entries.")
-  -- TODO leftover from Atr_InitDB
-  -- Atr_PruneScanDB ();
-  -- Atr_PrunePostDB ();
+  Auctionator.Utilities.Message(
+    Auctionator.Locales.Apply("DATABASE_LOADED", count)
+  )
 
-  -- Atr_Broadcast_DBupdated (#gAtr_ScanDB, "dbinited");
+  Auctionator.Database.Prune()
 end
 
 function Auctionator.Variables.InitializeShoppingLists()

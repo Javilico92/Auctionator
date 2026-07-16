@@ -9,7 +9,7 @@ function AuctionatorFullScanFrameMixin:OnLoad()
   Auctionator.Debug.Message("AuctionatorFullScanFrameMixin:OnLoad")
 
   -- Updates to self.state should store in the SAVED_VARIABLE
-  self.state = Auctionator.FullScan.State
+  self.state = Auctionator.SavedState
   self.prices = {}
   self.startTime = nil
 end
@@ -17,11 +17,11 @@ end
 function AuctionatorFullScanFrameMixin:InitiateScan()
   if self:CanInitiate() then
     self.state.TimeOfLastScan = time()
-    self.state.InProgress = true
+    self.inProgress = true
 
     self:RegisterForEvents()
-    Auctionator.Utilities.Message("Starting a full scan.")
-    C_AuctionHouse.ReplicateItems()
+    Auctionator.Utilities.Message(Auctionator.Locales.Apply("STARTING_FULL_SCAN"))
+    Auctionator.AH.ReplicateItems()
   else
     Auctionator.Utilities.Message(self:NextScanMessage())
   end
@@ -30,22 +30,22 @@ end
 function AuctionatorFullScanFrameMixin:CanInitiate()
   return
    ( self.state.TimeOfLastScan ~= nil and
-     time() - self.state.TimeOfLastScan > 60 * 1 and
-     not self.state.InProgress
+     time() - self.state.TimeOfLastScan > 60 * 15 and
+     not self.inProgress
    ) or self.state.TimeOfLastScan == nil
 end
 
 function AuctionatorFullScanFrameMixin:NextScanMessage()
   local timeSinceLastScan = time() - self.state.TimeOfLastScan
   local minutesUntilNextScan = 15 - math.floor(timeSinceLastScan / 60) - 1
-  local secondsUntilNextScan = (1 * 60 - timeSinceLastScan) % 60
+  local secondsUntilNextScan = (15 * 60 - timeSinceLastScan) % 60
 
   return
-    "A full scan may be started in " ..
-    minutesUntilNextScan ..
-    " minutes and " ..
-    secondsUntilNextScan ..
-    " seconds."
+    Auctionator.Locales.Apply(
+      "NEXT_SCAN_MESSAGE",
+      minutesUntilNextScan,
+      secondsUntilNextScan
+    )
 end
 
 function AuctionatorFullScanFrameMixin:RegisterForEvents()
@@ -69,13 +69,13 @@ function AuctionatorFullScanFrameMixin:OnEvent(event, ...)
   elseif event =="AUCTION_HOUSE_CLOSED" then
     self:UnregisterForEvents()
 
-    if self.state.InProgress then
-      self.state.InProgress = false
+    if self.inProgress then
+      self.inProgress = false
       self.prices = {}
 
       Auctionator.Utilities.Message(
-        "Full scan failed to complete. " ..
-        self:NextScanMessage()
+        Auctionator.Locales.Apply("FULL_SCAN_FAILED") ..
+        " " .. self:NextScanMessage()
       )
     end
   end
@@ -99,16 +99,21 @@ function AuctionatorFullScanFrameMixin:BeginProcessing()
   self.processingComplete = false
 
   self.startTime = debugprofilestop()
-  self:ProcessBatch(0, 2000, C_AuctionHouse.GetNumReplicateItems())
+  self:ProcessBatch(
+    0,
+    Auctionator.Config.Get(Auctionator.Config.Options.FULL_SCAN_STEP),
+    C_AuctionHouse.GetNumReplicateItems()
+  )
 end
 
 function AuctionatorFullScanFrameMixin:EndProcessing()
   Auctionator.Debug.Message("BeginProcessing() completed in " .. tostring(debugprofilestop() - self.startTime))
 
-  Auctionator.Database.ProcessFullScan(self.prices)
+  local count = Auctionator.Database.ProcessScan(self.prices)
+  Auctionator.Utilities.Message(Auctionator.Locales.Apply("FINISHED_PROCESSING", count))
 
   self.processingComplete = true
-  self.state.InProgress = false
+  self.inProgress = false
   self.startTime = nil
   self.prices = {}
 
@@ -116,8 +121,10 @@ function AuctionatorFullScanFrameMixin:EndProcessing()
 end
 
 function AuctionatorFullScanFrameMixin:ProcessBatch(startIndex, stepSize, totalCount)
-  if not self.state.InProgress then
-    Auctionator.Utilities.Message("Stopped processing at " .. startIndex .. " out of " .. totalCount .. ".")
+  if not self.inProgress then
+    Auctionator.Utilities.Message(
+      Auctionator.Locales.Apply("STOPPED_PROCESSING", startIndex, totalCount)
+    )
     self:EndProcessing()
     return
   end
@@ -142,7 +149,7 @@ function AuctionatorFullScanFrameMixin:ProcessBatch(startIndex, stepSize, totalC
   end
 
   if index < totalCount then
-    C_Timer.After(0.2, function()
+    C_Timer.After(0.01, function()
       self:ProcessBatch(index, stepSize, totalCount)
     end)
   else

@@ -57,8 +57,7 @@ end
 
 function Auctionator.Utilities.UTF8_Truncate( string, options )
   options = options or {}
-  -- local newLength = options.newLength or 127
-  local newLength = options.newLength or 63 -- 3.3.5 dosen't support more than 63 bytes
+  local newLength = options.newLength or 127
 
   if string:len() <= newLength then
     return string

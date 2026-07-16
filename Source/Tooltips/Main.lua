@@ -1,15 +1,18 @@
-
 local _, addonTable = ...;
 local zc = addonTable.zc;
 
-local L = Auctionator.Localization.Localize
+local L = Auctionator.Locales.Apply
 
 -- TODO DOCUMENTATION
 -- Auctionator.Config.Options.VENDOR_TOOLTIPS: true if should show vendor tips
 -- Auctionator.Config.Options.SHIFT_STACK_TOOLTIPS: true to show stack price when [shift] is down
 -- Auctionator.Config.Options.AUCTION_TOOLTIPS: true if should show auction tips
-function Auctionator.Tooltip.ShowTipWithPricing(tooltipFrame, itemKey, itemCount)
-  if itemKey==nil then
+function Auctionator.Tooltip.ShowTipWithPricing(tooltipFrame, itemLink, itemCount)
+  Auctionator.Debug.Message("Auctionator.Tooltip.ShowTipWithPricing", itemLink, itemCount)
+
+  local itemKey = Auctionator.Utilities.ItemKeyFromLink(itemLink)
+
+  if itemKey == nil or Auctionator.Utilities.IsPetItemKey(itemKey) then
     return
   end
 
@@ -21,7 +24,7 @@ function Auctionator.Tooltip.ShowTipWithPricing(tooltipFrame, itemKey, itemCount
 
   local countString = ""
   if itemCount and showStackPrices then
-    countString = "|cFFAAAAFF x" .. itemCount .. "|r"
+    countString = Auctionator.Utilities.CreateCountString(itemCount)
   end
 
   local auctionPrice = Auctionator.Database.GetPrice(itemKey)
@@ -29,19 +32,19 @@ function Auctionator.Tooltip.ShowTipWithPricing(tooltipFrame, itemKey, itemCount
     auctionPrice = auctionPrice * (showStackPrices and itemCount or 1)
   end
 
-  local vendorPrice = nil;
+  local vendorPrice, disenchantParams, disenchantPrice
   local cannotAuction = 0;
 
-  if Auctionator.Utilities.IsPetItemKey(itemKey) then
-    if auctionPrice ~= nil then
-      Auctionator.Debug.Message("Pet has AH price "..math.floor(auctionPrice/10000).."g "..math.floor((auctionPrice%10000)/100).."s");
-    end
-  else
-    local _, _, _, _, _, _, _, _, _, _, sellPrice, _, _, cannotAuctionTemp = GetItemInfo(itemKey);
-    cannotAuction = cannotAuctionTemp;
+  local itemInfo = { GetItemInfo(itemLink) };
+  if (#itemInfo) ~= 0 then
+    cannotAuction = itemInfo[Auctionator.Constants.ITEM_INFO.BIND_TYPE];
+    local sellPrice = itemInfo[Auctionator.Constants.ITEM_INFO.SELL_PRICE]
     if sellPrice ~= nil then
       vendorPrice = sellPrice * (showStackPrices and itemCount or 1);
     end
+
+    disenchantStatus = Auctionator.Enchant.DisenchantStatus(itemInfo)
+    disenchantPrice = Auctionator.Enchant.GetDisenchantAuctionPrice(itemLink)
   end
 
   if Auctionator.Debug.IsOn() then
@@ -52,13 +55,14 @@ function Auctionator.Tooltip.ShowTipWithPricing(tooltipFrame, itemKey, itemCount
     Auctionator.Tooltip.AddVendorTip(tooltipFrame, vendorPrice, countString)
   end
   Auctionator.Tooltip.AddAuctionTip(tooltipFrame, auctionPrice, countString, cannotAuction)
-  -- TODO Disenchant price; still need to figure out d/e tables...
+  if disenchantStatus ~= nil then
+    Auctionator.Tooltip.AddDisenchantTip(tooltipFrame, disenchantPrice, disenchantStatus)
+  end
   tooltipFrame:Show()
 end
 
 -- Each itemKey entry should contain
--- key
--- link (which may be an item link or a string name)
+-- link
 -- count
 function Auctionator.Tooltip.ShowTipWithMultiplePricing(tooltipFrame, itemKeys)
   local auctionPrice
@@ -68,20 +72,21 @@ function Auctionator.Tooltip.ShowTipWithMultiplePricing(tooltipFrame, itemKeys)
   for _, itemEntry in ipairs(itemKeys) do
     tooltipFrame:AddLine(itemEntry.link)
 
-    auctionPrice = Auctionator.Database.GetPrice(itemEntry.key)
+    auctionPrice = Auctionator.Database.GetPrice(
+      Auctionator.Utilities.ItemKeyFromLink(itemEntry.link)
+    )
     if auctionPrice ~= nil then
       total = total + (auctionPrice * itemEntry.count)
     end
     itemCount = itemCount + itemEntry.count
 
-    Auctionator.Tooltip.ShowTipWithPricing(tooltipFrame, itemEntry.key, itemEntry.count)
+    Auctionator.Tooltip.ShowTipWithPricing(tooltipFrame, itemEntry.link, itemEntry.count)
   end
 
   tooltipFrame:AddLine("  ")
 
   tooltipFrame:AddDoubleLine(
-    -- TODO Is "Total" localized?
-    "Total " .. "|cFFAAAAFF " .. itemCount .. " items|r",
+    Auctionator.Locales.Apply("TOTAL_ITEMS_COLORED", itemCount),
     WHITE_FONT_COLOR:WrapTextInColorCode(
       zc.priceToMoneyString(total)
     )
@@ -93,7 +98,7 @@ end
 function Auctionator.Tooltip.AddVendorTip(tooltipFrame, vendorPrice, countString)
   if Auctionator.Config.Get(Auctionator.Config.Options.VENDOR_TOOLTIPS) and vendorPrice > 0 then
     tooltipFrame:AddDoubleLine(
-      L("Vendor") .. countString,
+      L("VENDOR") .. countString,
       WHITE_FONT_COLOR:WrapTextInColorCode(
         zc.priceToMoneyString(vendorPrice)
       )
@@ -106,25 +111,80 @@ function Auctionator.Tooltip.AddAuctionTip (tooltipFrame, auctionPrice, countStr
 
     if (cannotAuction == 1) then
       tooltipFrame:AddDoubleLine(
-        L("Auction") .. countString,
+        L("AUCTION") .. countString,
         WHITE_FONT_COLOR:WrapTextInColorCode(
-          L("Cannot Auction") .. "  "
+          L("CANNOT_AUCTION") .. "  "
         )
       )
     elseif (auctionPrice ~= nil) then
       tooltipFrame:AddDoubleLine(
-        L("Auction") .. countString,
+        L("AUCTION") .. countString,
         WHITE_FONT_COLOR:WrapTextInColorCode(
           zc.priceToMoneyString(auctionPrice)
         )
       )
     else
       tooltipFrame:AddDoubleLine(
-        L("Auction") .. countString,
+        L("AUCTION") .. countString,
         WHITE_FONT_COLOR:WrapTextInColorCode(
-          L("unknown") .. "  "
+          L("UNKNOWN") .. "  "
         )
       )
     end
+  end
+end
+
+function Auctionator.Tooltip.AddDisenchantTip (
+  tooltipFrame, disenchantPrice, disenchantStatus
+)
+  if not Auctionator.Config.Get(Auctionator.Config.Options.ENCHANT_TOOLTIPS) then
+    return
+  end
+
+  if disenchantPrice ~= nil then
+    tooltipFrame:AddDoubleLine(
+      L("DISENCHANT"),
+      WHITE_FONT_COLOR:WrapTextInColorCode(
+        zc.priceToMoneyString(disenchantPrice)
+      )
+    )
+  elseif disenchantStatus.isDisenchantable and
+         disenchantStatus.supportedXpac then
+    tooltipFrame:AddDoubleLine(
+      L("DISENCHANT"),
+      WHITE_FONT_COLOR:WrapTextInColorCode(
+        L("UNKNOWN") .. "  "
+      )
+    )
+  end
+end
+
+local PET_TOOLTIP_SPACING = " "
+function Auctionator.Tooltip.AddPetTip(
+  speciesID
+)
+  Auctionator.Debug.Message("Auctionator.Tooltip.AddPetTip", speciesID)
+  if not Auctionator.Config.Get(Auctionator.Config.Options.AUCTION_TOOLTIPS) or
+     not Auctionator.Config.Get(Auctionator.Config.Options.PET_TOOLTIPS) then
+    return
+  end
+
+  local key = "p:" .. tostring(speciesID)
+  local price = Auctionator.Database.GetPrice(key)
+  BattlePetTooltip:AddLine(" ")
+  if price ~= nil then
+    BattlePetTooltip:AddLine(
+      L("AUCTION") .. PET_TOOLTIP_SPACING ..
+      WHITE_FONT_COLOR:WrapTextInColorCode(
+        zc.priceToMoneyString(price)
+      )
+    )
+  else
+    BattlePetTooltip:AddLine(
+      L("AUCTION") .. PET_TOOLTIP_SPACING ..
+      WHITE_FONT_COLOR:WrapTextInColorCode(
+        L("UNKNOWN")
+      )
+    )
   end
 end

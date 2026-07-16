@@ -1,493 +1,373 @@
-﻿function AtrBuildLTable_koKR ()
+AUCTIONATOR_LOCALES.koKR = function()
+  local L = {}
 
--- Translated by Nfrog
+L = L or {}
+L["ADD_ITEM"] = "품목 추가"
+--[[Translation missing --]]
+L["ADD_TERM_TO_LIST_DIALOG"] = "Enter the search term to add:"
+L["AUCTION"] = "경매"
+L["AUCTION_DURATION_12"] = "12 시간"
+L["AUCTION_DURATION_24"] = "24 시간"
+L["AUCTION_DURATION_48"] = "48 시간"
+L["AUCTION_TOOLTIP_TOOLTIP_HEADER"] = "경매 툴팁 정보"
+L["AUCTION_TOOLTIP_TOOLTIP_TEXT"] = "마우스를 위로  가져갔을 때 경매 정보를 표시하기"
+L["AUTHOR_HEADER"] = "작가"
+--[[Translation missing --]]
+L["BIDDING_AUCTION_INFO"] = "%s bidding at %s"
+L["BUG_REPORT"] = "오류를 보고하기"
+L["BUG_TOOLTIP_HEADER"] = "깃허브에 오류를 보고하기"
+L["BUG_TOOLTIP_TEXT"] = "옥션내터를 사용옥션내터를 사용하실 때 오류가 발생실 때 오류가 발생하는 경우에 깃허브에 보고하십시오. 저희가 그 오류를 재현할 수 있도록 충분한 정보를 제공하십시오. !BugGrabber와 !BugSack 애드온을 사용하시는 것도 도움이 됩니다."
+--[[Translation missing --]]
+L["BUYOUT_AUCTION_INFO"] = "%s buyout at %s"
+L["CANCEL"] = "취소"
+--[[Translation missing --]]
+L["CANCEL_UNDERCUT"] = "Cancel Undercut"
+--[[Translation missing --]]
+L["CANCELLING_TAB"] = "Cancelling"
+--[[Translation missing --]]
+L["CANCELLING_TAB_HEADER"] = "Auctionator - Cancelling"
+L["CANNOT_AUCTION"] = "경매 불가"
+--[[Translation missing --]]
+L["CONFIG_ADVANCED_CATEGORY"] = "Advanced"
+--[[Translation missing --]]
+L["CONFIG_ADVANCED_TEXT"] = "Only look here if you know what you're doing"
+--[[Translation missing --]]
+L["CONFIG_ALTERNATE_SCAN"] = "Use alternate slower scan mode by default"
+--[[Translation missing --]]
+L["CONFIG_ALTERNATE_SCAN_HEADER"] = "Alternate Scan Mode"
+--[[Translation missing --]]
+L["CONFIG_ALTERNATE_SCAN_TEXT"] = "The fast scan mode can cause disconnections on busy servers. This setting uses a slower and less likely to disconnect, scan method."
+L["CONFIG_AUCTION_TOOLTIP"] = "경매 툴팁 표시"
+L["CONFIG_AUTO_LIST_SEARCH"] = "자동으로 쇼핑 리스트 품목을 검색하기"
+L["CONFIG_AUTO_LIST_SEARCH_TOOLTIP_HEADER"] = "자동 리스트 검색"
+L["CONFIG_AUTO_LIST_SEARCH_TOOLTIP_TEXT"] = "리스트를 선택할 때 경매장에서 리스트 항목이 자동으로 스캔됩니다. 이 옵션이 해제된 경우에는 쇼핑 리스트 사이드 바에 있는  '검색'을 선택하시면 리스트 전체를 스캔할 수 있습니다."
+L["CONFIG_AUTOSCAN"] = "경매장 열을 때 자동스캔 운영한다"
+L["CONFIG_AUTOSCAN_TOOLTIP_HEADER"] = "자동스캔"
+L["CONFIG_AUTOSCAN_TOOLTIP_TEXT"] = "경매장응 열을 때 전체스캔을 합니다. 선택하지 않았으면 '전체스캔' 버튼을 누르면 전체스캔할 수 있습니다."
+L["CONFIG_BASIC_OPTIONS_CATEGORY"] = "기본  설정"
+L["CONFIG_BASIC_OPTIONS_TEXT"] = "옥션내터의 기능을 할 수 있게 하는 기본 설정"
+L["CONFIG_CHAT_LOG"] = "대화에 새로운 경매를 표시하기"
+L["CONFIG_CHAT_LOG_TOOLTIP_HEADER"] = "경매 대화 일지"
+L["CONFIG_CHAT_LOG_TOOLTIP_TEXT"] = "이 옵션이 꺼져 있는 경우 새 경매 찾기 위해 사용자의 경매가 스캔되지 않을 것입니다."
+L["CONFIG_DEBUG"] = "디버그 산출 토글하기"
+L["CONFIG_DEBUG_TOOLTIP_HEADER"] = "옥션내터 디버그"
+L["CONFIG_DEBUG_TOOLTIP_TEXT"] = "디버그 메시지를 대화창에 산출하기 위해 유지자가 이 것을 사용합니다."
+L["CONFIG_DEVELOPER"] = "개발자의 설정"
+L["CONFIG_ENCHANT_TOOLTIP"] = "마법부여 툴팁을 표시함"
+--[[Translation missing --]]
+L["CONFIG_FULL_SCAN_STEP_SIZE"] = "Full scan step size"
+L["CONFIG_LIFO_CATEGORY"] = "팔기"
+L["CONFIG_MAIL_TOOLTIP"] = "우체통 툴팁을 표시함"
+L["CONFIG_NOT_LIFO_CATEGORY"] = "장비/애완동물"
+--[[Translation missing --]]
+L["CONFIG_PET_TOOLTIP"] = "Show pet tooltips"
+--[[Translation missing --]]
+L["CONFIG_SCAN_SETTINGS"] = "Scan Settings"
+--[[Translation missing --]]
+L["CONFIG_SCANNING"] = "Full Scan Settings"
+L["CONFIG_SELLING_LIFO_HEADER"] = "팔기"
+--[[Translation missing --]]
+L["CONFIG_SELLING_LIFO_TEXT"] = "Options to set undercutting percent or values and duration of most items. Without an undercut, these item categories group up with the last item added being the first to sell. Undercutting may not be necessary."
+L["CONFIG_SELLING_NOT_LIFO_HEADER"] = "장비/애완동물을 팔기"
+--[[Translation missing --]]
+L["CONFIG_SELLING_NOT_LIFO_TEXT"] = "Options to set undercutting percent or values and duration of gear and caged pets. These item categories are listed individually and a buyer can choose which one they want. Undercutting may be useful."
+L["CONFIG_SHOPPING_LIST"] = "쇼핑 리스트의 설정"
+--[[Translation missing --]]
+L["CONFIG_STACK_TOOLTIP"] = "Show stack price when holding shift."
+L["CONFIG_TOOLTIPS_CATEGORY"] = "툴팁"
+--[[Translation missing --]]
+L["CONFIG_TOOLTIPS_TEXT"] = "Options to display different auction related information on game tooltips."
+--[[Translation missing --]]
+L["CONFIG_UNDERCUT_SCAN_NOT_LIFO"] = "Include gear and pets in undercut scans"
+--[[Translation missing --]]
+L["CONFIG_UNDERCUT_SCAN_NOT_LIFO_TOOLTIP_HEADER"] = "Gear/Pets Undercut Scans"
+--[[Translation missing --]]
+L["CONFIG_UNDERCUT_SCAN_NOT_LIFO_TOOLTIP_TEXT"] = "Leave this on to include any pets and gear auctions when using the undercut scan. Turn this off to exclude pets and gear."
+--[[Translation missing --]]
+L["CONFIG_VENDOR_TOOLTIP"] = "Show vendor tooltips."
+--[[Translation missing --]]
+L["CONTRIBUTORS_HEADER"] = "Contributors"
+--[[Translation missing --]]
+L["CRAFTED_LEVEL"] = "Crafted Level"
+--[[Translation missing --]]
+L["CREATE"] = "Create"
+--[[Translation missing --]]
+L["CREATE_LIST_DIALOG"] = "Enter the name of the new shopping list:"
+--[[Translation missing --]]
+L["DATABASE_LOADED"] = "Database loaded with %s entries."
+--[[Translation missing --]]
+L["DAY_1"] = "Sunday"
+--[[Translation missing --]]
+L["DAY_2"] = "Monday"
+--[[Translation missing --]]
+L["DAY_3"] = "Tuesday"
+--[[Translation missing --]]
+L["DAY_4"] = "Wednesday"
+--[[Translation missing --]]
+L["DAY_5"] = "Thursday"
+--[[Translation missing --]]
+L["DAY_6"] = "Friday"
+--[[Translation missing --]]
+L["DAY_7"] = "Saturday"
+--[[Translation missing --]]
+L["DEFAULT_AUCTION_DURATION"] = "Default Auction Duration"
+--[[Translation missing --]]
+L["DELETE"] = "Delete"
+--[[Translation missing --]]
+L["DELETE_LIST_CONFIRM"] = "Are you SURE you want to delete '%s'?"
+--[[Translation missing --]]
+L["DELETE_LIST_NONE_SELECTED"] = "You must select a list to delete."
+--[[Translation missing --]]
+L["DISCORD"] = "Discord"
+--[[Translation missing --]]
+L["DISCORD_TOOLTIP_HEADER"] = "Join us in Discord!"
+--[[Translation missing --]]
+L["DISCORD_TOOLTIP_TEXT"] = "We have an active community of Auctionator users that can help answer any questions you might have."
+--[[Translation missing --]]
+L["DISENCHANT"] = "Disenchant"
+--[[Translation missing --]]
+L["ENCHANT_TOOLTIP_TOOLTIP_HEADER"] = "Enchant Tooltip Information"
+--[[Translation missing --]]
+L["ENCHANT_TOOLTIP_TOOLTIP_TEXT"] = "Show enchant information in tooltip on mouseover."
+--[[Translation missing --]]
+L["ENGAGE_HEADER"] = "Engage With Auctionator"
+--[[Translation missing --]]
+L["EXACT_SEARCH"] = "Exact Search"
+--[[Translation missing --]]
+L["FETCHING_ITEM_INFO"] = "Fetching item info..."
+--[[Translation missing --]]
+L["FINISHED_PROCESSING"] = "Finished processing %s items."
+--[[Translation missing --]]
+L["FULL_SCAN_ALTERNATE_FAILED"] = "Full scan (alternate mode) failed to complete."
+--[[Translation missing --]]
+L["FULL_SCAN_BUTTON"] = "Full Scan"
+--[[Translation missing --]]
+L["FULL_SCAN_FAILED"] = "Full scan failed to complete."
+--[[Translation missing --]]
+L["INFO_TAB_HEADER"] = "Auctionator - Info"
+--[[Translation missing --]]
+L["IS_UNDERCUT"] = "Undercut?"
+--[[Translation missing --]]
+L["ITEM_CLASS"] = "Item Class"
+--[[Translation missing --]]
+L["ITEM_LEVEL"] = "Item Level"
+--[[Translation missing --]]
+L["LEVEL"] = "Level"
+--[[Translation missing --]]
+L["LIMITED_FUNCTIONALITY_MESSAGE"] = "Limited functionality due to 8.3 AH updates."
+--[[Translation missing --]]
+L["LIST_ADD_ERROR"] = "An error occurred attempting to add an item to a list."
+--[[Translation missing --]]
+L["LIST_ADD_ITEM_HEADER"] = "Add Shopping List Item"
+--[[Translation missing --]]
+L["LIST_DELETE_ERROR"] = "An error occurred attempting to delete a list."
+--[[Translation missing --]]
+L["LIST_SEARCH_START"] = "Searching for items in %s..."
+--[[Translation missing --]]
+L["LIST_SEARCH_STATUS"] = [=[Search for item %s/%s in
+ %s]=]
+--[[Translation missing --]]
+L["MAIL_TOOLTIP_TOOLTIP_HEADER"] = "Mailbox Tooltips"
+--[[Translation missing --]]
+L["MAIL_TOOLTIP_TOOLTIP_TEXT"] = "Shows Auctionator information for items in your mailbox on mouseover."
+--[[Translation missing --]]
+L["MAX"] = "Max"
+--[[Translation missing --]]
+L["MIN"] = "Min"
+--[[Translation missing --]]
+L["MONTH_1"] = "January"
+--[[Translation missing --]]
+L["MONTH_10"] = "October"
+--[[Translation missing --]]
+L["MONTH_11"] = "November"
+--[[Translation missing --]]
+L["MONTH_12"] = "December"
+--[[Translation missing --]]
+L["MONTH_2"] = "February"
+--[[Translation missing --]]
+L["MONTH_3"] = "March"
+--[[Translation missing --]]
+L["MONTH_4"] = "April"
+--[[Translation missing --]]
+L["MONTH_5"] = "May"
+--[[Translation missing --]]
+L["MONTH_6"] = "June"
+--[[Translation missing --]]
+L["MONTH_7"] = "July"
+--[[Translation missing --]]
+L["MONTH_8"] = "August"
+--[[Translation missing --]]
+L["MONTH_9"] = "September"
+--[[Translation missing --]]
+L["NAME"] = "Name"
+--[[Translation missing --]]
+L["NEXT_SCAN_MESSAGE"] = "A full scan may be started in %s minutes and %s seconds."
+--[[Translation missing --]]
+L["NO_RESULTS"] = "No results found."
+--[[Translation missing --]]
+L["OPEN_ADDON_OPTIONS"] = "Open Addon Options"
+--[[Translation missing --]]
+L["PERCENTAGE"] = "Percentage"
+--[[Translation missing --]]
+L["PERCENTAGE_SUFFIX"] = "% Undercut"
+--[[Translation missing --]]
+L["PERCENTAGE_TOOLTIP_HEADER"] = "Undercut percentage"
+--[[Translation missing --]]
+L["PERCENTAGE_TOOLTIP_TEXT"] = "The undercut percentage that will be used to calculate the sell price. For example, a value of 5 means that your item will be posted at 5% less than the current lowest price."
+--[[Translation missing --]]
+L["PET_TOOLTIP_TOOLTIP_HEADER"] = "Pet Tooltips"
+--[[Translation missing --]]
+L["PET_TOOLTIP_TOOLTIP_TEXT"] = "Shows Auctionator information for caged pets."
+--[[Translation missing --]]
+L["PRICE"] = "Price"
+--[[Translation missing --]]
+L["QUANTITY"] = "Quantity"
+--[[Translation missing --]]
+L["RENAME"] = "Rename"
+--[[Translation missing --]]
+L["RENAME_LIST_DIALOG"] = "Enter the new name for the shopping list:"
+--[[Translation missing --]]
+L["RESET_ALL"] = "Reset All"
+--[[Translation missing --]]
+L["RESULTS_AVAILABLE_COLUMN"] = "Available"
+--[[Translation missing --]]
+L["RESULTS_NAME_COLUMN"] = "Name"
+--[[Translation missing --]]
+L["RESULTS_PRICE_COLUMN"] = "Price"
+--[[Translation missing --]]
+L["ROADMAP"] = "Technical Roadmap"
+--[[Translation missing --]]
+L["ROADMAP_TOOLTIP_TEXT"] = "The technical roadmap defined the work we have planned for upcoming releases of Auctionator. Please check here for implementation progress towards your favorite feature!"
+--[[Translation missing --]]
+L["SALES_PREFERENCE"] = "Sales Preference"
+--[[Translation missing --]]
+L["SEARCH"] = "Search"
+--[[Translation missing --]]
+L["SEARCH_TERM"] = "Search Term"
+--[[Translation missing --]]
+L["SELLING_TAB"] = "Selling"
+--[[Translation missing --]]
+L["SELLING_TAB_HEADER"] = "Auctionator - Selling"
+--[[Translation missing --]]
+L["SET_VALUE"] = "Set Value"
+--[[Translation missing --]]
+L["SET_VALUE_SUFFIX"] = "Undercut"
+--[[Translation missing --]]
+L["SHOPPING_TAB"] = "Shopping"
+--[[Translation missing --]]
+L["SHOPPING_TAB_HEADER"] = "Auctionator - Shopping Lists"
+--[[Translation missing --]]
+L["SPLASH_830_BUGS_1"] = "Please join us in the Auctionator Discord server %s"
+--[[Translation missing --]]
+L["SPLASH_830_BUGS_2"] = "Please report bugs on Github %s"
+--[[Translation missing --]]
+L["SPLASH_830_BUGS_3"] = "We are most active on Discord, and do not take bug reports on curseforge or Auctionator forums"
+--[[Translation missing --]]
+L["SPLASH_830_BUGS_4"] = "For the roadmap of upcoming features, visit %s"
+--[[Translation missing --]]
+L["SPLASH_830_BUGS_HEADER"] = "Communication and Bug Reports"
+--[[Translation missing --]]
+L["SPLASH_830_DESCRIPTION"] = "Auctionator 8.3.0 is a complete re-write of Auctionator to work with the changes that Blizzard made to the Auction House in their 8.3 release. Please note that many of the features you may be used to from previous versions of Auctionator may not be implemented yet or may be in a different location! Please read the notes below for details."
+--[[Translation missing --]]
+L["SPLASH_830_DONE_1"] = "Automatic scanning of the Auction House when opened (limited by Blizzard to every 15 minutes)"
+--[[Translation missing --]]
+L["SPLASH_830_DONE_2"] = "Manual scanning of the Auction House from the 'Auctionator' tab in the Auction House"
+--[[Translation missing --]]
+L["SPLASH_830_DONE_3"] = "Shopping Lists with advanced search terms from the 'Shopping' tab in the Auction House"
+--[[Translation missing --]]
+L["SPLASH_830_DONE_HEADER"] = "Implemented Features"
+--[[Translation missing --]]
+L["SPLASH_830_NOT_DONE_1"] = "Undercut Scanning"
+--[[Translation missing --]]
+L["SPLASH_830_NOT_DONE_2"] = "Price Histories"
+--[[Translation missing --]]
+L["SPLASH_830_NOT_DONE_3"] = "Advanced Selling Functionality"
+--[[Translation missing --]]
+L["SPLASH_830_NOT_DONE_HEADER"] = "Not Yet Implemented (But Coming Soon!)"
+--[[Translation missing --]]
+L["SPLASH_831_CANCELLING"] = "New Cancelling Tab"
+--[[Translation missing --]]
+L["SPLASH_831_CANCELLING_1"] = "Click once on any auction to cancel it."
+--[[Translation missing --]]
+L["SPLASH_831_CANCELLING_2"] = "Scan for undercuts for all your auctions by clicking \"Undercut Scan\""
+--[[Translation missing --]]
+L["SPLASH_831_CANCELLING_3"] = "Click \"Cancel Undercut\" repeatedly to cancel all undercut auctions."
+--[[Translation missing --]]
+L["SPLASH_HIDE_MESSAGE"] = "Do not show until next update"
+--[[Translation missing --]]
+L["SPLASH_SCREEN_HEADER"] = "Welcome to Auctionator"
+--[[Translation missing --]]
+L["STACK_AUCTION_INFO"] = "%s for %s (at %s each)"
+--[[Translation missing --]]
+L["STACK_TOOLTIP_TOOLTIP_HEADER"] = "Stack Prices"
+--[[Translation missing --]]
+L["STACK_TOOLTIP_TOOLTIP_TEXT"] = "When selected, the shift key must be held to see stack prices. When not selected, stack prices show by default."
+--[[Translation missing --]]
+L["STARTING_FULL_SCAN"] = "Starting a full scan."
+--[[Translation missing --]]
+L["STARTING_FULL_SCAN_ALTERNATE"] = "Starting a full scan (alternate mode)."
+--[[Translation missing --]]
+L["STOPPED_PROCESSING"] = "Stopped processing at %s out of %s."
+--[[Translation missing --]]
+L["TIME_LEFT_H"] = "Time Left (h)"
+--[[Translation missing --]]
+L["TOO_BIG_PERCENTAGE"] = "%% must be <= 100 (provided %s)"
+--[[Translation missing --]]
+L["TOO_MANY_SEARCH_RESULTS"] = "Too many search results. Limiting results displayed."
+--[[Translation missing --]]
+L["TOO_SMALL_PERCENTAGE"] = "%% must be >= 0 (provided %s)"
+--[[Translation missing --]]
+L["TOTAL_ITEMS_COLORED"] = "Total |cFFAAAAFF %s items|r"
+--[[Translation missing --]]
+L["TRANSLATORS_BRAZIL_PORTUGUEUSE"] = "Brazilian Portuguese:"
+--[[Translation missing --]]
+L["TRANSLATORS_FRENCH"] = "French:"
+--[[Translation missing --]]
+L["TRANSLATORS_GERMAN"] = "German:"
+--[[Translation missing --]]
+L["TRANSLATORS_HEADER"] = "Translators"
+--[[Translation missing --]]
+L["TRANSLATORS_HELP"] = "Please help translate!"
+--[[Translation missing --]]
+L["TRANSLATORS_ITALIAN"] = "Italian:"
+--[[Translation missing --]]
+L["TRANSLATORS_KOREAN"] = "Korean:"
+--[[Translation missing --]]
+L["TRANSLATORS_LATIN_SPANISH"] = "Latin American Spanish:"
+--[[Translation missing --]]
+L["TRANSLATORS_RUSSIAN"] = "Russian:"
+--[[Translation missing --]]
+L["TRANSLATORS_SIMPLIFIED_CHINESE"] = "Simplified Chinese:"
+--[[Translation missing --]]
+L["TRANSLATORS_SPANISH"] = "Spanish:"
+--[[Translation missing --]]
+L["TRANSLATORS_TRADITIONAL_CHINESE"] = "Traditional Chinese:"
+--[[Translation missing --]]
+L["UNDERCUT_NO"] = "No"
+--[[Translation missing --]]
+L["UNDERCUT_SCAN"] = "Undercut Scan"
+--[[Translation missing --]]
+L["UNDERCUT_TOOLTIP_HEADER"] = "Undercut Value"
+--[[Translation missing --]]
+L["UNDERCUT_TOOLTIP_TEXT"] = "The undercut value that will be used to calculate the sell price."
+--[[Translation missing --]]
+L["UNDERCUT_UNKNOWN"] = "?"
+--[[Translation missing --]]
+L["UNDERCUT_YES"] = "Yes"
+--[[Translation missing --]]
+L["UNIT_PRICE"] = "Unit Price"
+--[[Translation missing --]]
+L["UNKNOWN"] = "unknown"
+--[[Translation missing --]]
+L["VENDOR"] = "Vendor"
+--[[Translation missing --]]
+L["VENDOR_TOOLTIP_TOOLTIP_HEADER"] = "Vendor Tooltip Information"
+--[[Translation missing --]]
+L["VENDOR_TOOLTIP_TOOLTIP_TEXT"] = "Show vendor information in tooltip on mouseover."
+--[[Translation missing --]]
+L["VERSION_HEADER"] = "Version"
+--[[Translation missing --]]
+L["VERSION_MESSAGE"] = "Version %s"
 
-AtrL = {};
-
--- New Vars
---- Globals
-AUCTIONATOR_SELL_TAB_TEXT = "Sell"
-AUCTIONATOR_AUCTION_DURATION = "Default Auction Duration"
-AUCTIONATOR_DEFAULT_AUCTIONATOR_TAB = "Default Auctionator tab"
-AUCTIONATOR_MINIMUM_QUALITY_LEVEL = "Minimum quality level:"
-AUCTIONATOR_MEMORY_USAGE = "Auctionator Memory Usage"
-AUCTIONATOR_ITEMS_IN_THE_DATABASE = "Items in the database:"
-AUCTIONATOR_DELETE_HISTORICAL_PRICES = "On start-up delete historical prices older than:"
-AUCTIONATOR_DELETE_HISTORICAL_PRICES_DAYS = "day/s"
-AUCTIONATOR_CLEAR_SCANNING_HISTORY_BTN = "Clear Scanning History"
-AUCTIONATOR_CLEAR_POSTING_HISTORY_BTN = "Clear Posting History"
-AUCTIONATOR_CLEAR_STACKING_PREFERENCES_BTN = "Clear Stacking Preferences"
-AUCTIONATOR_CLEAR_SHOPPING_LISTS_BTN = "Clear Shopping Lists"
-AUCTIONATOR_SHOPPING_LISTS_OPTION_DESCRIPTION = "Select multiple shopping lists by holding down the control key while clicking"
-AUCTIONATOR_SHPLIST_IMPORTSAVEBTN = "Shopping List Import Button"
-AUCTIONATOR_SHPLIST_SAVEBTN = "Save"
-AUCTIONATOR_SHPLIST_SELECTALLBTN = "Select All"
-AUCTIONATOR_SHPLIST_ALREADY_EXIST = "The following shopping list(s) already exist:"
-AUCTIONATOR_SHPLIST_OKAY = "OKAY"
-AUCTIONATOR_SHPLIST_NEW_NAME_TEXT = "New name for this list"
-AUCTIONATOR_AUTOR_TEXT = "Author:  Borjamacare (US)"
-AUCTIONATOR_ITEM_NAME = "Item Name"
-AUCTIONATOR_ITEM_PRICE = "Item Price"
-AUCTIONATOR_CURRENT_AUCTIONS = "Current Auctions"
-AUCTIONATOR_SAVE_THIS_SHPLIST = "Save this Shopping List"
-AUCTIONATOR_LOWEST_PRICE = "Lowest Price"
-AUCTIONATOR_ITEM_NAME = "Item Name"
-AUCTIONATOR_NEW = "New"
-AUCTIONATOR_IMPORT = "Import"
-AUCTIONATOR_EXPORT = "Export"
-AUCTIONATOR_ARE_YOU_SURE = "Are you sure?"
-AUCTIONATOR_CLEAR_IT = "Clear It"
-AUCTIONATOR_ADD_ITEM = "Add Item"
-AUCTIONATOR_REMOVE_ITEM = "Remove Item"
-AUCTIONATOR_SEARCH_FOR_ALL_ITEMS = "Search for All Items"
-AUCTIONATOR_MANAGE_SHOPPING_LISTS = "Manage Shopping Lists"
-AUCTIONATOR_NEW_SHOPPING_LIST = "New Shopping List"
-AUCTIONATOR_NEXT_SCAN_ALLOWED = "Next scan allowed:"
-AUCTIONATOR_LAST_SCAN = "Last scan:"
-AUCTIONATOR_ITEMS_IN_DB = "Items in database:"
-AUCTIONATOR_START_SCANNING = "Start Scanning"
-AUCTIONATOR_AUCTIONS_SCANNED = "Auctions scanned:"
-AUCTIONATOR_ITEMS_ADDED = "Items added:"
-AUCTIONATOR_ITEMS_UPDATED = "Items updated:"
-AUCTIONATOR_ITEMS_IGNORED = "Items ignored:"
---- End Globals
-AtrL["AH"] = ""
-AtrL["%A, %B %d at %I:%M %p"] = "%d/%m/%Y alle %H:%M" -- Date and Time. Refer to https://www.lua.org/pil/22.1.html
-AtrL["Date"] = ""
-AtrL["Today"] = ""
-AtrL["Yesterday"] = ""
-AtrL["Slow scan"] = ""
-AtrL["Level"] = ""
-AtrL["Shopping list overwritten:"] = ""
-AtrL["Shopping list created:"] = ""
-AtrL["Paste text that was previously exported into the text area to the left."] = ""
-AtrL["Create new shopping lists with new names"] = ""
-AtrL["Create new shopping lists with new names."] = ""
-AtrL["Overwrite the existing shopping lists with the imported lists."] = ""
-AtrL["Abort the import.  You can hand-edit the import text to change the names and then try again."] = ""
-AtrL["Click Select All, type Ctrl-C to copy the text and then paste into any text document."] = ""
-AtrL["%6d items"] = "" -- AUCTIONATOR_ITEMS_IN_THE_DATABASE %6d items description
-AtrL["Default Auction duration"] = ""
-AtrL["Options..."] = ""
-AtrL["More"] = ""
-AtrL["Yes, cancel them"] = ""
-AtrL["No, leave them"] = ""
-AtrL["Basic Options"] = "Attiva scorciatoia tasto Alt"
-AtrL["Show Starting Price on the Sell Tab"] = ""
-AtrL["Enable debug mode"] = ""
-AtrL["basic options saved"] = ""
-AtrL["Reset to Default"] = ""
-AtrL["Shopping Lists"] = ""
-AtrL["New"] = ""
-AtrL["Edit"] = ""
-AtrL["Delete"] = ""
-AtrL["Rename"] = ""
-AtrL["Import"] = ""
-AtrL["Export"] = ""
-AtrL["Tooltips"] = ""
-AtrL["Show vendor prices in tooltips"] = ""
-AtrL["Show auction house prices in tooltips"] = ""
-AtrL["Show disenchant prices in tooltips"] = ""
-AtrL["Show auction house prices in mailbox tooltips"] = ""
-AtrL["Undercutting"] = ""
-AtrL["Selling"] = ""
-AtrL["Configure how you typically like to sell the items listed below."] = ""
-AtrL["Clears"] = "Pulizia"
-AtrL["The features below will help you clear out data that Auctionator stores.  Typically you would only need this in the event that that data gets corrupted."] = ""
-AtrL["Read the FAQ at"] = "Leggi le FAQ su"
-AtrL["MoP disenchanting data courtesy of the Norganna's AddOns (the Auctioneer folks)"] = ""
-AtrL["Subcategory"] = ""
-AtrL["Search For"] = ""
-AtrL["Level Range"] = LEVEL_RANGE.."."
-AtrL["Advanced Search"] = ""
-AtrL["Advanced"] = ADVANCED_LABEL
-AtrL["Vendor"] = AUCTION_CREATOR
-AtrL["Version"] = GAME_VERSION_LABEL
-AtrL["items"] = ""
-AtrL["Time:"] = ""
-AtrL["auctions returned empty results (out of %d)"] = ""
-AtrL["auctions returned null itemLinks (out of %d)"] = ""
-AtrL["Blizzard server failed to return all items"] = ""
-AtrL["You might want to try slow scanning."] = ""
-AtrL["Buy Another"] = ""
-AtrL["Buy One"] = ""
-AtrL["Are you sure you want to clear the scanned prices database?"] = ""
-AtrL["This will clear the pricing history for all items for all your characters - even characters on different servers."] = ""
-AtrL["Pricing history cleared."] = ""
-AtrL["Are you sure you want to clear the posting history?"] = ""
-AtrL["This will clear the information that Auctionator keeps for all items that you've posted - as shown on the \"Other\" tab after you scan for an item that you've sold in the past."] = ""
-AtrL["Posting history cleared."] = ""
-AtrL["Are you sure you want to clear your stacking preferences?"] = ""
-AtrL["Go ahead - this isn't a big deal.  Auctionator will figure it out again fairly quickly.  This is just some info Auctionator keeps to help it set the default stack size a bit more intelligently."] = ""
-AtrL["Stacking preferences cleared."] = ""
-AtrL["Are you sure you want to clear your shopping lists?"] = ""
-AtrL["If you put a lot of time into constructing detailed shopping lists, this will require you to build them all over again."] = ""
-AtrL["Shopping lists cleared."] = ""
-AtrL["Memory went from"] = ""
-AtrL["to"] = ""
-AtrL["Disenchant data restored. Number of entries:"] = ""
-AtrL["No data available to be restored."] = ""
-AtrL["1 stack available"] = ""
-AtrL["%d stacks available"] = ""
-AtrL["none available"] = ""
-AtrL["Waiting for auction data"] = ""
-AtrL["Updating database"] = ""
-AtrL["Scan complete"] = ""
-AtrL["Analyzing data"] = ""
-AtrL["out of"] = ""
-AtrL["Page %s of %s"] = ""
-AtrL["FULL SCAN:"] = ""
-AtrL["AUCTIONATOR_FS_CHUNK:"] = ""
-AtrL["Warning"] = ""
-AtrL["Bad item scanned."] = ""
-AtrL["Name:"] = ""
-AtrL["Count:"] = ""
-AtrL["badItemCount:"] = ""
-AtrL["ignored"] = ""
-AtrL["Scanning auctions: page %d of %d"] = ""
-AtrL["Scanning auctions for %s%s"] = ""
-AtrL["When the Auction House is open\nclicking this button tells Auctionator\nto scan for the item and all its reagents."] = ""
-AtrL["%d bought so far"] = ""
-AtrL["%d available"] = ""
-AtrL["Italian translation courtesy of %s"] = ""
--- End New Vars
-
--- Old Vars
-AtrL["%d auctions created for %s"] = "경매시작 - %d묶음 %s"
-AtrL[": page %d"] = ": %d 페이지"
-AtrL["%d of %d bought so far"] = "지금까지 %d개 구입(%d개 중)"
-AtrL["%d bought so far"] = "지금까지 %d개 구입"
-AtrL["1 stack available"] = "1 덩이 판매중"
-AtrL["%d stacks available"] = "%d 덩이 판매중"
---AtrL["Add Item To List"] = "목록에 아이템 추가"
-AtrL["All Items"] = "모든 아이템"
-AtrL["Are you sure you want to create\nan auction with no buyout price?"] = "즉시 구매가 없이 경매물품을 등록합니까?"
-AtrL["As many as possible"] = "최대(가능한)"
-AtrL["Auction"] = "경매"
-AtrL["Auction #%d created for %s"] = ""
-AtrL["Auction cancelled for "] = "경매 취소됨 "
-AtrL["Auction created for %s"] = "경매시작 - %s"
-AtrL["  per stack"] = "  묶음당"
-AtrL["Auction House timed out"] = ""
-AtrL["Auctionator"] = "경매도우미"
-AtrL["Auctionator has yet to record any auctions for this item"] = "Auctionator에 이 아이템에 대한 기록이 없습니다."
-AtrL["Auctionator provided an auction module to LilSparky's Workshop."] = ""
-AtrL["Auctionator scan data"] = ""
-AtrL["Author:  Zirco"] = ""
-AtrL["Automatically cancel all of your auctions|n|nthat are not the lowest priced?"] = ""
-AtrL["available"] = "개 판매중"
-AtrL["average of your auctions for"] = "본인 경매등록품 평균가 -"
-AtrL["Back"] = "뒤로"
-AtrL["based on"] = "근거 -"
-AtrL["BOA"] = "계정 귀속"
-AtrL["BOP"] = "획득시 귀속"
-AtrL["Buy One"] = "1개 구매"
-AtrL["Buy Another"] = "추가 구매"
-AtrL["Cancel"] = "취소"
-AtrL["Cancel Auctions"] = "경매 취소"
-AtrL["Check and Cancel Auctions"] = ""
-AtrL["Checking stopped"] = ""
-AtrL["Cleaning up"] = ""
-AtrL["Continue"] = "계속"
-AtrL["Create Auction"] = "경매 시작"
-AtrL["Create Multiple Auctions failed.\nYou need at least one empty slot in your bags."] = ""
-AtrL["Current Auctions"] = "현재 경매품"
-AtrL["Current"] = "현재"
-AtrL["History"] = "기록"
-AtrL["Other"] = "기타"
-AtrL["Date"] = "일자"
-AtrL["Delete"] = "삭제"
-AtrL["Delete Shopping List"] = "쇼핑 목록 삭제"
-AtrL["Disenchant"] = "마력추출"
-AtrL["Edit"] = "편집"
-AtrL["For information on the latest version browse to"] = ""
-AtrL["for your stack of %d"] = "%d개 묶음당"
-AtrL["Forget this Item"] = ""
-AtrL["French translation courtesy of %s"] = ""
-AtrL["German translation courtesy of %s"] = ""
-AtrL["Ignore any ERROR message to the contrary below."] = ""
-AtrL["Item Price"] = "물품 가격"
-AtrL["Just Check Auctions"] = ""
-AtrL["Keep going"] = "계속"
-AtrL["max"] = "최대"
-AtrL["max. stacks of %d"] = ""
-AtrL["Minimum Quality Level"] = "최소 품질"
-AtrL["Name for your new shopping list"] = "쇼핑목록 이름"
-AtrL["Never"] = "없음"
-AtrL["New"] = "새로 만들기"
-AtrL["New Shopping List"] = "새로운 쇼핑 목록"
-AtrL["no buyout price"] = "즉시 구매가 없음"
-AtrL["No current auctions found"] = "해당 물품을 현재 경매장에서 찾을 수 없습니다."
-AtrL["No current auctions found\n\n(related auctions shown)"] = ""
-AtrL["No current auctions with buyouts found"] = ""
-AtrL["None"] = "없음"
-AtrL["none available"] = "판매물품 없음"
-AtrL["Options"] = "옵션"
-AtrL["Past"] = ""
-AtrL["per item"] = "개당"
-AtrL["per item price"] = "개당 가격"
-AtrL["per stack"] = "묶음당"
-AtrL["Processing"] = "진행중"
-AtrL["Quest Item"] = "퀘스트 아이템"
---AtrL["Remove Item From List"] = "물품 삭제"
-AtrL["removed from database"] = ""
-AtrL["Rename"] = "이름 바꾸기"
-AtrL["Required DE skill level"] = ""
-AtrL["Russian translation courtesy of %s"] = ""
-AtrL["Save this Shopping List"] = "쇼핑 목록으로 저장"
-AtrL["Scan complete"] = "조사 완료"
-AtrL["Scan in progress"] = "조사 진행중"
-AtrL["Scanning"] = "검색중"
-AtrL["Scanning auctions: page %d"] = "경매장 검색 중: %d 페이지"
-AtrL["Scanning auctions for %s%s"] = "경매장 검색 중 %s%s"
-AtrL["Scanning is entirely optional."] = ""
-AtrL["scanning options saved"] = "조사 옵션이 저장되었습니다"
-AtrL["Search"] = "검색"
-AtrL["Source"] = ""
-AtrL["stack"] = ""
-AtrL["stack for"] = ""
-AtrL["stack of"] = "덩이  /묶음당"
-AtrL["stack price"] = "묶음당 가격"
-AtrL["Stack Price"] = "묶음당 가격"
-AtrL["stacks for"] = ""
-AtrL["stacks for:"] = ""
-AtrL["stacks of"] = "덩이  /묶음당"
-AtrL["Swedish translation courtesy of %s"] = ""
-AtrL["The latest information on Auctionator can be found at"] = ""
-AtrL["There is a more recent version of Auctionator: VERSION"] = ""
-AtrL["Today"] = "오늘"
-AtrL["Total Price"] = ""
-AtrL["trade volume"] = ""
-AtrL["unknown"] = "알 수 없음"
-AtrL["unrecognized command"] = "알 수 없는 명령어"
-AtrL["Vendor"] = "상점"
-AtrL["Version"] = "버전"
-AtrL["Wowecon global price"] = ""
-AtrL["Wowecon server price"] = ""
-AtrL["Yesterday"] = "어제"
-AtrL["You can buy at most %d auctions"] = ""
-AtrL["You can create at most %d auctions"] = ""
-AtrL["You can stack at most %d of these items"] = ""
-AtrL["You do not have enough gold\n\nto make any more purchases."] = "구매할 골드가 충분하지 않습니다."
-AtrL["You may have at most 40 single-stack (x1)\nauctions posted for this item.\n\nYou already have %d such auctions and\nyou are trying to post %d more."] = ""
-AtrL["You may have no more than\n\n%d items on a shopping list."] = ""
-AtrL["your auction on"] = "경매물품 등록 - "
-AtrL["your most recent posting"] = ""
-AtrL["yours"] = "|cFF4499FF본인 물품|r"
-
-
-----------------------------------
---	Auctionator Windows(기본창)	--
-----------------------------------
-
--- Full Scan Popup Windows (전체 스캔창)
-AtrL["Full Scan..."] = "모두 조사..."
-AtrL["Full Scan"] = "모두 조사"
-AtrL["full scan database cleared"] = "전체스캔 데이터가 삭제되었습니다."
-AtrL["Start Scanning"] = "조사 시작"
-AtrL["Done"] = "확인"
-AtrL["SCAN_EXPLANATION"] = "Auctionator가 경매장 조사를 통해 경매가격 데이터베이스를 수집하는데는 두가지 목적이 있습니다. "
-.."그 중 하나는 경매장을 열지 않더라도 해당 아이템의 경매장 가격을 툴팁에 표시하기 위해서이고, "
-.."다른 하나는 해당 아이템의 경매물건이 경매장에 없을때 적절한 경매가격을 제안하기 위해서입니다."
-.."<br/><br/>"
-.."조사에는 보통 10초 정도가 소요되지만 경매장 상황에 따라 지연될 수 있습니다."
-.."<br/><br/>"
-.."조사가 진행 중일때 와우에서 연결이 끊긴것처럼 보일 수 있습니다. 이 부분에 대한 내용은 "
-.."https://github.com/Auctionator/Auctionator/wiki 에서 좀 더 자세히 읽어볼 수 있습니다.";
-
-AtrL["Next scan allowed:"] = "다음 조사 가능"
-AtrL["in about %d minutes"] = "약 %d분 후"
-AtrL["in about one minute"] = "약 1분 후"
-AtrL["in less than a minute"] = "1분 내"
-AtrL["Now"] = "지금"
-AtrL["Last scan:"] = "최근 조사:"
-AtrL["Items in database:"] = "데이터베이스 내 아이템수"
-
-AtrL["Auctions scanned:"] = "조사한 경매건수:"
-AtrL["Items added:"] = "추가한 아이템 수:"
-AtrL["Items updated:"] = "업데이트한 아이템 수:"
-AtrL["Items ignored:"] = "무시한 아이템 수:"
-
-	-- full scan result : chat messages
-AtrL["Auctions scanned"] = "조사한 경매건수"
-AtrL["Items ignored"] = ""
-AtrL["Epic items"] = "영웅 아이템"
-AtrL["Rare items"] = "희귀 아이템"
-AtrL["Uncommon items"] = "고급 아이템"
-AtrL["Common items"] = "일반 아이템"
-AtrL["Poor items"] = "하급 아이템"
-AtrL["Items added to database"] = "데이터베이스에 아이템이 추가되었습니다"
-AtrL["Items updated in database"] = "데이터베이스에 아이템이 업데이트되었습니다"
-
-
-
--- Buying (구매)
-AtrL["Recent Searches"] = "최근 검색"
-AtrL["Add Item"] = "물품 추가"
-AtrL["Remove Item"] = "물품 삭제"
-AtrL["Search for All Items"] = "모든 물품 검색"
-AtrL["Searching for All Items"] = "모든 물품 검색"
-AtrL["Manage Shopping Lists"] = "쇼핑목록 관리"
-
-AtrL["Select an item from the list on the left\n or type a search term above to start a scan."] = "왼쪽 목록에서 검색할 물품을 선택하거나\n이름을 직접 입력하세요."
-
-AtrL["Lowest Price"] = "최저가"
-AtrL["Item Name"] = "물품명"
-AtrL["%d available"] = "%d 개 판매중"
-
-	-- Advanced Search(고급 검색)
-AtrL["Advanced Search"] = "고급 검색"
-AtrL["Search For"] = "이름"
-AtrL["Category"] = "분류"
-AtrL["Subcategory"] = "하위 분류"
-AtrL["Level Range"] = "최소 요구 레벨"
-AtrL["Item Level Range"] = "아이템 레벨"
-
--- Selling (판매)
-AtrL["Per Item"] = "단가"
-AtrL["Create %d Auctions"] = "%d건의 경매 시작"
-AtrL["Starting Price"] = "경매 시작가"
-AtrL["Duration"] = "기간"
-AtrL["Deposit"] = "보증금"
-AtrL["Drag an item you want to sell to this area."] = "판매하려는 물품을 이곳으로 드래그하세요."
-AtrL["Recommended Buyout Price"] = "즉시 구입가 추천"
-AtrL["Recommended buyout price"] = "즉시 구입가 추천"
-AtrL["based on cheapest current auction"] = "근거 - 현재 경매품 중 최저가"
-AtrL["based on cheapest stack of the same size"] = "근거 - 동일수량 묶음경매품 중 최저가"
-AtrL["based on selected auction"] = "근거 - 선택된 경매"
-
--- More (추가기능...)
-AtrL["Active Items"] = "경매중인 물품"
-AtrL["Check for Undercuts"] = "저가공급 조사"
-AtrL["Stop Checking"] = "조사 중지"
-AtrL["%d of your auctions are not the lowest priced.\n\nWould you like to cancel them?"] = "%d개의 물품이 최저가가 아닙니다.\n\n경매를 취소하시겠습니까?"
-AtrL["Start canceling"] = "경매 취소 시작"
-AtrL["No, leave them"] = "아니오. 그대로 둡니다."
-
-
-
-
----------------------------------------
---	blizzard config screen(설정창)	---
----------------------------------------
---   Basic Options(기본 설정)
-AtrL["Basic Options"] = "기본 설정"
-AtrL["Basic Options for %s"] = "기본 설정 : %s"
-AtrL["Enable alt-key shortcut"] = "Alt 단축키 사용"
-AtrL["Automatically open all bags"] = "모든 가방 열기"
-AtrL["Show Starting Price on the Sell Tab"] = "판매 탭에 경매 시작가를 표시"
-AtrL["Default Auction Duration"] = "기본 경매기간"
-AtrL["Default Auctionator tab"] = "경매장 클릭시 활성화 탭"
-AtrL["Sell"] = "판매"
-AtrL["Buy"] = "구매"
-AtrL["More"] = "추가기능"
-
-	--     descriptive texts
-AtrL["If this option is checked, holding the Alt key down while clicking an item in your bags will switch to the Auctionator panel, place the item in the Auction Item area, and start the scan."] = "이 옵션을 선택하고 가방안의 아이템을 Alt 클릭하면 해당 아이템에 대한 조사를 진행합니다."
-AtrL["If this option is checked, ALL your bags will be opened when you first open the Auctionator panel."] = "이 옵션을 선택하고 경매장을 열면 모든 가방이 함께 열립니다."
-AtrL["If this option is checked, every time you initiate a new auction the auction duration will be reset to the default duration you've selected."] = "신규 경매 진행시 선택한 경매기간을 자동으로 적용합니다."
-AtrL["Select the Auctionator panel to be displayed first whenever you open the Auction House window."] = "경매장을 열었을 때 처음 표시할 Auctionator 패널을 선택합니다."
-AtrL["If this option is checked, the Auctionator BUY panel will display first whenever you open the Auction House window."] = ""
-
-
-
---   Tooltips(툴팁)
-AtrL["Tooltips"] = "툴팁"
-AtrL["Show vendor prices in tooltips"] = "상점판매가를 툴팁에 표시"
-AtrL["Show auction house prices in tooltips"] = "경매가를 툴팁에 표시"
-AtrL["Show disenchant prices in tooltips"] = "마력추출 가격을 툴팁에 표시"
-
-AtrL["When SHIFT is down show"] = "Shift키를 눌렀을 때 툴팁에 표시"
-AtrL["Show disenchanting details"] = "마력추출 상세보기"
-AtrL["never"] = "없음"
-AtrL["always"] = "항상"
-AtrL["when ALT is held down"] = "ALT키를 누르는 동안"
-AtrL["when CONTROL is held down"] = "Ctrl키를 누르는 동안"
-AtrL["when SHIFT is held down"] = "Shift키를 누르는 동안"
-
-AtrL["tooltip configuration saved"] = "툴팁 설정이 저장되었습니다."
-
-
---   Undercutting(저가 공급)
-AtrL["Undercutting"] = "저가공급"
-AtrL["Buyout Price"] = "즉시 구입가"
-AtrL["Undercut by"] = "인하가격"
-AtrL["over %d gold"] = "%d골 초과시"
-AtrL["over %d silver"] = "%d실 초과시"
-AtrL["over 1 gold"] = "1골드 초과시"
-AtrL["Starting Price Discount"] = "시작가 할인"
-AtrL["Reset to Default"] = "기본값 복원"
-AtrL["percent"] = "퍼센트(%)"
-
-AtrL["undercutting configuration saved"] = "저가공급 설정이 저장되었습니다."
-
-
---  Selling(판매)
-AtrL["Selling"] = "판매"
-AtrL["Configure how you typically like to sell the items listed below."]="아래 분류에 해당되는 아이템의 일반적인 판매방식을 설정합니다."
-AtrL["default behavior"] = "기본값"
-
-AtrL["Flasks"] = "영약"
-AtrL["Gems - Cut"] = "보석-세공됨"
-AtrL["Gems - Uncut"] = "보석-원석"
-AtrL["Glyphs"] = "문양"
-AtrL["Herbs"] = "약초"
-AtrL["Item Enhancements"] = "아이템 강화"
-AtrL["Potions and Elixirs"] = "물약과 비약"
-
-
--- Database(데이터 베이스)
-AtrL["Database"] = "데이터 베이스"
-
-AtrL["Only include items in the scanning database that are this level or higher"] = "아이템 조사시 설정한 등급이상을 데이터베이스에 저장합니다."
-AtrL["Minimum quality level:"] = "최소 품질:"
-AtrL["Epic"] = "영웅"
-AtrL["Rare"] = "희귀"
-AtrL["Uncommon"] = "고급"
-AtrL["Common"] = "일반"
-AtrL["Poor (all)"] = "하급(모두)"
-
-AtrL["Auctionator memory usage:"] = "Auctionator 메모리 사용량"
-AtrL["Items in the database:"] = "데이터 베이스의 아이템 수:"
-AtrL["%6d items"]="%6d 개"
-
-AtrL["On start-up delete historical prices older than:"]="자료 보관일:"
-AtrL["days"]="일"
-
-
--- Clears(삭제)
-AtrL["Clears"]="삭제"
-AtrL["The features below will help you clear out data that Auctionator stores.  Typically you would only need this in the event that that data gets corrupted."]="다음 기능은 Auctionator 데이터를 삭제하는데 유용한 기능을 합니다. 데이터가 손상되었을 경우에 이 기능이 필요합니다."
-
-AtrL["Clear Scanning History"]="조사 이력 삭제"
-AtrL["Clear Posting History"]="등록 이력 삭제"
-AtrL["Clear Stacking Preferences"]="Stacking Preferences 삭제"
-AtrL["Clear Shopping Lists"]="쇼핑목록 삭제"
-AtrL["Clear It"]="삭제"
-
-	-- confirm window
-AtrL["Are you sure you want to clear the scanned prices database?"]="데이터 베이스에 조사된 가격을 삭제합니까?"
-AtrL["This will clear the pricing history for all items for all your characters - even characters on different servers."]="가격기록을 삭제하면 다른 서버를 포함한 모든 캐릭터에 저장된 가격기록도 삭제됩니다.."
-AtrL["Are you sure you want to clear the posting history?"]="경매등록 기록을 삭제합니까?"
-AtrL["This will clear the information that Auctionator keeps for all items that you've posted - as shown on the \"Other\" tab after you scan for an item that you've sold in the past."]="자신이 등록한 모든 경매품에 대한 이력을 삭제합니다. 경매품에 대한 정보란 [판매]-[기타] 탭에 표시되는 내용을 의미합니다."
-AtrL["Are you sure you want to clear your stacking preferences?"]="Stacking Preferences을 삭제합니까?"
-AtrL["Go ahead - this isn't a big deal.  Auctionator will figure it out again fairly quickly.  This is just some info Auctionator keeps to help it set the default stack size a bit more intelligently."]=""
-AtrL["Are you sure you want to clear your shopping lists?"]="내 쇼핑목록을 삭제합니까?"
-AtrL["If you put a lot of time into constructing detailed shopping lists, this will require you to buidl them all over again."]="쇼핑목록 구성에 많은 시간을 소비했다면, 다시 구성하는데 그만큼의 시간이 필요하게 됩니다."
-
-	-- result chat windows
-
-AtrL["pricing history cleared"] = "가격 기록이 삭제되었습니다."
-AtrL["Posting history cleared."] = "경매등록기록이 삭제되었습니다."
-AtrL["Stacking preferences cleared."] = "Stacking preferences이 삭제되었습니다."
-
---Shopping Lists(쇼핑목록)
-AtrL["Shopping Lists"]="쇼핑 목록"
-AtrL["Import"]="가져오기"
-AtrL["Export"]="내보내기"
-
-AtrL["Really delete the shopping list %s ?"] = "정말 쇼핑목록에서 삭제하시겠습니까? %s"
-AtrL["Select multiple shopping lists by holding down the control key while clicking"]="여러개를 선택하려면 Ctrl키를 누른채로 목록을 클릭하세요."
-
-
+  return L
 end

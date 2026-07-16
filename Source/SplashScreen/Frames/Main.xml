@@ -1,0 +1,135 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <Frame
+    name="AuctionatorSplashScreenTemplate"
+    virtual="true"
+    inherits="SimplePanelTemplate"
+    frameStrata="DIALOG"
+    hidden="true">
+
+    <Scripts>
+      <OnLoad>
+        Mixin(self, AuctionatorSplashScreenMixin)
+
+        self.Close = _G[self:GetName() .. "Close"]
+        self.ScrollFrame = _G[self:GetName() .. "ScrollFrame"]
+        self.HideCheckbox = _G[self:GetName() .. "HideCheckbox"]
+
+        if self.ScrollFrame then
+          self.ScrollFrame.Content =
+            _G[self.ScrollFrame:GetName() .. "Content"]
+        end
+
+        if self.OnLoad then
+          self:OnLoad()
+        end
+      </OnLoad>
+
+      <OnShow>
+        if self.OnShow then
+          self:OnShow()
+        end
+      </OnShow>
+    </Scripts>
+
+    <Size>
+      <AbsDimension x="600" y="600"/>
+    </Size>
+
+    <Anchors>
+      <Anchor point="CENTER"/>
+    </Anchors>
+
+    <Frames>
+      <Button
+        name="$parentClose"
+        inherits="UIStaticPopupSpecialCloseButton">
+
+        <Anchors>
+          <Anchor
+            point="TOPRIGHT"
+            relativeTo="$parent"
+            relativePoint="TOPRIGHT">
+
+            <Offset>
+              <AbsDimension x="2" y="1"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+      </Button>
+
+      <ScrollFrame
+        name="$parentScrollFrame"
+        inherits="UIPanelScrollFrameTemplate">
+
+        <Anchors>
+          <Anchor
+            point="TOPLEFT"
+            relativeTo="$parentInset"
+            relativePoint="TOPLEFT">
+
+            <Offset>
+              <AbsDimension x="10" y="-7"/>
+            </Offset>
+          </Anchor>
+
+          <Anchor
+            point="BOTTOMRIGHT"
+            relativeTo="$parentInset"
+            relativePoint="BOTTOMRIGHT">
+
+            <Offset>
+              <AbsDimension x="-23" y="3"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+
+        <ScrollChild>
+          <Frame name="$parentContent">
+            <Size>
+              <AbsDimension x="540" y="1"/>
+            </Size>
+          </Frame>
+        </ScrollChild>
+      </ScrollFrame>
+
+      <Frame
+        name="$parentHideCheckbox"
+        inherits="AuctionatorConfigurationCheckbox">
+
+        <Anchors>
+          <Anchor
+            point="TOPLEFT"
+            relativeTo="$parentInset"
+            relativePoint="BOTTOMLEFT">
+
+            <Offset>
+              <AbsDimension x="-20" y="2"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+      </Frame>
+    </Frames>
+
+    <Layers>
+      <Layer>
+        <FontString
+          name="$parentHeader"
+          text="AUCTIONATOR_L_SPLASH_SCREEN_HEADER"
+          inherits="GameFontHighlight">
+
+          <Anchors>
+            <Anchor
+              point="TOP"
+              relativeTo="$parent"
+              relativePoint="TOP">
+
+              <Offset>
+                <AbsDimension x="0" y="-10"/>
+              </Offset>
+            </Anchor>
+          </Anchors>
+        </FontString>
+      </Layer>
+    </Layers>
+  </Frame>
+</Ui>

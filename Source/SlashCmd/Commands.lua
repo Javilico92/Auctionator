@@ -2,10 +2,12 @@ local SLASH_COMMAND_DESCRIPTIONS = {
   {commands = "ra, resetall", message = "Reset database and full scan timer." },
   {commands = "rdb, resetdatabase", message = "Reset Auctionator database."},
   {commands = "rt, resettimer", message = "Reset full scan timer."},
+  {commands = "rc, resetconfig", message = "Reset configuration to defaults."},
   {commands = "d, debug", message = "Toggle debug mode."},
   {commands = "c, config", message = "Show current configuration values."},
   {commands = "c [toggle-name], config [toggle-name]", message = "Toggle the value of the configuration value [toggle-name]."},
-  {commands = "h, help", message = "Show this help message."}
+  {commands = "v, version", message = "Show current version."},
+  {commands = "h, help", message = "Show this help message."},
 }
 
 function Auctionator.SlashCmd.ToggleDebug()
@@ -30,7 +32,7 @@ end
 
 function Auctionator.SlashCmd.ResetTimer()
   if Auctionator.Debug.IsOn() then
-    Auctionator.FullScan.State.TimeOfLastScan = nil
+    Auctionator.SavedState.TimeOfLastScan = nil
     Auctionator.Utilities.Message("Scan timer reset.")
   else
     Auctionator.Utilities.Message("Requires debug mode.")
@@ -55,7 +57,7 @@ function Auctionator.SlashCmd.Config(name)
   if name == nil then
     Auctionator.Utilities.Message("Current config:")
     for _, name in pairs(Auctionator.Config.Options) do
-      Auctionator.Utilities.Message(name .. "=" .. tostring(Auctionator.Config.Get(name)))
+      Auctionator.Utilities.Message(name .. "=" .. tostring(Auctionator.Config.Get(name)) .. " (" .. type(Auctionator.Config.Get(name)) .. ")")
     end
   elseif type(Auctionator.Config.Get(name)) == "boolean" then
     Auctionator.Config.Set(name, not Auctionator.Config.Get(name))
@@ -65,6 +67,10 @@ function Auctionator.SlashCmd.Config(name)
   else
     Auctionator.Utilities.Message("Unknown config " .. name)
   end
+end
+
+function Auctionator.SlashCmd.Version()
+  Auctionator.Utilities.PrintVersion()
 end
 
 function Auctionator.SlashCmd.Help()

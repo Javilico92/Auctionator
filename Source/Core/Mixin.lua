@@ -1,30 +1,8 @@
 AuctionatorAHFrameMixin = {}
 
-local function InitializeShoppingListFrame()
+local function InitializeFullScanFrame()
   local frame
-  if Auctionator.State.ShoppingListFrameRef == nil then
-    frame = CreateFrame(
-      "FRAME",
-      "AuctionatorShoppingLists",
-      AuctionHouseFrame,
-      "AuctionatorShoppingListFrameTemplate"
-    )
-
-    Auctionator.State.ShoppingListFrameRef = frame
-  else
-    frame = Auctionator.State.ShoppingListFrameRef
-  end
-
-  frame:SetPoint("TOPLEFT", AuctionHouseFrame, "TOPRIGHT", -2, 0)
-  frame:SetPoint("BOTTOMLEFT", AuctionHouseFrame, "BOTTOMRIGHT", -2, 0)
-  if Auctionator.Config.Get(Auctionator.Config.Options.SHOW_LISTS) then
-    frame:Show()
-  end
-end
-
-local function InitializeScanFrame()
-  local frame
-  if Auctionator.State.ScanFrameRef == nil then
+  if Auctionator.State.FullScanFrameRef == nil then
     frame = CreateFrame(
       "FRAME",
       "AuctionatorFullScanFrame",
@@ -32,26 +10,128 @@ local function InitializeScanFrame()
       "AuctionatorFullScanFrameTemplate"
     )
 
-    Auctionator.State.ScanFrameRef = frame
+    Auctionator.State.FullScanFrameRef = frame
   else
-    frame = Auctionator.State.ScanFrameRef
-    end
-  if Auctionator.Config.Get(Auctionator.Config.Options.AUTOSCAN) then
+    frame = Auctionator.State.FullScanFrameRef
+  end
+
+  if (
+    Auctionator.Config.Get(Auctionator.Config.Options.AUTOSCAN) and
+    not Auctionator.Config.Get(Auctionator.Config.Options.ALTERNATE_SCAN_MODE)
+  ) then
     frame:InitiateScan()
   end
 end
 
-local function InitializeAuctionatorButtonFrame()
-  AuctionatorButtonFrame:SetPoint("BOTTOMRIGHT", AuctionHouseFrame, "TOPRIGHT")
-  AuctionatorButtonFrame:Show()
+local function InitializeIncrementalScanFrame()
+  local frame
+  if Auctionator.State.IncrementalScanFrameRef == nil then
+    frame = CreateFrame(
+      "FRAME",
+      "AuctionatorIncrementalScanFrame",
+      AuctionHouseFrame,
+      "AuctionatorIncrementalScanFrameTemplate"
+    )
+
+    Auctionator.State.IncrementalScanFrameRef = frame
+  else
+    frame = Auctionator.State.IncrementalScanFrameRef
+  end
+
+  if (
+    Auctionator.Config.Get(Auctionator.Config.Options.AUTOSCAN) and
+    Auctionator.Config.Get(Auctionator.Config.Options.ALTERNATE_SCAN_MODE)
+  ) then
+    frame:InitiateScan()
+  end
+end
+
+local function InitializeAuctionChatLogFrame()
+  local frame
+  if Auctionator.State.AuctionChatLogFrameRef == nil then
+    frame = CreateFrame(
+      "FRAME",
+      "AuctionatorAuctionChatLogFrame",
+      AuctionHouseFrame,
+      "AuctionatorAuctionChatLogFrameTemplate"
+    )
+
+    Auctionator.State.AuctionChatLogFrameRef = frame
+  else
+    frame = Auctionator.State.AuctionChatLogFrameRef
+  end
+end
+
+local function InitializeSellingFrame()
+  if Auctionator.State.SellingFrameRef == nil then
+    Auctionator.State.SellingFrameRef = CreateFrame(
+      "FRAME",
+      "AuctionatorSellingFrame",
+      AuctionHouseFrame,
+      "AuctionatorSellingFrameTemplate"
+    )
+  end
+end
+
+local function InitializeAuctionHouseTabs()
+  if Auctionator.State.TabFrameRef == nil then
+    Auctionator.State.TabFrameRef = CreateFrame(
+      "Frame",
+      "AuctionatorAHTabsContainer",
+      AuctionHouseFrame,
+      "AuctionatorAHTabsContainerTemplate"
+    )
+  end
+end
+
+local function InitializeSplashScreen()
+  -- TODO Check for display setting before creating
+  if Auctionator.State.SplashScreenRef == nil then
+    Auctionator.State.SplashScreenRef = CreateFrame(
+      "Frame",
+      "AuctionatorSplashScreen",
+      UIParent,
+      "AuctionatorSplashScreenTemplate"
+    )
+  end
+
+  local lastViewedSplashScreenVersion = Auctionator.Config.Get(Auctionator.Config.Options.SPLASH_SCREEN_VERSION)
+  local mostRecentSplashScreenVersion = Auctionator.State.SplashScreenRef:GetMostRecentVersion()
+
+  if lastViewedSplashScreenVersion ~= mostRecentSplashScreenVersion then
+    Auctionator.Config.Set(
+      Auctionator.Config.Options.HIDE_SPLASH_SCREEN,
+      false
+    )
+  end
+
+  if not Auctionator.Config.Get(Auctionator.Config.Options.HIDE_SPLASH_SCREEN) then
+    Auctionator.State.SplashScreenRef:Show()
+  end
+end
+
+local setTooltipHooks = false
+local function InitializeLateTooltipHooks()
+  if setTooltipHooks then
+    return
+  end
+
+  Auctionator.Tooltip.LateHooks()
+
+  setTooltipHooks = true
 end
 
 function AuctionatorAHFrameMixin:OnShow()
   Auctionator.Debug.Message("AuctionatorAHFrameMixin:OnShow()")
 
-  InitializeShoppingListFrame()
-  InitializeScanFrame()
-  InitializeAuctionatorButtonFrame()
+  InitializeFullScanFrame()
+  InitializeIncrementalScanFrame()
+  InitializeAuctionChatLogFrame()
+  InitializeSellingFrame()
+  InitializeLateTooltipHooks()
+
+  InitializeAuctionHouseTabs()
+  InitializeSplashScreen()
 end
 
 function AuctionatorAHFrameMixin:OnEvent(eventName, ...)
@@ -59,20 +139,5 @@ function AuctionatorAHFrameMixin:OnEvent(eventName, ...)
     self:Show()
   elseif eventName == "AUCTION_HOUSE_CLOSED" then
     self:Hide()
-    Auctionator.State.ShoppingListFrameRef:Hide()
   end
-end
-
-AuctionatorButtonFrameMixin = {}
-
-function AuctionatorButtonFrameMixin:ToggleShoppingLists()
-  if AuctionatorShoppingLists:IsVisible() then
-    AuctionatorShoppingLists:Hide()
-  else
-    AuctionatorShoppingLists:Show()
-  end
-end
-
-function AuctionatorButtonFrameMixin:AutoScan()
-  Auctionator.State.ScanFrameRef:InitiateScan()
 end

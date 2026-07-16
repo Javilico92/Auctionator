@@ -1,70 +1,19 @@
 ## Interface: 30300
 ## Title: Auctionator
-## Version: 8.3.0
-## Author: Borjamacare, Zirco
+## Version: 8.3.1.3
+## Author: Borjamacare, plusmouse
 ## X-Website: http://mods.curse.com/addons/wow/auctionator
-## X-Localizations: enUS, itIT, deDE, ruRU, svSE, frFR, esES, esMX, zhTW
+## X-Localizations: enUS, itIT, deDE, ruRU, koKR, frFR, esES, esMX, zhTW, ptBR, zhCN
 ## Notes: A lightweight addon that makes it easy and fast to buy, sell and manage auctions
 ## Notes-esES: Un addon liviano que hace que comprar, vender y administrar subastas sea fácil y rápido
 ## Notes-esMX: Un addon liviano que hace que comprar, vender y administrar subastas sea fácil y rápido
-## SavedVariablesPerCharacter: AUCTIONATOR_SHOW_ST_PRICE, AUCTIONATOR_ENABLE_ALT, AUCTIONATOR_OPEN_FIRST, AUCTIONATOR_OPEN_BUY, AUCTIONATOR_DEF_DURATION, AUCTIONATOR_SHOW_TIPS, AUCTIONATOR_D_TIPS, AUCTIONATOR_DE_DETAILS_TIPS, AUCTIONATOR_DEFTAB
-## SavedVariables: AUCTIONATOR_CONFIG, AUCTIONATOR_SAVEDVARS, AUCTIONATOR_PRICING_HISTORY, AUCTIONATOR_SHOPPING_LISTS, AUCTIONATOR_PRICE_DATABASE, AUCTIONATOR_TOONS, AUCTIONATOR_STACKING_PREFS, AUCTIONATOR_DB_MAXITEM_AGE, AUCTIONATOR_DB_MAXHIST_AGE, AUCTIONATOR_DB_MAXHIST_DAYS, AUCTIONATOR_FS_CHUNK, AUCTIONATOR_DE_DATA, AUCTIONATOR_DE_DATA_BAK, ITEM_ID_VERSION
-
-Patches\UIDropDownMenuTaintHonor.lua
-Patches\UIDropDownMenuTaintCommunities.lua
-
-Libs\LibItemUpgradeInfo-1.0\LibItemUpgradeInfo-1.0.xml
+## SavedVariablesPerCharacter:
+## SavedVariables: AUCTIONATOR_CONFIG, AUCTIONATOR_SAVEDVARS, AUCTIONATOR_SHOPPING_LISTS, AUCTIONATOR_PRICE_DATABASE
 
 zcUtils.lua
 
 Locales\Manifest.xml
-
 Compat\Compat.lua
-
-AuctionatorObjects.lua
-
 Source\Manifest.xml
 
-AuctionatorItemLink.lua
-
-Auctionator.lua
-AuctionatorShop.lua
-
 Auctionator.xml
--- Due to a problem by using XML includes, we include directly here UI XML
-UI\Templates\Fonts.xml
-
-UI\Templates\Buttons\SmallButtonTemplate.xml
-UI\Templates\Buttons\ClickableColumnHeading.xml
-
-UI\Templates\Dialogs\Default.xml
-
-UI\Templates\Buttons\ResultRow.xml
-UI\Templates\Buttons\HistoryRow.xml
-
-UI\Templates\Frames\Sell.xml
-
-UI\Frames\ErrorMessage.xml
-UI\Frames\ConfirmationDialog.xml
-UI\Frames\MaskFrame.xml
-UI\Frames\BuyConfirmationDialog.xml
-UI\Frames\CheckActives.xml
-UI\Frames\CancelAuctionConfirmation.xml
-UI\Frames\FullScan.xml
-UI\Frames\AdvancedSearchDialog.xml
--- END
-
-AuctionatorPane.lua
-AuctionatorDatabase.lua
-AuctionatorScan.lua
-AuctionatorScanFull.lua
-AuctionatorQuery.lua
-Source\Tooltips\Manifest.xml
-AuctionatorVendor.lua
-AuctionatorConflicts.lua
-AuctionatorAPI.lua
-#AuctionatorConfig.lua
-AuctionatorBuy.lua
-
-#AuctionatorConfig.xml
-

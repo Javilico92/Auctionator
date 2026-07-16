@@ -44,9 +44,80 @@ AuctionatorCompat.TradeSkillFrame.RecipeList.GetSelectedRecipeID = function()
     return GetTradeSkillSelectionIndex()
 end
 
-AuctionatorCompat.LE_ITEM_CLASS_WEAPON = 1 -- LE_ITEM_CLASS_WEAPON = 2 after 7.0.X
-AuctionatorCompat.LE_ITEM_CLASS_ARMOR = 2 -- LE_ITEM_CLASS_ARMOR = 4 after 7.0.X
-AuctionatorCompat.LE_ITEM_CLASS_BATTLEPET = 0 -- Not used in 3.3.5
+-- CONSTANTS
+LE_EXPANSION_CLASSIC = LE_EXPANSION_CLASSIC or 0
+LE_EXPANSION_BURNING_CRUSADE = LE_EXPANSION_BURNING_CRUSADE or 1
+LE_EXPANSION_WRATH_OF_THE_LICH_KING =
+    LE_EXPANSION_WRATH_OF_THE_LICH_KING or 2
+LE_EXPANSION_CATACLYSM = LE_EXPANSION_CATACLYSM or 3
+LE_EXPANSION_MISTS_OF_PANDARIA =
+    LE_EXPANSION_MISTS_OF_PANDARIA or 4
+LE_EXPANSION_WARLORDS_OF_DRAENOR =
+    LE_EXPANSION_WARLORDS_OF_DRAENOR or 5
+LE_EXPANSION_LEGION = LE_EXPANSION_LEGION or 6
+LE_EXPANSION_BATTLE_FOR_AZEROTH =
+    LE_EXPANSION_BATTLE_FOR_AZEROTH or 7
+
+-- CLASS
+-- Modern WoW IDS
+LE_ITEM_CLASS_CONSUMABLE      = LE_ITEM_CLASS_CONSUMABLE or 0
+LE_ITEM_CLASS_CONTAINER       = LE_ITEM_CLASS_CONTAINER or 1
+LE_ITEM_CLASS_WEAPON          = LE_ITEM_CLASS_WEAPON or 2
+LE_ITEM_CLASS_GEM             = LE_ITEM_CLASS_GEM or 3
+LE_ITEM_CLASS_ARMOR           = LE_ITEM_CLASS_ARMOR or 4
+LE_ITEM_CLASS_REAGENT         = LE_ITEM_CLASS_REAGENT or 5
+LE_ITEM_CLASS_PROJECTILE      = LE_ITEM_CLASS_PROJECTILE or 6
+LE_ITEM_CLASS_TRADEGOODS      = LE_ITEM_CLASS_TRADEGOODS or 7
+LE_ITEM_CLASS_ITEM_ENHANCEMENT =
+    LE_ITEM_CLASS_ITEM_ENHANCEMENT or 8
+LE_ITEM_CLASS_RECIPE          = LE_ITEM_CLASS_RECIPE or 9
+LE_ITEM_CLASS_QUIVER          = LE_ITEM_CLASS_QUIVER or 11
+LE_ITEM_CLASS_QUESTITEM       = LE_ITEM_CLASS_QUESTITEM or 12
+LE_ITEM_CLASS_MISCELLANEOUS   = LE_ITEM_CLASS_MISCELLANEOUS or 15
+LE_ITEM_CLASS_GLYPH           = LE_ITEM_CLASS_GLYPH or 16
+LE_ITEM_CLASS_BATTLEPET       = LE_ITEM_CLASS_BATTLEPET or 17
+
+if not GetItemClassInfo then
+    -- Translate modern WoW LE_ITEM IDS TO 3.3.5
+    local legacyAuctionClassIndex = {
+        [LE_ITEM_CLASS_WEAPON]        = 1,
+        [LE_ITEM_CLASS_ARMOR]         = 2,
+        [LE_ITEM_CLASS_CONTAINER]     = 3,
+        [LE_ITEM_CLASS_CONSUMABLE]    = 4,
+        [LE_ITEM_CLASS_GLYPH]         = 5,
+        [LE_ITEM_CLASS_TRADEGOODS]    = 6,
+        [LE_ITEM_CLASS_PROJECTILE]    = 7,
+        [LE_ITEM_CLASS_QUIVER]        = 8,
+        [LE_ITEM_CLASS_RECIPE]        = 9,
+        [LE_ITEM_CLASS_GEM]           = 10,
+        [LE_ITEM_CLASS_MISCELLANEOUS] = 11,
+        [LE_ITEM_CLASS_QUESTITEM]     = 12,
+    }
+
+    function GetItemClassInfo(classID)
+        local legacyIndex = legacyAuctionClassIndex[classID]
+
+        if not legacyIndex then
+            return nil
+        end
+
+        local classes = { GetAuctionItemClasses() }
+        return classes[legacyIndex]
+    end
+end
+--
+
+GameFontNormalHuge =
+    GameFontNormalHuge
+    or GameFontNormalLarge
+    or GameFontNormal
+
+GameFontDisableHuge =
+    GameFontDisableHuge
+    or GameFontDisableLarge
+    or GameFontDisable
+    or GameFontNormalLarge
+    or GameFontNormal
 
 if not SOUNDKIT then
     SOUNDKIT = {
@@ -94,24 +165,44 @@ end
 C_AuctionHouse = C_AuctionHouse or {}
 
 if not C_AuctionHouse.GetAuctionItemSubClasses then
-    function C_AuctionHouse.GetAuctionItemSubClasses(classID)
-        if not GetAuctionItemSubClasses then
-            return {}
-        end
+  function C_AuctionHouse.GetAuctionItemSubClasses(classID)
+    local result = {}
 
-        local results = { GetAuctionItemSubClasses(classID) }
-        local subclasses = {}
+    local legacyClassIndex = AuctionatorCompat.ItemClassToAuctionIndex
+      and AuctionatorCompat.ItemClassToAuctionIndex[classID]
 
-        for index, name in ipairs(results) do
-            subclasses[index] = {
-                classID = classID,
-                subClassID = index - 1,
-                name = name,
-            }
-        end
-
-        return subclasses
+    if not legacyClassIndex then
+      return result
     end
+
+    local subClasses = {
+      GetAuctionItemSubClasses(legacyClassIndex)
+    }
+
+    for subClassIndex = 1, #subClasses do
+      table.insert(result, subClassIndex - 1)
+    end
+
+    return result
+  end
+end
+
+if not GetItemSubClassInfo then
+  function GetItemSubClassInfo(classID, subClassID)
+    local legacyClassIndex = AuctionatorCompat.ItemClassToAuctionIndex
+      and AuctionatorCompat.ItemClassToAuctionIndex[classID]
+
+    if not legacyClassIndex then
+      return nil
+    end
+
+    local subClasses = {
+      GetAuctionItemSubClasses(legacyClassIndex)
+    }
+
+    -- Los IDs modernos empiezan en 0; la tabla Lua empieza en 1.
+    return subClasses[(tonumber(subClassID) or -1) + 1]
+  end
 end
 
 ItemLocation = {}

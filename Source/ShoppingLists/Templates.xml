@@ -25,12 +25,8 @@
 
     <NormalTexture parentKey="NormalTexture" atlas="auctionhouse-rowstripe-1" setAllPoints="true"/>
 
-    <Scripts>
-      <OnLoad method="OnLoad" />
-    </Scripts>
-
     <Frames>
-      <Button parentKey="DeleteButton" inherits="UIPanelButtonTemplate" mixin="AuctionatorScrollListLineDeleteMixin">
+      <Button parentKey="DeleteButton" inherits="UIPanelButtonTemplate">
         <Size>
           <AbsDimension x="15" y="15"/>
         </Size>
@@ -44,7 +40,7 @@
         </Layers>
 
         <Scripts>
-          <OnClick method="OnClick" />
+          <OnClick>self:GetParent():DeleteItem()</OnClick>
         </Scripts>
       </Button>
     </Frames>

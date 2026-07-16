@@ -1,0 +1,79 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <Frame
+    name="AuctionatorConfigurationCheckbox"
+    inherits="AuctionatorConfigurationTooltip"
+    virtual="true">
+
+    <Size>
+      <AbsDimension x="300" y="40"/>
+    </Size>
+
+    <Scripts>
+      <OnLoad>
+        Mixin(self, AuctionatorConfigTooltipMixin)
+        Mixin(self, AuctionatorConfigCheckboxMixin)
+
+        self.CheckBox = self.CheckBox or select(1, self:GetChildren())
+
+        if self.CheckBox and not self.CheckBox.Label then
+          local regions = { self.CheckBox:GetRegions() }
+
+          for _, region in ipairs(regions) do
+            if region and region.GetObjectType
+                and region:GetObjectType() == "FontString"
+            then
+              self.CheckBox.Label = region
+              break
+            end
+          end
+        end
+
+        if self.OnLoad then
+          self:OnLoad()
+        end
+      </OnLoad>
+    </Scripts>
+
+    <Frames>
+      <CheckButton inherits="UICheckButtonTemplate">
+        <Anchors>
+          <Anchor point="TOPLEFT">
+            <Offset>
+              <AbsDimension x="20" y="0"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+
+        <Layers>
+          <Layer level="BACKGROUND">
+            <FontString inherits="GameFontHighlight">
+              <Anchors>
+                <Anchor point="TOPLEFT" relativePoint="TOPLEFT">
+                  <Offset>
+                    <AbsDimension x="58" y="-8"/>
+                  </Offset>
+                </Anchor>
+              </Anchors>
+            </FontString>
+          </Layer>
+        </Layers>
+
+        <Scripts>
+          <OnEnter>
+            local parent = self:GetParent()
+            if parent and parent.OnEnter then
+              parent:OnEnter()
+            end
+          </OnEnter>
+
+          <OnLeave>
+            local parent = self:GetParent()
+            if parent and parent.OnLeave then
+              parent:OnLeave()
+            end
+          </OnLeave>
+        </Scripts>
+      </CheckButton>
+    </Frames>
+  </Frame>
+</Ui>

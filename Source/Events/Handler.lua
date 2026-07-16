@@ -3,37 +3,13 @@
 -- event: Event name string
 function Auctionator.Events.Handler(self, event, ...)
   -- Auctionator.Debug.Message("Auctionator.Events.Handler", event, ...)
-  event = AuctionatorCompat.NormalizeEvent(event) -- 335 make sure to translate modern events to original events
 
   if event == "VARIABLES_LOADED" then
     Auctionator.Events.VariablesLoaded()
-  elseif event == "ADDON_LOADED" then
-    Auctionator.Events.AddonLoaded(...)
-  elseif event == "PLAYER_ENTERING_WORLD" then
-    Auctionator.Events.PlayerEnteringWorld()
   elseif event == "AUCTION_HOUSE_SHOW" then
     Auctionator.Events.OnAuctionHouseShow()
-  elseif event == "AUCTION_HOUSE_CLOSED" then
-    Auctionator.Events.OnAuctionHouseClosed()
-  elseif event == "AUCTION_HOUSE_BROWSE_RESULTS_ADDED" then
-    Auctionator.Events.BrowseResultsAdded(...)
-  elseif event == "AUCTION_HOUSE_BROWSE_RESULTS_UPDATED" then
-    Auctionator.Events.BrowseResultsUpdated(...)
-  elseif event == "ITEM_SEARCH_RESULTS_ADDED" then
-    Auctionator.Events.ItemSearchResultsAdded(...)
-  elseif event == "ITEM_SEARCH_RESULTS_UPDATED" then
-    Auctionator.Events.ItemSearchResultsUpdated(...)
-  elseif event == "AUCTION_MULTISELL_START" then
-    Auctionator.Events.AuctionMultisellStart(...)
-  elseif event == "AUCTION_MULTISELL_UPDATE" then
-    Auctionator.Events.AuctionMultisellUpdate(...)
-  elseif event == "AUCTION_MULTISELL_FAILURE" then
-    Auctionator.Events.AuctionMultisellFailure(...)
-  elseif event == "CHAT_MSG_ADDON" then
-    Auctionator.Events.ChatMessageAddon(...)
   end
 end
-
 
 -- TODO Where are these registered?
 --   if (event == "UNIT_SPELLCAST_SENT")     then  Atr_OnSpellCastSent(...);     end;

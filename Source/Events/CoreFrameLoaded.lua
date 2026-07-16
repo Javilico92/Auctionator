@@ -32,38 +32,23 @@
   -- -- self:RegisterEvent("AUCTION_OWNED_LIST_UPDATE");
   -- -- self:RegisterEvent("NEW_AUCTION_UPDATE");
 
+
 local AUCTIONATOR_EVENTS = {
   -- Addon Initialization Events
   "VARIABLES_LOADED",
-  "PLAYER_ENTERING_WORLD",
-  "ADDON_LOADED",
   -- AH Window Initialization Events
   "AUCTION_HOUSE_SHOW",
-  "AUCTION_HOUSE_CLOSED",
-  -- Scan Events
-  -- "REPLICATE_ITEM_LIST_UPDATE",
-  "AUCTION_HOUSE_BROWSE_RESULTS_ADDED",
-  "AUCTION_HOUSE_BROWSE_RESULTS_UPDATED",
-  "ITEM_SEARCH_RESULTS_ADDED",
-  "ITEM_SEARCH_RESULTS_UPDATED",
-  "AUCTION_MULTISELL_START",
-  "AUCTION_MULTISELL_UPDATE",
-  "AUCTION_MULTISELL_FAILURE",
-  -- Extended Funtionality
-  "CHAT_MSG_ADDON",
 }
 
 -- Called from AuctionatorCore frame's OnLoad (defined in Auctionator.xml)
 -- coreFrame: AuctionatorCore Frame (see Auctionator.xml)
 function Auctionator.Events.CoreFrameLoaded(coreFrame)
   Auctionator.Debug.Message("Auctionator.Events.CoreFrameLoaded")
-  Auctionator.Utilities.Message("Pre-release version. Limited functionality due to 8.3 AH updates.");
+  Auctionator.Utilities.Message(
+    Auctionator.Locales.Apply("LIMITED_FUNCTIONALITY_MESSAGE")
+  )
 
   for _, eventName in ipairs(AUCTIONATOR_EVENTS) do
-    -- 335 we need to translante new events to original events
-    -- coreFrame:RegisterEvent(eventName)
-    coreFrame:RegisterEvent(
-        AuctionatorCompat.GetEventName(eventName)
-    )
+    coreFrame:RegisterEvent(eventName)
   end
 end
