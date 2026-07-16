@@ -1,102 +1,123 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
   <Frame
     name="AuctionatorConfigBasicOptionsFrame"
-    mixin="AuctionatorConfigBasicOptionsFrameMixin"
     parent="InterfaceOptionsFrame">
 
     <Scripts>
-      <OnLoad method="OnLoad"/>
-      <OnShow method="OnShow"/>
-      <OnHide method="Save"/>
+      <OnLoad>
+        AuctionatorXMLCompat.InitializeDeferred(
+          self,
+          "AuctionatorConfigBasicOptionsFrame"
+        )
+      </OnLoad>
+
+      <OnShow>
+        AuctionatorXMLCompat.Call(self, "OnShow")
+      </OnShow>
+
+      <OnHide>
+        AuctionatorXMLCompat.Call(self, "Save")
+      </OnHide>
     </Scripts>
 
     <Frames>
-      <Frame inherits="AuctionatorConfigurationTitleFrame" parentKey="TitleArea">
-        <KeyValues>
-          <KeyValue key="titleText" value="AUCTIONATOR_L_CONFIG_BASIC_OPTIONS_CATEGORY" type="global" />
-          <KeyValue key="subTitleText" value="AUCTIONATOR_L_CONFIG_BASIC_OPTIONS_TEXT" type="global"/>
-        </KeyValues>
-      </Frame>
+      <Frame
+        name="$parentTitleArea"
+        inherits="AuctionatorConfigurationTitleFrame"/>
 
-      <Frame inherits="AuctionatorConfigurationHeadingFrame" parentKey="ShoppingListHeading">
-        <KeyValues>
-          <KeyValue key="headingText" value="AUCTIONATOR_L_CONFIG_SHOPPING_LIST" type="global"/>
-        </KeyValues>
+      <Frame
+        name="$parentShoppingListHeading"
+        inherits="AuctionatorConfigurationHeadingFrame">
+
         <Anchors>
-          <Anchor point="TOPLEFT" relativeKey="$parent.TitleArea" relativePoint="BOTTOMLEFT"/>
+          <Anchor
+            point="TOPLEFT"
+            relativeTo="$parentTitleArea"
+            relativePoint="BOTTOMLEFT"/>
         </Anchors>
       </Frame>
 
-      <Frame inherits="AuctionatorConfigurationCheckbox" parentKey="AutoListSearch">
-        <KeyValues>
-          <KeyValue key="labelText" value="AUCTIONATOR_L_CONFIG_AUTO_LIST_SEARCH" type="global" />
-          <KeyValue key="tooltipTitleText" value="AUCTIONATOR_L_CONFIG_AUTO_LIST_SEARCH_TOOLTIP_HEADER" type="global" />
-          <KeyValue key="tooltipText" value="AUCTIONATOR_L_CONFIG_AUTO_LIST_SEARCH_TOOLTIP_TEXT" type="global"/>
-        </KeyValues>
+      <Frame
+        name="$parentAutoListSearch"
+        inherits="AuctionatorConfigurationCheckbox">
+
         <Anchors>
-          <Anchor point="TOPLEFT" relativeKey="$parent.ShoppingListHeading" relativePoint="BOTTOMLEFT" />
+          <Anchor
+            point="TOPLEFT"
+            relativeTo="$parentShoppingListHeading"
+            relativePoint="BOTTOMLEFT"/>
         </Anchors>
       </Frame>
 
-      <Frame inherits="AuctionatorConfigurationCheckbox" parentKey="AuctionChatLog">
-        <KeyValues>
-          <KeyValue key="labelText" value="AUCTIONATOR_L_CONFIG_CHAT_LOG" type="global" />
-          <KeyValue key="tooltipTitleText" value="AUCTIONATOR_L_CONFIG_CHAT_LOG_TOOLTIP_HEADER" type="global" />
-          <KeyValue key="tooltipText" value="AUCTIONATOR_L_CONFIG_CHAT_LOG_TOOLTIP_TEXT" type="global"/>
-        </KeyValues>
+      <Frame
+        name="$parentAuctionChatLog"
+        inherits="AuctionatorConfigurationCheckbox">
+
         <Anchors>
-          <Anchor point="TOPLEFT" relativeKey="$parent.AutoListSearch" relativePoint="BOTTOMLEFT" />
+          <Anchor
+            point="TOPLEFT"
+            relativeTo="$parentAutoListSearch"
+            relativePoint="BOTTOMLEFT"/>
         </Anchors>
       </Frame>
 
-      <Frame inherits="AuctionatorConfigurationHeadingFrame" parentKey="ScanningHeading">
-        <KeyValues>
-          <KeyValue key="headingText" value="AUCTIONATOR_L_CONFIG_SCANNING" type="global"/>
-        </KeyValues>
+      <Frame
+        name="$parentScanningHeading"
+        inherits="AuctionatorConfigurationHeadingFrame">
+
         <Anchors>
-          <Anchor point="TOPLEFT" relativeKey="$parent.AuctionChatLog" relativePoint="BOTTOMLEFT"/>
+          <Anchor
+            point="TOPLEFT"
+            relativeTo="$parentAuctionChatLog"
+            relativePoint="BOTTOMLEFT"/>
         </Anchors>
       </Frame>
 
-      <Frame inherits="AuctionatorConfigurationCheckbox" parentKey="Autoscan">
-        <KeyValues>
-          <KeyValue key="labelText" value="AUCTIONATOR_L_CONFIG_AUTOSCAN" type="global" />
-          <KeyValue key="tooltipTitleText" value="AUCTIONATOR_L_CONFIG_AUTOSCAN_TOOLTIP_HEADER" type="global" />
-          <KeyValue key="tooltipText" value="AUCTIONATOR_L_CONFIG_AUTOSCAN_TOOLTIP_TEXT" type="global"/>
-        </KeyValues>
+      <Frame
+        name="$parentAutoscan"
+        inherits="AuctionatorConfigurationCheckbox">
+
         <Anchors>
-          <Anchor point="TOPLEFT" relativeKey="$parent.ScanningHeading" relativePoint="BOTTOMLEFT" />
+          <Anchor
+            point="TOPLEFT"
+            relativeTo="$parentScanningHeading"
+            relativePoint="BOTTOMLEFT"/>
         </Anchors>
       </Frame>
 
-      <Frame inherits="AuctionatorConfigurationCheckbox" parentKey="AlternateScan">
-        <KeyValues>
-          <KeyValue key="labelText" value="AUCTIONATOR_L_CONFIG_ALTERNATE_SCAN" type="global" />
-          <KeyValue key="tooltipTitleText" value="AUCTIONATOR_L_CONFIG_ALTERNATE_SCAN_HEADER" type="global" />
-          <KeyValue key="tooltipText" value="AUCTIONATOR_L_CONFIG_ALTERNATE_SCAN_TEXT" type="global"/>
-        </KeyValues>
+      <Frame
+        name="$parentAlternateScan"
+        inherits="AuctionatorConfigurationCheckbox">
+
         <Anchors>
-          <Anchor point="TOPLEFT" relativeKey="$parent.Autoscan" relativePoint="BOTTOMLEFT" />
+          <Anchor
+            point="TOPLEFT"
+            relativeTo="$parentAutoscan"
+            relativePoint="BOTTOMLEFT"/>
         </Anchors>
       </Frame>
 
-      <Frame inherits="AuctionatorConfigurationHeadingFrame" parentKey="CancellingHeading">
-        <KeyValues>
-          <KeyValue key="headingText" value="AUCTIONATOR_L_CANCELLING_TAB" type="global"/>
-        </KeyValues>
+      <Frame
+        name="$parentCancellingHeading"
+        inherits="AuctionatorConfigurationHeadingFrame">
+
         <Anchors>
-          <Anchor point="TOPLEFT" relativeKey="$parent.AlternateScan" relativePoint="BOTTOMLEFT"/>
+          <Anchor
+            point="TOPLEFT"
+            relativeTo="$parentAlternateScan"
+            relativePoint="BOTTOMLEFT"/>
         </Anchors>
       </Frame>
 
-      <Frame inherits="AuctionatorConfigurationCheckbox" parentKey="UndercutScanPetsGear">
-        <KeyValues>
-          <KeyValue key="labelText" value="AUCTIONATOR_L_CONFIG_UNDERCUT_SCAN_NOT_LIFO" type="global" />
-          <KeyValue key="tooltipTitleText" value="AUCTIONATOR_L_CONFIG_UNDERCUT_SCAN_NOT_LIFO_TOOLTIP_HEADER" type="global" />
-          <KeyValue key="tooltipText" value="AUCTIONATOR_L_CONFIG_UNDERCUT_SCAN_NOT_LIFO_TOOLTIP_TEXT" type="global"/>
-        </KeyValues>
+      <Frame
+        name="$parentUndercutScanPetsGear"
+        inherits="AuctionatorConfigurationCheckbox">
+
         <Anchors>
-          <Anchor point="TOPLEFT" relativeKey="$parent.CancellingHeading" relativePoint="BOTTOMLEFT" />
+          <Anchor
+            point="TOPLEFT"
+            relativeTo="$parentCancellingHeading"
+            relativePoint="BOTTOMLEFT"/>
         </Anchors>
       </Frame>
     </Frames>

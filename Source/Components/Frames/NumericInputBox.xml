@@ -1,41 +1,102 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
-  <!-- Template for a simple input box -->
-  <Frame name="AuctionatorConfigurationNumericInput" mixin="AuctionatorConfigNumericInputMixin"  inherits="AuctionatorConfigurationTooltip" virtual="true">
-    <!--
-      <KeyValues>
-        <KeyValue key="labelText" value="" type="string"/>
-        <KeyValue key="tooltipTitleText" value="" type="string"/>
-        <KeyValue key="tooltipText" value="" type="string"/>
-      </KeyValues>
-    -->
-    <Size y="40" />
+  <Frame
+    name="AuctionatorConfigurationNumericInput"
+    inherits="AuctionatorConfigurationTooltip"
+    virtual="true">
+
+    <Size>
+      <AbsDimension x="300" y="40"/>
+    </Size>
+
     <Scripts>
-      <OnLoad method="OnLoad"/>
+      <OnLoad>
+        Mixin(self, AuctionatorConfigTooltipMixin)
+        Mixin(self, AuctionatorConfigNumericInputMixin)
+
+        self.InputBox = select(1, self:GetChildren())
+
+        if self.InputBox and not self.InputBox.Label then
+          local regions = { self.InputBox:GetRegions() }
+
+          for _, region in ipairs(regions) do
+            if region
+              and region.GetObjectType
+              and region:GetObjectType() == "FontString"
+            then
+              self.InputBox.Label = region
+              break
+            end
+          end
+        end
+
+        if self.OnLoad then
+          self:OnLoad()
+        end
+      </OnLoad>
     </Scripts>
+
     <Anchors>
-      <Anchor point="LEFT" relativeKey="$parent" relativePoint="LEFT" />
-      <Anchor point="RIGHT" relativeKey="$parent" relativePoint="RIGHT" />
+      <Anchor point="LEFT" relativeTo="$parent" relativePoint="LEFT"/>
+      <Anchor point="RIGHT" relativeTo="$parent" relativePoint="RIGHT"/>
     </Anchors>
+
     <Frames>
-      <EditBox autoFocus="false" inherits="InputBoxTemplate" numeric="true" parentKey="InputBox" letters="3">
-        <Size x="50" y="20" />
+      <EditBox
+        autoFocus="false"
+        inherits="InputBoxTemplate"
+        numeric="true"
+        letters="3">
+
+        <Size>
+          <AbsDimension x="50" y="20"/>
+        </Size>
+
         <Anchors>
-          <Anchor point="TOPLEFT" x="25" />
+          <Anchor point="TOPLEFT">
+            <Offset>
+              <AbsDimension x="25" y="0"/>
+            </Offset>
+          </Anchor>
         </Anchors>
-        <FontString inherits="ChatFontNormal" justifyH="CENTER" />
+
+        <FontString inherits="ChatFontNormal" justifyH="CENTER"/>
+
         <Layers>
           <Layer level="BACKGROUND">
-            <FontString inherits="GameFontHighlight" parentKey="Label">
+            <FontString inherits="GameFontHighlight">
               <Anchors>
-                <Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeKey="$parent" x="58" y="-4" />
+                <Anchor
+                  point="TOPLEFT"
+                  relativeTo="$parent"
+                  relativePoint="TOPLEFT">
+
+                  <Offset>
+                    <AbsDimension x="58" y="-4"/>
+                  </Offset>
+                </Anchor>
               </Anchors>
             </FontString>
           </Layer>
         </Layers>
+
         <Scripts>
-          <OnEnter>self:GetParent():OnEnter()</OnEnter>
-          <OnLeave>self:GetParent():OnLeave()</OnLeave>
-          <OnEscapePressed>self:ClearFocus()</OnEscapePressed>
+          <OnEnter>
+            local parent = self:GetParent()
+            if parent and parent.OnEnter then
+              parent:OnEnter()
+            end
+          </OnEnter>
+
+          <OnLeave>
+            local parent = self:GetParent()
+            if parent and parent.OnLeave then
+              parent:OnLeave()
+            end
+          </OnLeave>
+
+          <OnEscapePressed>
+            self:ClearFocus()
+          </OnEscapePressed>
         </Scripts>
       </EditBox>
     </Frames>

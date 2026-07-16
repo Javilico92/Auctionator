@@ -13,7 +13,12 @@
 zcUtils.lua
 
 Locales\Manifest.xml
+
 Compat\Compat.lua
+Compat\XMLCompat.lua
+
 Source\Manifest.xml
+
+Compat\Config\Frames\Manifest.xml
 
 Auctionator.xml

@@ -568,24 +568,36 @@ function AuctionatorCompat.NormalizeEvent(eventName)
     return eventName
 end
 
-if not Mixin then
-    function Mixin(object, ...)
-        if type(object) ~= "table" then
-            return object
-        end
+do
+  local BlizzardMixin = Mixin
 
-        for i = 1, select("#", ...) do
-            local mixin = select(i, ...)
-
-            if type(mixin) == "table" then
-                for key, value in pairs(mixin) do
-                    object[key] = value
-                end
-            end
-        end
-
-        return object
+  local function BasicMixin(object, ...)
+    if not object then
+      return object
     end
+
+    for index = 1, select("#", ...) do
+      local mixin = select(index, ...)
+
+      if type(mixin) == "table" then
+        for key, value in pairs(mixin) do
+          object[key] = value
+        end
+      end
+    end
+
+    return object
+  end
+
+  function Mixin(object, ...)
+    if BlizzardMixin then
+      BlizzardMixin(object, ...)
+    else
+      BasicMixin(object, ...)
+    end
+
+    return object
+  end
 end
 
 if not CreateAndInitFromMixin then
