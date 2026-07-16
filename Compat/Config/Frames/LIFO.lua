@@ -6,7 +6,6 @@
     "AuctionatorConfigLIFOFrame",
     {
       mixins = {
-        AuctionatorPanelConfigMixin,
         AuctionatorConfigLIFOFrameMixin,
       },
 

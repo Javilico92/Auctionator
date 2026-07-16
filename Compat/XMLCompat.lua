@@ -62,6 +62,16 @@ end
 
 function AuctionatorXMLCompat.Register(key, definition)
   definitions[key] = definition
+
+  local frame = _G[key]
+
+  if frame and type(AuctionatorXMLCompat.Initialize) == "function" then
+    local complete = AuctionatorXMLCompat.Initialize(frame, key)
+
+    if complete then
+      frame.__auctionatorXMLCompatPending = nil
+    end
+  end
 end
 
 local function ApplyValues(frame, values)
@@ -185,40 +195,41 @@ local function InitializeChild(parent, propertyName, childDefinition)
   end
 
   ApplyValues(child, childDefinition.values)
-
-  -- Reconstruye referencias que parentKey habría creado en Retail
   BindKnownComponentReferences(child)
 
-  if childDefinition.children then
-    for nestedName, nestedDefinition in pairs(childDefinition.children) do
-      local initialized = InitializeChild(
-        child,
-        nestedName,
-        nestedDefinition
-      )
+  local nestedChildrenReady = true
 
-      if not initialized then
-        return false
-      end
+  for nestedName, nestedDefinition in pairs(
+    childDefinition.children or {}
+  ) do
+    if not InitializeChild(
+      child,
+      nestedName,
+      nestedDefinition
+    ) then
+      nestedChildrenReady = false
     end
   end
 
+  -- El OnLoad del grupo se ejecuta cuando sus hijos estén disponibles.
+  -- Pero el control superior ya queda enlazado al panel.
   local method = childDefinition.onload
 
-  if method
+  if nestedChildrenReady
+    and method
     and type(child[method]) == "function"
     and not child.__auctionatorXMLCompatOnLoadCalled
   then
     child.__auctionatorXMLCompatOnLoadCalled = true
 
-    local success, errorMessage = pcall(
+    local success, message = pcall(
       child[method],
       child
     )
 
     if not success then
       child.__auctionatorXMLCompatOnLoadCalled = nil
-      error(errorMessage)
+      geterrorhandler()(message)
     end
   end
 
@@ -227,6 +238,7 @@ end
 
 function AuctionatorXMLCompat.Initialize(frame, definitionKey)
   local definition = definitions[definitionKey]
+
   if not frame or not definition then
     return false
   end
@@ -236,46 +248,103 @@ function AuctionatorXMLCompat.Initialize(frame, definitionKey)
   end
 
   ApplyValues(frame, definition.values)
+  BindKnownComponentReferences(frame)
 
-  local allChildrenReady = true
+  local topLevelReady = true
 
-  for propertyName, childDefinition in pairs(definition.children or {}) do
-    if not InitializeChild(frame, propertyName, childDefinition) then
-      allChildrenReady = false
+  for propertyName, childDefinition in pairs(
+    definition.children or {}
+  ) do
+    if not InitializeChild(
+      frame,
+      propertyName,
+      childDefinition
+    ) then
+      topLevelReady = false
     end
   end
 
-  if not allChildrenReady then
+  if not topLevelReady then
     return false
   end
 
   if definition.onload
-      and type(frame[definition.onload]) == "function"
+    and type(frame[definition.onload]) == "function"
+    and not frame.__auctionatorXMLCompatOnLoadCalled
   then
-    frame[definition.onload](frame)
+    frame.__auctionatorXMLCompatOnLoadCalled = true
+
+    local success, message = pcall(
+      frame[definition.onload],
+      frame
+    )
+
+    if not success then
+      frame.__auctionatorXMLCompatOnLoadCalled = nil
+      geterrorhandler()(message)
+      return false
+    end
   end
 
   frame.__auctionatorXMLCompatInitialized = true
-  return true
+
+  local internalsReady = true
+
+  for propertyName, childDefinition in pairs(
+    definition.children or {}
+  ) do
+    local child = frame[propertyName]
+
+    if childDefinition.children
+      and child
+    then
+      for nestedName, nestedDefinition in pairs(
+        childDefinition.children
+      ) do
+        if not InitializeChild(
+          child,
+          nestedName,
+          nestedDefinition
+        ) then
+          internalsReady = false
+        end
+      end
+    end
+  end
+
+  return internalsReady
 end
 
 function AuctionatorXMLCompat.InitializeDeferred(frame, definitionKey)
-  if not frame or frame.__auctionatorXMLCompatPending then
+  if not frame then
     return
   end
 
+  frame.__auctionatorXMLCompatDefinitionKey = definitionKey
   frame.__auctionatorXMLCompatPending = true
 
-  frame:SetScript("OnUpdate", function(self)
-    if AuctionatorXMLCompat.Initialize(self, definitionKey) then
-      self:SetScript("OnUpdate", nil)
-      self.__auctionatorXMLCompatPending = nil
-    end
-  end)
+  local definition = definitions[definitionKey]
+
+  if not definition then
+    return
+  end
+
+  local complete = AuctionatorXMLCompat.Initialize(
+    frame,
+    definitionKey
+  )
+
+  if complete then
+    frame.__auctionatorXMLCompatPending = nil
+  end
 end
 
 function AuctionatorXMLCompat.Call(frame, methodName, ...)
   if frame and type(frame[methodName]) == "function" then
     return frame[methodName](frame, ...)
   end
+end
+
+function AuctionatorXMLCompat.HasDefinition(key)
+  return definitions[key] ~= nil
 end
