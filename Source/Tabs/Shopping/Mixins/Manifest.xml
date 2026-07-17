@@ -1,0 +1,5 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <Script file="ResultsRow.lua"/>
+  <Script file="ResultsListing.lua"/>
+  <Script file="Main.lua"/>
+</Ui>

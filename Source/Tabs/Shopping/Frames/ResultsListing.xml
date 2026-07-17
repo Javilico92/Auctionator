@@ -1,0 +1,183 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <!--
+    Bloque funcional de resultados de la pestaña Shopping.
+    Las referencias antiguas se enlazarán desde ResultsListing.lua.
+  -->
+  <Frame name="AuctionatorShoppingResultsListingTemplate" virtual="true">
+    <Size><AbsDimension x="605" y="286"/></Size>
+
+    <Frames>
+      <!-- Cabeceras -->
+      <Frame name="$parentHeadingsBar">
+        <Size><AbsDimension x="605" y="64"/></Size>
+        <Anchors><Anchor point="TOPLEFT"/></Anchors>
+
+        <Layers>
+          <Layer level="ARTWORK">
+            <Texture name="$parentMiddle" file="Interface\Glues\CharacterCreate\CharacterCreate-LabelFrame">
+              <Size><AbsDimension x="605" y="64"/></Size>
+              <Anchors><Anchor point="TOPLEFT"/></Anchors>
+              <TexCoords left="0.1953125" right="0.8046875" top="0" bottom="1"/>
+            </Texture>
+
+            <FontString name="$parentCol1Heading" inherits="GameFontHighlightSmall" text="AUCTIONATOR_ITEM_PRICE" hidden="true" justifyH="CENTER">
+              <Size><AbsDimension x="100"/></Size>
+              <Anchors>
+                <Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle">
+                  <Offset><AbsDimension x="40" y="1"/></Offset>
+                </Anchor>
+              </Anchors>
+            </FontString>
+
+            <FontString name="$parentCol3Heading" inherits="GameFontHighlightSmall" text="AUCTIONATOR_CURRENT_AUCTIONS" hidden="true">
+              <Anchors>
+                <Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle">
+                  <Offset><AbsDimension x="205" y="1"/></Offset>
+                </Anchor>
+              </Anchors>
+            </FontString>
+
+            <FontString name="$parentCol4Heading" inherits="GameFontHighlightSmall" text="TOTAL" hidden="true">
+              <Anchors>
+                <Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle">
+                  <Offset><AbsDimension x="500" y="1"/></Offset>
+                </Anchor>
+              </Anchors>
+            </FontString>
+          </Layer>
+        </Layers>
+
+        <Frames>
+          <Button name="$parentBackButton" text="BACK" inherits="Atr_SmallButtonTemplate" hidden="true">
+            <Size><AbsDimension x="70" y="18"/></Size>
+            <Anchors>
+              <Anchor point="TOPLEFT">
+                <Offset><AbsDimension x="8" y="5"/></Offset>
+              </Anchor>
+            </Anchors>
+            <Scripts><OnClick>Atr_Onclick_Back();</OnClick></Scripts>
+          </Button>
+
+          <Button name="$parentSaveThisListButton" text="AUCTIONATOR_SAVE_THIS_SHPLIST" inherits="Atr_SmallButtonTemplate" hidden="true">
+            <Size><AbsDimension x="200" y="20"/></Size>
+            <Anchors>
+              <Anchor point="TOPLEFT">
+                <Offset><AbsDimension x="8" y="8"/></Offset>
+              </Anchor>
+            </Anchors>
+            <Scripts><OnClick>Atr_Onclick_SaveTempList();</OnClick></Scripts>
+          </Button>
+
+          <Button name="$parentCol1HeadingButton" text="AUCTIONATOR_LOWEST_PRICE" inherits="Atr_Col_Heading_Template" hidden="true">
+            <Size><AbsDimension x="100" y="20"/></Size>
+            <Anchors>
+              <Anchor point="TOPLEFT">
+                <Offset><AbsDimension x="46" y="-21"/></Offset>
+              </Anchor>
+            </Anchors>
+            <Scripts><OnClick>Atr_Onclick_Col1();</OnClick></Scripts>
+          </Button>
+
+          <Button name="$parentCol3HeadingButton" text="AUCTIONATOR_ITEM_NAME" inherits="Atr_Col_Heading_Template" hidden="true">
+            <Size><AbsDimension x="108" y="20"/></Size>
+            <Anchors>
+              <Anchor point="TOPLEFT">
+                <Offset><AbsDimension x="220" y="-21"/></Offset>
+              </Anchor>
+            </Anchors>
+            <Scripts><OnClick>Atr_Onclick_Col3();</OnClick></Scripts>
+          </Button>
+        </Frames>
+      </Frame>
+
+      <!-- Listado desplazable -->
+      <ScrollFrame name="$parentScrollFrame" inherits="FauxScrollFrameTemplate">
+        <Size><AbsDimension x="588" y="196"/></Size>
+        <Anchors>
+          <Anchor point="TOPLEFT" relativeTo="$parentHeadingsBar" relativePoint="BOTTOMLEFT">
+            <Offset><AbsDimension x="-6" y="0"/></Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnVerticalScroll>
+            FauxScrollFrame_OnVerticalScroll(self, offset, 16, Atr_RedisplayAuctions);
+          </OnVerticalScroll>
+        </Scripts>
+      </ScrollFrame>
+
+      <!-- Filas -->
+      <Button name="$parentEntry1" inherits="AuctionatorShoppingResultsRowTemplate">
+        <Anchors>
+          <Anchor point="TOPLEFT" relativeTo="$parentScrollFrame" relativePoint="TOPLEFT">
+            <Offset><AbsDimension x="8" y="0"/></Offset>
+          </Anchor>
+        </Anchors>
+      </Button>
+      <Button name="$parentEntry2" inherits="AuctionatorShoppingResultsRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentEntry1" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentEntry3" inherits="AuctionatorShoppingResultsRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentEntry2" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentEntry4" inherits="AuctionatorShoppingResultsRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentEntry3" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentEntry5" inherits="AuctionatorShoppingResultsRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentEntry4" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentEntry6" inherits="AuctionatorShoppingResultsRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentEntry5" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentEntry7" inherits="AuctionatorShoppingResultsRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentEntry6" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentEntry8" inherits="AuctionatorShoppingResultsRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentEntry7" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentEntry9" inherits="AuctionatorShoppingResultsRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentEntry8" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentEntry10" inherits="AuctionatorShoppingResultsRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentEntry9" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentEntry11" inherits="AuctionatorShoppingResultsRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentEntry10" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentEntry12" inherits="AuctionatorShoppingResultsRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentEntry11" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentEntry13" inherits="AuctionatorShoppingResultsRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentEntry12" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentEntry14" inherits="AuctionatorShoppingResultsRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentEntry13" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentEntry15" inherits="AuctionatorShoppingResultsRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentEntry14" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+
+      <!-- Marco de resaltado usado al arrastrar un objeto -->
+      <Frame name="$parentHighlight" hidden="true">
+        <Size><AbsDimension x="605" y="260"/></Size>
+        <Anchors>
+          <Anchor point="TOPLEFT" relativeTo="$parentHeadingsBar" relativePoint="TOPLEFT"/>
+        </Anchors>
+        <Backdrop edgeFile="Interface\Tooltips\UI-Tooltip-Border">
+          <EdgeSize><AbsValue val="16"/></EdgeSize>
+        </Backdrop>
+      </Frame>
+
+      <Button name="$parentHighlightButton">
+        <Size><AbsDimension x="605" y="260"/></Size>
+        <Anchors>
+          <Anchor point="TOPLEFT" relativeTo="$parentHighlight" relativePoint="TOPLEFT"/>
+        </Anchors>
+        <Scripts>
+          <OnLoad>
+            Auctionator.Shopping.ResultsListing.HighlightButtonOnLoad(self);
+          </OnLoad>
+          <OnEvent>
+            Auctionator.Shopping.ResultsListing.HighlightButtonOnEvent(self, event);
+          </OnEvent>
+          <OnClick>Atr_OnDropItem();</OnClick>
+          <OnReceiveDrag>Atr_OnDropItem();</OnReceiveDrag>
+          <OnEnter>
+            Auctionator.Shopping.ResultsListing.HighlightButtonOnEnter(self);
+          </OnEnter>
+          <OnLeave>
+            Auctionator.Shopping.ResultsListing.HighlightButtonOnLeave(self);
+          </OnLeave>
+        </Scripts>
+      </Button>
+
+      <!-- Acción principal -->
+      <Button name="$parentBuyButton" text="Buy" inherits="UIPanelButtonTemplate">
+        <Size><AbsDimension x="90" y="22"/></Size>
+        <Anchors>
+          <Anchor point="BOTTOMRIGHT">
+            <Offset><AbsDimension x="0" y="-28"/></Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts><OnClick>Atr_Buy1_Onclick();</OnClick></Scripts>
+      </Button>
+    </Frames>
+
+    <Scripts>
+      <OnLoad>
+        Auctionator.Shopping.ResultsListing.OnLoad(self);
+      </OnLoad>
+    </Scripts>
+  </Frame>
+</Ui>

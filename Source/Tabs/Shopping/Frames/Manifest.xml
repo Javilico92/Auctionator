@@ -1,0 +1,5 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <Include file="ResultsRow.xml"/>
+  <Include file="ResultsListing.xml"/>
+  <Include file="Main.xml"/>
+</Ui>

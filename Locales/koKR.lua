@@ -379,7 +379,7 @@ AtrL["Show Starting Price on the Sell Tab"] = "판매 탭에 경매 시작가를
 AtrL["Default Auction Duration"] = "기본 경매기간"
 AtrL["Default Auctionator tab"] = "경매장 클릭시 활성화 탭"
 AtrL["Sell"] = "판매"
-AtrL["Buy"] = "구매"
+AtrL["CONFIG_SHOPPING_CATEGORY"] = "구매 목록"
 AtrL["More"] = "추가기능"
 
 	--     descriptive texts

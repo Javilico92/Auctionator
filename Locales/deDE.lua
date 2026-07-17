@@ -192,7 +192,7 @@ AtrL["Quest Item"] = "Questgegenstand"
 AtrL["unknown"] = "unbekannt"                    -- used in tooltips when data is not available
 
 -- buy pane texts
-AtrL["Buy"] = "Kaufe"                            -- tab name
+AtrL["CONFIG_SHOPPING_CATEGORY"] = "Einkaufen"
 AtrL["Select an item from the list on the left\n or type a search term above to start a scan."] = "Wähle ein Item aus der Liste links\n oder gib deine Suchanfrage oben ein."
 AtrL["Search"] = "Suche"
 AtrL["available"] = "verfügbar"

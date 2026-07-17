@@ -1171,11 +1171,13 @@ function Atr_Init()
 		Atr_ResetSavedVars()
 	end
 
-	gShopPane	= Atr_AddSellTab (ZT("Buy"),			BUY_TAB);
+	gShopPane	= Atr_AddSellTab (ZT("CONFIG_SHOPPING_CATEGORY"),			BUY_TAB);
 	gSellPane	= Atr_AddSellTab (ZT("Sell"),			SELL_TAB);
 	gMorePane	= Atr_AddSellTab (ZT("More").."...",	MORE_TAB);
 
 	Atr_AddMainPanel ();
+
+	Auctionator.Shopping.Initialize(AuctionFrame) -- Modern logic
 
 	Atr_SetupHookFunctions ();
 
@@ -1301,6 +1303,8 @@ function Atr_AuctionFrameTab_OnClick (self, index, down)
 
 	_G["Atr_Main_Panel"]:Hide();
 
+	Auctionator.Shopping.Hide() -- Modern structure
+
 	gBuyState = ATR_BUY_NULL;			-- just in case
 	gItemPostingInProgress = false;		-- just in case
 	
@@ -1351,7 +1355,7 @@ function Atr_AuctionFrameTab_OnClick (self, index, down)
 		if (index == Atr_FindTabIndex(MORE_TAB))	then gCurrentPane = gMorePane; end;
 
     if (index == Atr_FindTabIndex(SELL_TAB))  then AuctionatorTitle:SetText ("Auctionator - "..ZT("Sell"));     end;
-    if (index == Atr_FindTabIndex(BUY_TAB))   then AuctionatorTitle:SetText ("Auctionator - "..ZT("Buy"));      end;
+    if (index == Atr_FindTabIndex(BUY_TAB))   then AuctionatorTitle:SetText ("Auctionator - "..ZT("CONFIG_SHOPPING_CATEGORY"));      end;
     if (index == Atr_FindTabIndex(MORE_TAB))  then AuctionatorTitle:SetText ("Auctionator - "..ZT("More").."...");  end;
 
 	Atr_ClearHlist();
@@ -1459,7 +1463,15 @@ function Atr_AuctionFrameTab_OnClick (self, index, down)
 
 	Atr_HideElems (recommendElements);
 
-	_G["Atr_Main_Panel"]:Show();
+	if index == Atr_FindTabIndex(BUY_TAB) then
+  		_G["Atr_Main_Panel"]:Hide()
+		Auctionator.Shopping.Show()
+	else
+		Auctionator.Shopping.Hide()
+		_G["Atr_Main_Panel"]:Show()
+	end
+
+	gCurrentPane.UINeedsUpdate = true
 
 	gCurrentPane.UINeedsUpdate = true;
 	end
@@ -2155,7 +2167,7 @@ function Atr_ClearList ()
 	FauxScrollFrame_Update (AuctionatorScrollFrame, 0, 12, 16);
 
 	for line = 1,12 do
-		local lineEntry = _G["AuctionatorEntry"..line];
+		local lineEntry = Auctionator.Shopping.ResultsListing.GetRow(line);
 		lineEntry:Hide();
 	end
 
@@ -3736,6 +3748,8 @@ function Atr_ShowSearchSummary()
 
 	local numrows = gCurrentPane.activeSearch:NumScans();
 
+	Auctionator.Shopping.ResultsListing.BeginDisplay("search-summary", numrows);
+
 	if (gCurrentPane.activeScan.hasStack) then
 		Atr_Col4_Heading:SetText (ZT("Total Price"));
 	else
@@ -3756,7 +3770,7 @@ function Atr_ShowSearchSummary()
 		dataOffset	= dataOffset + 1;
 		line		= line + 1;
 
-		local lineEntry = _G["AuctionatorEntry"..line];
+		local lineEntry = Auctionator.Shopping.ResultsListing.GetRow(line);
 
 		lineEntry:SetID(dataOffset);
 
@@ -3777,12 +3791,19 @@ function Atr_ShowSearchSummary()
 		else
 			local data = scn.absoluteBest;
 
-			local lineEntry_item_tag = "AuctionatorEntry"..line.."_PerItem_Price";
+			Auctionator.Shopping.ResultsListing.SetDisplayResult(dataOffset, {
+				type = "search-summary",
+				scan = scn,
+				data = data,
+				itemLink = scn.itemLink,
+				itemName = scn.itemName,
+			});
 
-			local lineEntry_item		= _G[lineEntry_item_tag];
-			local lineEntry_itemtext	= _G["AuctionatorEntry"..line.."_PerItem_Text"];
-			local lineEntry_text		= _G["AuctionatorEntry"..line.."_EntryText"];
-			local lineEntry_stack		= _G["AuctionatorEntry"..line.."_StackPrice"];
+			local lineEntry_item = lineEntry.PerItemPrice;
+			local lineEntry_item_tag = lineEntry_item:GetName();
+			local lineEntry_itemtext = lineEntry.PerItemText;
+			local lineEntry_text = lineEntry.EntryText;
+			local lineEntry_stack = lineEntry.StackPrice;
 			
 			lineEntry_itemtext:SetText	("");
 			lineEntry_text:SetText	("");
@@ -3866,6 +3887,8 @@ function Atr_ShowCurrentAuctions()
 	end
 	
 	local numrows = #scn.sortedData
+
+	Auctionator.Shopping.ResultsListing.BeginDisplay("current", numrows)
 	
 	if (numrows > 0) then
 		Atr_Col1_Heading:Show();
@@ -3892,7 +3915,7 @@ function Atr_ShowCurrentAuctions()
 		dataOffset	= dataOffset + 1;
 		line		= line + 1;
 
-		local lineEntry = _G["AuctionatorEntry"..line];
+		local lineEntry = Auctionator.Shopping.ResultsListing.GetRow(line);
 
 		lineEntry:SetID(dataOffset);
 
@@ -3906,12 +3929,19 @@ function Atr_ShowCurrentAuctions()
 		
 			local data = scn.sortedData[dataOffset];
 
-			local lineEntry_item_tag = "AuctionatorEntry"..line.."_PerItem_Price";
+			Auctionator.Shopping.ResultsListing.SetDisplayResult(dataOffset, {
+				type = "current",
+				scan = scn,
+				data = data,
+				itemLink = scn.itemLink,
+				itemName = scn.itemName,
+			});
 
-			local lineEntry_item		= _G[lineEntry_item_tag];
-			local lineEntry_itemtext	= _G["AuctionatorEntry"..line.."_PerItem_Text"];
-			local lineEntry_text		= _G["AuctionatorEntry"..line.."_EntryText"];
-			local lineEntry_stack		= _G["AuctionatorEntry"..line.."_StackPrice"];
+			local lineEntry_item = lineEntry.PerItemPrice;
+			local lineEntry_item_tag = lineEntry_item:GetName();
+			local lineEntry_itemtext = lineEntry.PerItemText;
+			local lineEntry_text = lineEntry.EntryText;
+			local lineEntry_stack = lineEntry.StackPrice;
 
 			lineEntry_itemtext:SetText	("");
 			lineEntry_text:SetText	("");
@@ -4017,6 +4047,8 @@ function Atr_ShowHistory (showPosts)
 	
 	local numrows = gCurrentPane.sortedHist and #gCurrentPane.sortedHist or 0;
 
+	Auctionator.Shopping.ResultsListing.BeginDisplay(showPosts and "old-postings" or "history", numrows);
+
 --zc.msg ("gCurrentPane.sortedHist: "..numrows,1,0,0);
 
 	if (numrows > 0) then
@@ -4036,7 +4068,7 @@ function Atr_ShowHistory (showPosts)
 
 		dataOffset = line + FauxScrollFrame_GetOffset (AuctionatorScrollFrame);
 
-		local lineEntry = _G["AuctionatorEntry"..line];
+		local lineEntry = Auctionator.Shopping.ResultsListing.GetRow(line);
 
 		lineEntry:SetID(dataOffset);
 
@@ -4044,12 +4076,16 @@ function Atr_ShowHistory (showPosts)
 
 			local data = gCurrentPane.sortedHist[dataOffset];
 
-			local lineEntry_item_tag = "AuctionatorEntry"..line.."_PerItem_Price";
+			Auctionator.Shopping.ResultsListing.SetDisplayResult(dataOffset, {
+				type = showPosts and "old-postings" or "history",
+				data = data,
+			});
 
-			local lineEntry_item		= _G[lineEntry_item_tag];
-			local lineEntry_itemtext	= _G["AuctionatorEntry"..line.."_PerItem_Text"];
-			local lineEntry_text		= _G["AuctionatorEntry"..line.."_EntryText"];
-			local lineEntry_stack		= _G["AuctionatorEntry"..line.."_StackPrice"];
+			local lineEntry_item = lineEntry.PerItemPrice;
+			local lineEntry_item_tag = lineEntry_item:GetName();
+			local lineEntry_itemtext = lineEntry.PerItemText;
+			local lineEntry_text = lineEntry.EntryText;
+			local lineEntry_stack = lineEntry.StackPrice;
 
 			lineEntry_text:GetParent():SetPoint ("LEFT", 172, 0);
 
@@ -4114,7 +4150,7 @@ function Atr_HighlightEntry(entryIndex)
 
 	for line = 1,12 do
 
-		local lineEntry = _G["AuctionatorEntry"..line];
+		local lineEntry = Auctionator.Shopping.ResultsListing.GetRow(line);
 
 		if (lineEntry:GetID() == entryIndex) then
 			lineEntry:SetButtonState ("PUSHED", true);

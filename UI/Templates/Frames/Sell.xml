@@ -581,7 +581,7 @@
 					</Layer>
 				</Layers>
 				
-				<Frames>
+					<Frames>
 					<Button name="Atr_Back_Button" text="BACK" inherits="Atr_SmallButtonTemplate"  hidden="true">
 						<Size><AbsDimension x="70" y="18"/></Size>
 						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="8" y="5"/></Offset></Anchor></Anchors>

@@ -1,0 +1,190 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <Frame
+    name="AuctionatorShoppingFrameTemplate"
+    virtual="true"
+    enableMouse="true">
+
+    <Size>
+      <AbsDimension x="765" y="447"/>
+    </Size>
+
+    <Anchors>
+      <Anchor point="TOPLEFT">
+        <Offset>
+          <AbsDimension x="20" y="-20"/>
+        </Offset>
+      </Anchor>
+    </Anchors>
+
+    <Scripts>
+      <OnLoad>
+        Auctionator.Shopping.OnLoad(self)
+      </OnLoad>
+
+      <OnShow>
+        Auctionator.Shopping.OnShow(self)
+      </OnShow>
+
+      <OnHide>
+        Auctionator.Shopping.OnHide(self)
+      </OnHide>
+    </Scripts>
+
+    <Layers>
+      <Layer level="ARTWORK">
+
+        <FontString
+          name="$parentTitle"
+          inherits="GameFontNormalLarge"
+          text="Shopping">
+
+          <Anchors>
+            <Anchor point="TOP">
+              <Offset>
+                <AbsDimension x="-100" y="-18"/>
+              </Offset>
+            </Anchor>
+          </Anchors>
+        </FontString>
+
+        <FontString
+          name="$parentSearchLabel"
+          inherits="GameFontNormal"
+          text="Search term:"
+          justifyH="RIGHT">
+
+          <Size>
+            <AbsDimension x="105" y="20"/>
+          </Size>
+
+          <Anchors>
+            <Anchor point="TOPLEFT">
+              <Offset>
+                <AbsDimension x="-38" y="-45"/>
+              </Offset>
+            </Anchor>
+          </Anchors>
+        </FontString>
+
+        <FontString
+          name="$parentEmptyText"
+          inherits="GameFontDisable"
+          text="Search for an item to view auction results."
+          justifyH="CENTER">
+
+          <Size>
+            <AbsDimension x="700" y="30"/>
+          </Size>
+
+          <Anchors>
+            <Anchor point="CENTER">
+              <Offset>
+                <AbsDimension x="0" y="-25"/>
+              </Offset>
+            </Anchor>
+          </Anchors>
+        </FontString>
+
+      </Layer>
+    </Layers>
+
+    <Frames>
+
+      <EditBox
+        name="$parentSearchBox"
+        inherits="InputBoxTemplate" 
+        autoFocus="false">
+
+        <Size><AbsDimension x="220" y="20"/></Size>
+        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="75" y="-45"/></Offset></Anchor></Anchors>
+        <FontString inherits="ChatFontNormal" bytes="64"/>
+
+        <Scripts>
+          <OnEnterPressed>
+            Auctionator.Shopping.Search(self:GetParent())
+          </OnEnterPressed>
+
+          <OnEscapePressed>
+            self:ClearFocus()
+          </OnEscapePressed>
+        </Scripts>
+      </EditBox>
+
+      <Button
+        name="$parentSearchButton"
+        inherits="UIPanelButtonTemplate"
+        text="Search">
+
+        <Size>
+          <AbsDimension x="90" y="22"/>
+        </Size>
+
+        <Anchors>
+          <Anchor
+            point="LEFT"
+            relativeTo="$parentSearchBox"
+            relativePoint="RIGHT">
+
+            <Offset>
+              <AbsDimension x="8" y="0"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+
+        <Scripts>
+          <OnClick>
+            Auctionator.Shopping.Search(self:GetParent())
+          </OnClick>
+        </Scripts>
+      </Button>
+
+      <Button
+        name="$parentClearButton"
+        inherits="UIPanelButtonTemplate"
+        text="Clear">
+
+        <Size>
+          <AbsDimension x="75" y="22"/>
+        </Size>
+
+        <Anchors>
+          <Anchor
+            point="LEFT"
+            relativeTo="$parentSearchButton"
+            relativePoint="RIGHT">
+
+            <Offset>
+              <AbsDimension x="5" y="0"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+
+        <Scripts>
+          <OnClick>
+            Auctionator.Shopping.ClearSearch(self:GetParent())
+          </OnClick>
+        </Scripts>
+      </Button>
+
+      <Frame
+        name="$parentResultsListing"
+        inherits="AuctionatorShoppingResultsListingTemplate">
+
+        <Anchors>
+            <Anchor
+            point="TOPLEFT"
+            relativeTo="$parent"
+            relativePoint="TOPLEFT">
+
+            <Offset>
+                <AbsDimension x="6" y="-104"/>
+            </Offset>
+            </Anchor>
+        </Anchors>
+      </Frame>
+
+    </Frames>
+
+  </Frame>
+
+</Ui>
