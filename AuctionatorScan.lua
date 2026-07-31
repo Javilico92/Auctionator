@@ -902,6 +902,7 @@ function AtrSearch:Continue()
 				.. " class=" .. tostring(itemClass)
 				.. " subclass=" .. tostring(itemSubclass))
 		end
+		SortAuctionItems("list", "unitprice")
 		QueryAuctionItems (queryString, minLevel, maxLevel, 0, itemClass, itemSubclass, self.current_page, 0, qualityIndex);
 
 		self.query_sent_when	= gAtr_ptime;
