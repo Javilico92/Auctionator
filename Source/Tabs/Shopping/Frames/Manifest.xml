@@ -1,5 +1,9 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
   <Include file="ResultsRow.xml"/>
+  <Include file="SidebarRow.xml"/>
   <Include file="ResultsListing.xml"/>
+  <Include file="Sidebar.xml"/>
+  <Include file="Dialogs.xml"/>
+  <Include file="AdvancedSearch.xml"/>
   <Include file="Main.xml"/>
 </Ui>

@@ -30,6 +30,8 @@
       </OnHide>
     </Scripts>
 
+    <!-- El frame principal es transparente. Solo Sidebar y ResultsListing
+         dibujan fondos propios, evitando una placa negra sobre AuctionFrame. -->
     <Layers>
       <Layer level="ARTWORK">
 
@@ -166,6 +168,50 @@
         </Scripts>
       </Button>
 
+      <Button
+        name="$parentAdvancedSearchButton"
+        inherits="UIPanelButtonTemplate"
+        text="Advanced">
+
+        <Size>
+          <AbsDimension x="95" y="22"/>
+        </Size>
+
+        <Anchors>
+          <Anchor
+            point="LEFT"
+            relativeTo="$parentClearButton"
+            relativePoint="RIGHT">
+
+            <Offset>
+              <AbsDimension x="5" y="0"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+
+        <Scripts>
+          <OnClick>
+            Auctionator.Shopping.ShowAdvancedSearch(self:GetParent())
+          </OnClick>
+        </Scripts>
+      </Button>
+
+      <Frame
+        name="$parentSidebar"
+        inherits="AuctionatorShoppingSidebarTemplate">
+
+        <Anchors>
+          <Anchor
+            point="TOPRIGHT"
+            relativeTo="$parent"
+            relativePoint="TOPLEFT">
+            <Offset>
+              <AbsDimension x="40" y="-72"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+      </Frame>
+
       <Frame
         name="$parentResultsListing"
         inherits="AuctionatorShoppingResultsListingTemplate">
@@ -177,7 +223,7 @@
             relativePoint="TOPLEFT">
 
             <Offset>
-                <AbsDimension x="6" y="-104"/>
+                <AbsDimension x="36" y="-64"/>
             </Offset>
             </Anchor>
         </Anchors>

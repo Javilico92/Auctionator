@@ -1,0 +1,134 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <Frame
+    name="AuctionatorShoppingSidebarTemplate"
+    virtual="true"
+    enableMouse="true">
+
+    <Size>
+      <AbsDimension x="238" y="340"/>
+    </Size>
+
+    <Scripts>
+      <OnLoad>
+        Auctionator.Shopping.Sidebar.OnLoad(self)
+      </OnLoad>
+      <OnShow>
+        Auctionator.Shopping.Sidebar.OnShow(self)
+      </OnShow>
+    </Scripts>
+
+    <Backdrop bgFile="Interface\CharacterFrame\UI-Party-Background"
+              edgeFile="Interface\Tooltips\UI-Tooltip-Border"
+              tile="true">
+      <TileSize><AbsValue val="16"/></TileSize>
+      <EdgeSize><AbsValue val="16"/></EdgeSize>
+      <BackgroundInsets>
+        <AbsInset left="4" right="4" top="4" bottom="4"/>
+      </BackgroundInsets>
+    </Backdrop>
+
+    <Frames>
+      <Button
+        name="$parentShoppingListsTab"
+        inherits="UIPanelButtonTemplate"
+        text="Shopping Lists">
+        <Size><AbsDimension x="118" y="24"/></Size>
+        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+        <Scripts>
+          <OnClick>
+            Auctionator.Shopping.Sidebar.SetMode("lists")
+          </OnClick>
+        </Scripts>
+      </Button>
+
+      <Button
+        name="$parentRecentSearchesTab"
+        inherits="UIPanelButtonTemplate"
+        text="Recent Searches">
+        <Size><AbsDimension x="118" y="24"/></Size>
+        <Anchors>
+          <Anchor point="LEFT" relativeTo="$parentShoppingListsTab" relativePoint="RIGHT">
+            <Offset><AbsDimension x="2" y="0"/></Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnClick>
+            Auctionator.Shopping.Sidebar.SetMode("recents")
+          </OnClick>
+        </Scripts>
+      </Button>
+
+      <Frame name="$parentContent">
+        <Anchors>
+          <Anchor point="TOPLEFT"><Offset><AbsDimension x="4" y="-28"/></Offset></Anchor>
+          <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-4" y="4"/></Offset></Anchor>
+        </Anchors>
+        <Layers>
+          <Layer level="BACKGROUND">
+            <Texture file="Interface\CharacterFrame\UI-Party-Background" alpha="1">
+              <Anchors>
+                <Anchor point="TOPLEFT"/>
+                <Anchor point="BOTTOMRIGHT"/>
+              </Anchors>
+            </Texture>
+          </Layer>
+          <Layer level="ARTWORK">
+            <FontString name="$parentEmptyText" inherits="GameFontDisableSmall" text="No entries" justifyH="CENTER">
+              <Size><AbsDimension x="190" y="40"/></Size>
+              <Anchors><Anchor point="CENTER"/></Anchors>
+            </FontString>
+          </Layer>
+        </Layers>
+      </Frame>
+
+      <ScrollFrame name="$parentScrollFrame" inherits="FauxScrollFrameTemplate">
+        <Size><AbsDimension x="220" y="296"/></Size>
+        <Anchors>
+          <Anchor point="TOPLEFT" relativeTo="$parentContent" relativePoint="TOPLEFT">
+            <Offset><AbsDimension x="2" y="-4"/></Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnVerticalScroll>
+            FauxScrollFrame_OnVerticalScroll(self, offset, 22, Auctionator.Shopping.Sidebar.Refresh)
+          </OnVerticalScroll>
+        </Scripts>
+      </ScrollFrame>
+
+      <Button name="$parentRow1" inherits="AuctionatorShoppingSidebarRowTemplate">
+        <Anchors><Anchor point="TOPLEFT" relativeTo="$parentContent" relativePoint="TOPLEFT"><Offset><AbsDimension x="4" y="-5"/></Offset></Anchor></Anchors>
+      </Button>
+      <Button name="$parentRow2" inherits="AuctionatorShoppingSidebarRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentRow1" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentRow3" inherits="AuctionatorShoppingSidebarRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentRow2" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentRow4" inherits="AuctionatorShoppingSidebarRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentRow3" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentRow5" inherits="AuctionatorShoppingSidebarRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentRow4" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentRow6" inherits="AuctionatorShoppingSidebarRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentRow5" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentRow7" inherits="AuctionatorShoppingSidebarRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentRow6" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentRow8" inherits="AuctionatorShoppingSidebarRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentRow7" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentRow9" inherits="AuctionatorShoppingSidebarRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentRow8" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentRow10" inherits="AuctionatorShoppingSidebarRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentRow9" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentRow11" inherits="AuctionatorShoppingSidebarRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentRow10" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentRow12" inherits="AuctionatorShoppingSidebarRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentRow11" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentRow13" inherits="AuctionatorShoppingSidebarRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentRow12" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentRow14" inherits="AuctionatorShoppingSidebarRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentRow13" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentRow15" inherits="AuctionatorShoppingSidebarRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentRow14" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+      <Button name="$parentRow16" inherits="AuctionatorShoppingSidebarRowTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="$parentRow15" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+
+      <Button name="$parentNewListButton" inherits="UIPanelButtonTemplate" text="Nueva lista">
+        <Size><AbsDimension x="76" y="22"/></Size>
+        <Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="4" y="7"/></Offset></Anchor></Anchors>
+        <Scripts><OnClick>Auctionator.Shopping.Sidebar.ShowNewListDialog()</OnClick></Scripts>
+      </Button>
+      <Button name="$parentImportButton" inherits="UIPanelButtonTemplate" text="Importar">
+        <Size><AbsDimension x="74" y="22"/></Size>
+        <Anchors><Anchor point="LEFT" relativeTo="$parentNewListButton" relativePoint="RIGHT"><Offset><AbsDimension x="1" y="0"/></Offset></Anchor></Anchors>
+        <Scripts><OnClick>Auctionator.Shopping.Sidebar.ShowImportDialog()</OnClick></Scripts>
+      </Button>
+      <Button name="$parentExportButton" inherits="UIPanelButtonTemplate" text="Exportar">
+        <Size><AbsDimension x="74" y="22"/></Size>
+        <Anchors><Anchor point="LEFT" relativeTo="$parentImportButton" relativePoint="RIGHT"><Offset><AbsDimension x="1" y="0"/></Offset></Anchor></Anchors>
+        <Scripts><OnClick>Auctionator.Shopping.Sidebar.ShowExportDialog()</OnClick></Scripts>
+      </Button>
+    </Frames>
+  </Frame>
+</Ui>

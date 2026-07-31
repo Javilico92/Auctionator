@@ -1,0 +1,87 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <Button
+    name="AuctionatorShoppingSidebarRowTemplate"
+    virtual="true"
+    hidden="true"
+    enableMouse="true">
+
+    <Size>
+      <AbsDimension x="210" y="22"/>
+    </Size>
+
+    <Layers>
+      <Layer level="ARTWORK">
+        <Texture name="$parentSearchIcon" file="Interface\Buttons\UI-Searchbox-Icon" hidden="true">
+          <Size><AbsDimension x="14" y="14"/></Size>
+          <Anchors>
+            <Anchor point="LEFT"><Offset><AbsDimension x="5" y="0"/></Offset></Anchor>
+          </Anchors>
+        </Texture>
+        <FontString
+          name="$parentText"
+          inherits="GameFontHighlight"
+          justifyH="LEFT">
+          <Anchors>
+            <Anchor point="LEFT">
+              <Offset>
+                <AbsDimension x="23" y="0"/>
+              </Offset>
+            </Anchor>
+            <Anchor point="RIGHT">
+              <Offset>
+                <AbsDimension x="-24" y="0"/>
+              </Offset>
+            </Anchor>
+          </Anchors>
+        </FontString>
+      </Layer>
+    </Layers>
+
+    <Frames>
+      <Button name="$parentDeleteButton" hidden="true" enableMouse="true">
+        <Size><AbsDimension x="18" y="18"/></Size>
+        <Anchors>
+          <Anchor point="RIGHT"><Offset><AbsDimension x="-3" y="0"/></Offset></Anchor>
+        </Anchors>
+        <Layers>
+          <Layer level="ARTWORK">
+            <FontString name="$parentText" inherits="GameFontNormalSmall" text="x">
+              <Anchors><Anchor point="CENTER"/></Anchors>
+            </FontString>
+          </Layer>
+        </Layers>
+        <HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
+        <Scripts>
+          <OnClick>
+            Auctionator.Shopping.Sidebar.DeleteRecent(self:GetParent())
+          </OnClick>
+          <OnEnter>
+            self:Show()
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:SetText("Remove recent search", 1, 1, 1)
+            GameTooltip:Show()
+          </OnEnter>
+          <OnLeave>
+            Auctionator.Shopping.Sidebar.RowOnLeave(self:GetParent())
+          </OnLeave>
+        </Scripts>
+      </Button>
+    </Frames>
+
+    <HighlightTexture file="Interface\QuestFrame\UI-QuestTitleHighlight" alphaMode="ADD">
+      <TexCoords left="0" right="1" top="0" bottom="1"/>
+    </HighlightTexture>
+
+    <Scripts>
+      <OnClick>
+        Auctionator.Shopping.Sidebar.RowOnClick(self)
+      </OnClick>
+      <OnEnter>
+        Auctionator.Shopping.Sidebar.RowOnEnter(self)
+      </OnEnter>
+      <OnLeave>
+        Auctionator.Shopping.Sidebar.RowOnLeave(self)
+      </OnLeave>
+    </Scripts>
+  </Button>
+</Ui>

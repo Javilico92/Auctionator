@@ -357,5 +357,7 @@ AtrL["your auction on"] = ""
 AtrL["your most recent posting"] = ""
 AtrL["yours"] = ""
 AtrL["Items owned"] = ""
+AtrL["Loading auction results..."] = "Loading auction results..."
+AtrL["SHOPPING_LISTS"] = "Shopping Lists"
 
 end

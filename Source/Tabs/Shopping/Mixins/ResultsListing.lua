@@ -54,11 +54,44 @@ local function ResolveListingObjects(frame)
   frame.Highlight = GetObject(frameName .. "Highlight")
   frame.HighlightButton = GetObject(frameName .. "HighlightButton")
   frame.BuyButton = GetObject(frameName .. "BuyButton")
+  frame.LoadMoreButton = GetObject(frameName .. "LoadMoreButton")
+  frame.LoadMoreHighlight = GetObject(frameName .. "LoadMoreButtonHighlight")
+  frame.LoadingOverlay = GetObject(frameName .. "LoadingOverlay")
+
+  if frame.LoadingOverlay then
+    local loadingName = frame.LoadingOverlay:GetName()
+    local contentName = loadingName .. "Content"
+    local content = GetObject(contentName)
+
+    -- Some Phase 3 layouts place the controls directly inside LoadingOverlay,
+    -- while others use a Content child frame. Support both structures so UI
+    -- coordinate changes cannot break the page counter or progress bar.
+    local controlsPrefix = content and contentName or loadingName
+
+    frame.LoadingOverlay.Content = content
+    frame.LoadingOverlay.Title = GetObject(controlsPrefix .. "Title")
+    frame.LoadingOverlay.Subtitle = GetObject(controlsPrefix .. "Subtitle")
+    frame.LoadingOverlay.SearchText = GetObject(controlsPrefix .. "SearchText")
+    frame.LoadingOverlay.PageText = GetObject(controlsPrefix .. "PageText")
+    frame.LoadingOverlay.TotalText = GetObject(controlsPrefix .. "TotalText")
+    frame.LoadingOverlay.ProgressBar = GetObject(controlsPrefix .. "ProgressBar")
+    frame.LoadingOverlay.ProgressFill = GetObject(controlsPrefix .. "ProgressBarFill")
+    frame.LoadingOverlay.Dots = {}
+
+    for index = 1, 8 do
+      frame.LoadingOverlay.Dots[index] = GetObject(controlsPrefix .. "Dot" .. index)
+    end
+  end
 
   frame.Col1Heading = GetObject(headingsName .. "Col1Heading")
   frame.Col3Heading = GetObject(headingsName .. "Col3Heading")
   frame.Col4Heading = GetObject(headingsName .. "Col4Heading")
   frame.BackButton = GetObject(headingsName .. "BackButton")
+  frame.SelectedItemButton = GetObject(headingsName .. "SelectedItemButton")
+  if frame.SelectedItemButton then
+    frame.SelectedItemButton.Icon = GetObject(headingsName .. "SelectedItemButtonIcon")
+    frame.SelectedItemButton.NameText = GetObject(headingsName .. "SelectedItemButtonName")
+  end
   frame.SaveThisListButton = GetObject(headingsName .. "SaveThisListButton")
   frame.Col1HeadingButton = GetObject(headingsName .. "Col1HeadingButton")
   frame.Col3HeadingButton = GetObject(headingsName .. "Col3HeadingButton")
@@ -108,6 +141,7 @@ function ResultsListing.OnLoad(frame)
 
       local rowName = row:GetName()
       row.EntryText = row.EntryText or GetObject(rowName .. "_EntryText")
+      row.ItemIcon = row.ItemIcon or GetObject(rowName .. "_ItemIcon")
       row.PerItemText = row.PerItemText or GetObject(rowName .. "_PerItem_Text")
       row.PerItemPrice = row.PerItemPrice or GetObject(rowName .. "_PerItem_Price")
       row.StackPrice = row.StackPrice or GetObject(rowName .. "_StackPrice")
@@ -116,6 +150,20 @@ function ResultsListing.OnLoad(frame)
 
   if frame.BuyButton then
     frame.BuyButton:SetFrameLevel(baseLevel + 5)
+  end
+
+  if frame.LoadingOverlay then
+    frame.LoadingOverlay:SetFrameLevel(baseLevel + 20)
+  end
+
+  -- The selected-item header is a detail-only element. Explicitly reset it
+  -- here because dynamically-created frames can retain layout state while the
+  -- Auction House is closed and reopened.
+  if frame.SelectedItemButton then
+    frame.SelectedItemButton:Hide()
+    frame.SelectedItemButton.ItemLink = nil
+    frame.SelectedItemButton.ItemName = nil
+    frame.SelectedItemButton.ItemQuality = nil
   end
 end
 
@@ -273,3 +321,488 @@ function ResultsListing.SetDisplayResult(index, result)
     provider:SetResult(index, result)
   end
 end
+
+
+
+-- Selected item header ----------------------------------------------------
+-- Keep the normal search-summary layout untouched. The extra vertical room
+-- is applied only while displaying the auctions belonging to one item.
+local DETAIL_TABLE_OFFSET = 40
+local DETAIL_HEADER_OFFSET = -24
+
+local function SetDetailLayout(enabled)
+  local frame = ResultsListing.Frame
+  if not frame or not frame.ScrollFrame or not frame.HeadingsBar then
+    return
+  end
+
+  local headingsName = frame.HeadingsBar:GetName()
+  local middle = GetObject(headingsName .. "Middle")
+  local yOffset = enabled and -DETAIL_TABLE_OFFSET or 0
+
+  -- Move the detail table as one unit. Re-anchor the first row explicitly as
+  -- well; on the 3.3.5 XML engine this avoids the rows retaining their old
+  -- screen coordinates after ClearAllPoints/SetPoint on the FauxScrollFrame.
+  frame.ScrollFrame:ClearAllPoints()
+  frame.ScrollFrame:SetPoint("TOPLEFT", frame.HeadingsBar, "BOTTOMLEFT", -6, yOffset)
+
+  if frame.Rows and frame.Rows[1] then
+    frame.Rows[1]:ClearAllPoints()
+    frame.Rows[1]:SetPoint("TOPLEFT", frame.ScrollFrame, "TOPLEFT", 8, 0)
+
+    for index = 2, 15 do
+      if frame.Rows[index] and frame.Rows[index - 1] then
+        frame.Rows[index]:ClearAllPoints()
+        frame.Rows[index]:SetPoint("TOPLEFT", frame.Rows[index - 1], "BOTTOMLEFT", 0, 0)
+      end
+    end
+  end
+
+  if middle then
+    middle:ClearAllPoints()
+    middle:SetPoint("TOPLEFT", frame.HeadingsBar, "TOPLEFT", 0, yOffset)
+  end
+
+  if frame.Col1Heading then
+    frame.Col1Heading:ClearAllPoints()
+    frame.Col1Heading:SetPoint("LEFT", middle or frame.HeadingsBar, "LEFT", 40, 1)
+  end
+  if frame.Col3Heading then
+    frame.Col3Heading:ClearAllPoints()
+    frame.Col3Heading:SetPoint("LEFT", middle or frame.HeadingsBar, "LEFT", 205, 1)
+  end
+  if frame.Col4Heading then
+    frame.Col4Heading:ClearAllPoints()
+    frame.Col4Heading:SetPoint("LEFT", middle or frame.HeadingsBar, "LEFT", 500, 1)
+  end
+  if frame.Col1HeadingButton then
+    frame.Col1HeadingButton:ClearAllPoints()
+    frame.Col1HeadingButton:SetPoint("TOPLEFT", frame.HeadingsBar, "TOPLEFT", 46, -21 + yOffset)
+  end
+  if frame.Col3HeadingButton then
+    frame.Col3HeadingButton:ClearAllPoints()
+    frame.Col3HeadingButton:SetPoint("TOPLEFT", frame.HeadingsBar, "TOPLEFT", 220, -21 + yOffset)
+  end
+
+  -- Lower the navigation/object row only in detail view. Previously the table
+  -- moved but these controls remained at the very top, making the rows appear
+  -- to overlap the selected-item information.
+  if frame.BackButton then
+    frame.BackButton:ClearAllPoints()
+    if enabled then
+      frame.BackButton:SetPoint("TOPLEFT", frame.HeadingsBar, "TOPLEFT", 8, DETAIL_HEADER_OFFSET)
+    else
+      frame.BackButton:SetPoint("TOPLEFT", frame.HeadingsBar, "TOPLEFT", 8, 5)
+    end
+  end
+
+  if frame.SelectedItemButton and frame.BackButton then
+    frame.SelectedItemButton:ClearAllPoints()
+    frame.SelectedItemButton:SetPoint("TOPLEFT", frame.BackButton, "TOPRIGHT", 10, enabled and -2 or 3)
+  end
+end
+
+function ResultsListing.ShowSelectedItemHeader(itemLink, itemName, itemQuality)
+  local frame = ResultsListing.Frame
+  local button = frame and frame.SelectedItemButton
+  if not button then
+    return
+  end
+
+  -- Never show an empty header. This is especially important when opening the
+  -- Auction House: the legacy pane may briefly point at its nil scan.
+  if (not itemLink or itemLink == "") and (not itemName or itemName == "") then
+    ResultsListing.HideSelectedItemHeader()
+    return
+  end
+
+  local name, link, quality, _, _, _, _, _, _, texture = GetItemInfo(itemLink or itemName)
+  button.ItemLink = link or itemLink
+  button.ItemName = name or itemName or ""
+  button.ItemQuality = tonumber(quality or itemQuality)
+
+  if button.ItemName == "" then
+    ResultsListing.HideSelectedItemHeader()
+    return
+  end
+
+  if not texture and GetItemIcon then
+    texture = GetItemIcon(button.ItemLink or button.ItemName)
+  end
+
+  if button.Icon then
+    if texture then
+      button.Icon:SetTexture(texture)
+      button.Icon:Show()
+    else
+      -- Do not display the red question-mark placeholder while the item cache
+      -- is warming up. The name remains usable and the icon appears next time
+      -- GetItemInfo has the data.
+      button.Icon:SetTexture(nil)
+      button.Icon:Hide()
+    end
+  end
+
+  if button.NameText then
+    button.NameText:SetText(button.ItemName)
+    local q = button.ItemQuality
+    if q then
+      local r, g, b = GetItemQualityColor(q)
+      button.NameText:SetTextColor(r or 1, g or 1, b or 1)
+    else
+      button.NameText:SetTextColor(1, 1, 1)
+    end
+  end
+
+  button:Show()
+  SetDetailLayout(true)
+end
+
+function ResultsListing.HideSelectedItemHeader()
+  local frame = ResultsListing.Frame
+  if frame and frame.SelectedItemButton then
+    frame.SelectedItemButton:Hide()
+    frame.SelectedItemButton.ItemLink = nil
+    frame.SelectedItemButton.ItemName = nil
+    frame.SelectedItemButton.ItemQuality = nil
+    if frame.SelectedItemButton.Icon then
+      frame.SelectedItemButton.Icon:SetTexture(nil)
+    end
+  end
+  SetDetailLayout(false)
+end
+
+function ResultsListing.SelectedItemOnClick(button)
+  local itemName = button and button.ItemName
+  if not itemName or itemName == "" then
+    return
+  end
+
+  -- Change to Blizzard's Browse/Consultar tab first. The tab handler can clear
+  -- BrowseName while rebuilding the panel, which made the old implementation
+  -- work only intermittently on repeated clicks.
+  if AuctionFrameTab1 and AuctionFrameTab_OnClick then
+    AuctionFrameTab_OnClick(AuctionFrameTab1)
+  elseif AuctionFrame and AuctionFrameTab1 then
+    PanelTemplates_SetTab(AuctionFrame, 1)
+    if AuctionFrameBrowse then
+      AuctionFrameBrowse:Show()
+    end
+  end
+
+  if BrowseName then
+    BrowseName:SetText(itemName)
+    BrowseName:SetCursorPosition(0)
+  end
+
+  -- Actually submit the Browse search every time, rather than only filling the
+  -- edit box. Prefer the Blizzard function and fall back to clicking its button.
+  if AuctionFrameBrowse_Search then
+    AuctionFrameBrowse_Search()
+  elseif BrowseSearchButton and BrowseSearchButton.Click then
+    BrowseSearchButton:Click()
+  end
+end
+
+function ResultsListing.SelectedItemOnEnter(button)
+  if button and button.NameText then
+    button.NameText:SetTextColor(0.75, 0.75, 0.75)
+  end
+  if button and button.ItemLink then
+    GameTooltip:SetOwner(button, "ANCHOR_RIGHT")
+    GameTooltip:SetHyperlink(button.ItemLink)
+    GameTooltip:Show()
+  end
+end
+
+function ResultsListing.SelectedItemOnLeave(button)
+  GameTooltip:Hide()
+  if not button or not button.NameText then
+    return
+  end
+
+  local quality = button.ItemQuality
+  if not quality and button.ItemLink then
+    local _, _, cachedQuality = GetItemInfo(button.ItemLink)
+    quality = cachedQuality
+  end
+
+  if quality then
+    local r, g, b = GetItemQualityColor(quality)
+    button.NameText:SetTextColor(r or 1, g or 1, b or 1)
+  else
+    button.NameText:SetTextColor(1, 1, 1)
+  end
+end
+
+-- Progressive page loading ------------------------------------------------
+function ResultsListing.HideLoadMore()
+  local frame = ResultsListing.Frame
+  if frame and frame.LoadMoreButton then
+    frame.LoadMoreButton:Hide()
+  end
+end
+
+local function SetLoadMoreText(button, text)
+  if not button then
+    return
+  end
+
+  local label = button.Text
+  if not label and button:GetName() then
+    label = GetObject(button:GetName() .. "Text")
+    button.Text = label
+  end
+
+  if label then
+    label:SetText(text or "")
+  end
+end
+
+function ResultsListing.ShowLoadMore(loadedPages, totalPages, totalAuctions)
+  local frame = ResultsListing.Frame
+  local button = frame and frame.LoadMoreButton
+  if not button then
+    return
+  end
+
+  button.LoadedPages = tonumber(loadedPages) or 1
+  button.TotalPages = tonumber(totalPages) or 1
+  button.TotalAuctions = tonumber(totalAuctions) or 0
+  button:Enable()
+  SetLoadMoreText(button, "Cargar más resultados")
+  button:Show()
+end
+
+function ResultsListing.LoadMoreOnEnter(button)
+  local highlight = button and button.Highlight
+  if not highlight and button and button:GetName() then
+    highlight = GetObject(button:GetName() .. "Highlight")
+    button.Highlight = highlight
+  end
+  if highlight then
+    highlight:Show()
+  end
+end
+
+function ResultsListing.LoadMoreOnLeave(button)
+  local highlight = button and button.Highlight
+  if highlight then
+    highlight:Hide()
+  end
+end
+
+function ResultsListing.LoadMoreOnClick(button)
+  if Auctionator.Shopping and Auctionator.Shopping.ProgressiveDebug then
+    Auctionator.Shopping.ProgressiveDebug("LoadMore button CLICK; button=" .. tostring(button) .. " enabled=" .. tostring(button and button:IsEnabled()))
+  end
+
+  if not button or not button:IsEnabled() then
+    if Auctionator.Shopping and Auctionator.Shopping.ProgressiveDebug then
+      Auctionator.Shopping.ProgressiveDebug("ABORT in OnClick: missing or disabled button")
+    end
+    return
+  end
+
+  button:Disable()
+  SetLoadMoreText(button, "Cargando...")
+  ResultsListing.LoadMoreOnLeave(button)
+
+  if Auctionator.Shopping and Auctionator.Shopping.LoadMoreResults then
+    Auctionator.Shopping.ProgressiveDebug("Calling Shopping.LoadMoreResults")
+    Auctionator.Shopping.LoadMoreResults()
+  else
+    if Auctionator.Shopping and Auctionator.Shopping.ProgressiveDebug then
+      Auctionator.Shopping.ProgressiveDebug("ERROR: Shopping.LoadMoreResults is nil")
+    end
+  end
+end
+
+-- Loading spinner ---------------------------------------------------------
+-- Eight text dots are faded in sequence. This avoids relying on Retail-only
+-- textures and works on the 3.3.5 client.
+function ResultsListing.LoadingOnUpdate(overlay, elapsed)
+  if overlay.FinishDelay then
+    overlay.FinishDelay = overlay.FinishDelay - elapsed
+
+    if overlay.FinishDelay <= 0 then
+      overlay.FinishDelay = nil
+      overlay:Hide()
+
+      local frame = ResultsListing.Frame
+      if frame and frame.BuyButton then
+        frame.BuyButton:Enable()
+      end
+    end
+
+    return
+  end
+
+  overlay.Elapsed = (overlay.Elapsed or 0) + elapsed
+
+  if overlay.Elapsed < 0.085 then
+    return
+  end
+
+  overlay.Elapsed = 0
+  overlay.ActiveDot = ((overlay.ActiveDot or 0) % 8) + 1
+
+  for index, dot in ipairs(overlay.Dots or {}) do
+    if dot then
+      local distance = (overlay.ActiveDot - index) % 8
+      local alpha
+
+      if distance == 0 then
+        alpha = 1
+      elseif distance == 1 then
+        alpha = 0.75
+      elseif distance == 2 then
+        alpha = 0.5
+      elseif distance == 3 then
+        alpha = 0.3
+      else
+        alpha = 0.15
+      end
+
+      dot:SetAlpha(alpha)
+    end
+  end
+end
+
+local function SetProgress(overlay, currentPage, totalPages)
+  if not overlay or not overlay.ProgressFill then
+    return
+  end
+
+  currentPage = tonumber(currentPage) or 0
+  totalPages = math.max(tonumber(totalPages) or 1, 1)
+
+  local progress = math.max(0, math.min(currentPage / totalPages, 1))
+  local width = math.max(1, math.floor(248 * progress))
+  overlay.ProgressFill:SetWidth(width)
+end
+
+function ResultsListing.SetLoading(isLoading, searchText)
+  local frame = ResultsListing.Frame
+  local overlay = frame and frame.LoadingOverlay
+
+  if not overlay then
+    return
+  end
+
+  if isLoading then
+    ResultsListing.HideLoadMore()
+    overlay.Elapsed = 0
+    overlay.ActiveDot = 0
+    overlay.FinishDelay = nil
+
+    if overlay.Title then
+      overlay.Title:SetText("Buscando en la Casa de Subastas...")
+    end
+
+    if overlay.Subtitle then
+      overlay.Subtitle:SetText("Esto puede tardar unos segundos.")
+    end
+
+    if overlay.SearchText then
+      if searchText and searchText ~= "" then
+        overlay.SearchText:SetText("Buscando: |cffffd200" .. searchText .. "|r")
+      else
+        overlay.SearchText:SetText("")
+      end
+    end
+
+    if overlay.PageText then
+      overlay.PageText:SetText("Preparando búsqueda...")
+    end
+
+    if overlay.TotalText then
+      overlay.TotalText:SetText("")
+    end
+
+    SetProgress(overlay, 0, 1)
+    overlay:Show()
+
+    if frame.BuyButton then
+      frame.BuyButton:Disable()
+    end
+  else
+    overlay.FinishDelay = nil
+    overlay:Hide()
+
+    if frame.BuyButton then
+      frame.BuyButton:Enable()
+    end
+  end
+end
+
+function ResultsListing.SetLoadingPage(currentPage, totalPages, totalAuctions)
+  local frame = ResultsListing.Frame
+  local overlay = frame and frame.LoadingOverlay
+
+  if not overlay or not overlay:IsShown() then
+    return
+  end
+
+  currentPage = math.max(tonumber(currentPage) or 1, 1)
+  totalPages = math.max(tonumber(totalPages) or 1, 1)
+  totalAuctions = math.max(tonumber(totalAuctions) or 0, 0)
+
+  if overlay.PageText then
+    overlay.PageText:SetFormattedText("Página %d de %d", currentPage, totalPages)
+  end
+
+  if overlay.TotalText then
+    if totalAuctions == 1 then
+      overlay.TotalText:SetText("1 subasta encontrada")
+    else
+      overlay.TotalText:SetFormattedText("%d subastas encontradas", totalAuctions)
+    end
+  end
+
+  SetProgress(overlay, currentPage, totalPages)
+end
+
+function ResultsListing.FinishLoading(totalAuctions)
+  local frame = ResultsListing.Frame
+  local overlay = frame and frame.LoadingOverlay
+
+  if not overlay or not overlay:IsShown() then
+    if frame and frame.BuyButton then
+      frame.BuyButton:Enable()
+    end
+    return
+  end
+
+  totalAuctions = math.max(tonumber(totalAuctions) or 0, 0)
+  overlay.FinishDelay = 0.45
+
+  if overlay.Title then
+    overlay.Title:SetText("Búsqueda completada")
+  end
+
+  if overlay.Subtitle then
+    overlay.Subtitle:SetText("Los resultados ya están disponibles.")
+  end
+
+  if overlay.PageText then
+    overlay.PageText:SetText("")
+  end
+
+  if overlay.TotalText then
+    if totalAuctions == 1 then
+      overlay.TotalText:SetText("1 resultado encontrado")
+    else
+      overlay.TotalText:SetFormattedText("%d resultados encontrados", totalAuctions)
+    end
+  end
+
+  SetProgress(overlay, 1, 1)
+
+  for _, dot in ipairs(overlay.Dots or {}) do
+    if dot then
+      dot:SetAlpha(1)
+    end
+  end
+end
+

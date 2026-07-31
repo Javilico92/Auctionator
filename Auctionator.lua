@@ -2054,16 +2054,70 @@ function Atr_OnAuctionUpdate (...)
 
 	if (gCurrentPane.activeSearch and gCurrentPane.activeSearch.processing_state == Auctionator.Constants.SearchStates.POST_QUERY) then
 
+        if Auctionator and Auctionator.Shopping and Auctionator.Shopping.ProgressiveDebug then
+          Auctionator.Shopping.ProgressiveDebug("AUCTION_ITEM_LIST_UPDATE handling POST_QUERY; activeSearch=" .. tostring(gCurrentPane.activeSearch)
+            .. " current_page=" .. tostring(gCurrentPane.activeSearch.current_page))
+        end
+
 		gCurrentPane.activeSearch:CapturePageInfo();
+
+        if Auctionator and Auctionator.Shopping and Auctionator.Shopping.SetLoadingPage then
+          local search = gCurrentPane.activeSearch
+          local query = search.query
+          local currentPage = tonumber(search.current_page)
+          local totalAuctions = query and tonumber(query.totalAuctions) or 0
+
+          -- AtrSearch.current_page is normally one-based by the time the
+          -- AUCTION_ITEM_LIST_UPDATE event arrives. Fall back to the captured
+          -- query page (which is zero-based in some older code paths).
+          if not currentPage or currentPage < 1 then
+            local capturedPage = query and query.curPageInfo and tonumber(query.curPageInfo.pagenum)
+            currentPage = capturedPage and (capturedPage + 1) or 1
+          end
+
+          local pageSize = NUM_AUCTION_ITEMS_PER_PAGE or 50
+          local totalPages = math.max(1, math.ceil(totalAuctions / pageSize))
+          Auctionator.Shopping.SetLoadingPage(currentPage, totalPages, totalAuctions)
+        end
 
 		local isDup = gCurrentPane.activeSearch:CheckForDuplicatePage ();
 		
 		if (not isDup) then
 
-			local done = gCurrentPane.activeSearch:AnalyzeResultsPage();
-			
-			if (done) then
-				gCurrentPane.activeSearch:Finish();
+			local activeSearch = gCurrentPane.activeSearch
+			local done = activeSearch:AnalyzeResultsPage();
+
+			local shouldPauseForMore = false
+			if activeSearch.auctionatorProgressiveMode and not activeSearch.auctionatorPausedOnce and not done and not activeSearch.shplist then
+				local pageInfo = activeSearch.query and activeSearch.query.curPageInfo
+				local totalAuctions = activeSearch.query and tonumber(activeSearch.query.totalAuctions) or 0
+				local numOnPage = pageInfo and tonumber(pageInfo.numOnPage) or 0
+				shouldPauseForMore = activeSearch.current_page == 1 and numOnPage >= (NUM_AUCTION_ITEMS_PER_PAGE or 50) and totalAuctions > numOnPage
+			end
+
+			if shouldPauseForMore then
+				local totalAuctions = tonumber(activeSearch.query.totalAuctions) or 0
+				local pageSize = NUM_AUCTION_ITEMS_PER_PAGE or 50
+				local totalPages = math.max(1, math.ceil(totalAuctions / pageSize))
+
+				activeSearch.auctionatorPausedOnce = true
+				activeSearch.auctionatorPausedForMore = true
+				activeSearch.processing_state = Auctionator.Constants.SearchStates.NULL
+
+				-- Build and display the first page while preserving current_page=1,
+				-- which is the next zero-based page required by QueryAuctionItems.
+				local nextPage = activeSearch.current_page
+				activeSearch:Finish()
+				activeSearch.current_page = nextPage
+				activeSearch.auctionatorPausedForMore = true
+				Atr_OnSearchComplete()
+
+				if Auctionator and Auctionator.Shopping and Auctionator.Shopping.PartialSearchFinished then
+					Auctionator.Shopping.PartialSearchFinished(1, totalPages, totalAuctions)
+				end
+			elseif (done) then
+				activeSearch:Finish();
+				activeSearch.auctionatorPausedForMore = false
 				Atr_OnSearchComplete ();
 			end
 		end
@@ -2075,6 +2129,22 @@ end
 
 function Atr_OnSearchComplete ()
   Auctionator.Debug.Message( 'Atr_OnSearchComplete' )
+
+  if Auctionator and Auctionator.Shopping then
+    local totalAuctions = 0
+
+    if gCurrentPane and gCurrentPane.activeSearch then
+      local activeSearch = gCurrentPane.activeSearch
+      local query = activeSearch.query
+      totalAuctions = (query and tonumber(query.totalAuctions)) or tonumber(activeSearch.totalAuctions) or 0
+    end
+
+    if Auctionator.Shopping.FinishLoading then
+      Auctionator.Shopping.FinishLoading(totalAuctions)
+    elseif Auctionator.Shopping.SetLoading then
+      Auctionator.Shopping.SetLoading(false)
+    end
+  end
 
 	gCurrentPane.sortedHist = nil;
 
@@ -2983,6 +3053,9 @@ function Atr_Idle(self, elapsed)
 	end
 
 	if (gCurrentPane.activeSearch and gCurrentPane.activeSearch.processing_state == Auctionator.Constants.SearchStates.PRE_QUERY) then   ------- check whether to send a new auction query to get the next page -------
+        if Auctionator and Auctionator.Shopping and Auctionator.Shopping.ProgressiveDebug then
+          Auctionator.Shopping.ProgressiveDebug("Atr_Idle sees PRE_QUERY; calling Continue; current_page=" .. tostring(gCurrentPane.activeSearch.current_page))
+        end
 		gCurrentPane.activeSearch:Continue();
 	end
 
@@ -3302,12 +3375,33 @@ function Atr_SetDepositText()
 	if (auctionCount > 0) and (Atr_StackSize() > 0) and (Atr_Batch_NumAuctions:GetNumber() > 0) then 
 		local duration = UIDropDownMenu_GetSelectedValue(Atr_Duration);
 	
-		local deposit1 = GetAuctionDeposit (duration, MoneyInputFrame_GetCopper(Atr_StartingPrice), MoneyInputFrame_GetCopper(Atr_StackPrice), Atr_StackSize(), Atr_Batch_NumAuctions:GetNumber());
+		local deposit1 = Atr_GetAuctionDeposit (duration, MoneyInputFrame_GetCopper(Atr_StartingPrice), MoneyInputFrame_GetCopper(Atr_StackPrice), Atr_StackSize(), Atr_Batch_NumAuctions:GetNumber());
 
 		Atr_Deposit_Text:SetText (ZT("Deposit")..":    "..zc.priceToMoneyString(deposit1, true));
 	else
 		Atr_Deposit_Text:SetText ("");
 	end
+end
+
+-----------------------------------------
+
+function Atr_GetAuctionDeposit(duration, startingPrice, buyoutPrice, stackSize, numAuctions)
+    if GetAuctionDeposit then
+        return GetAuctionDeposit(
+            duration,
+            startingPrice,
+            buyoutPrice,
+            stackSize,
+            numAuctions
+        ) or 0
+    end
+
+    if CalculateAuctionDeposit then
+        local depositPerAuction = CalculateAuctionDeposit(duration, stackSize) or 0
+        return depositPerAuction * numAuctions
+    end
+
+    return 0
 end
 
 
@@ -3738,6 +3832,10 @@ end
 function Atr_ShowSearchSummary()
   Auctionator.Debug.Message( 'Atr_ShowSearchSummary' )
 
+	if Auctionator and Auctionator.Shopping and Auctionator.Shopping.ResultsListing then
+		Auctionator.Shopping.ResultsListing.HideSelectedItemHeader()
+	end
+
 	Atr_Col1_Heading:Hide();
 	Atr_Col3_Heading:Hide();
 	Atr_Col1_Heading_Button:Show();
@@ -3816,6 +3914,9 @@ function Atr_ShowSearchSummary()
 			lineEntry:Show();
 			
 			lineEntry.itemLink = scn.itemLink;
+			if Auctionator and Auctionator.Shopping and Auctionator.Shopping.ResultsRow then
+				Auctionator.Shopping.ResultsRow.SetItem(lineEntry, scn.itemLink, scn.itemQuality)
+			end
 			
 			local r = scn.itemTextColor[1]
 			local g = scn.itemTextColor[2]
@@ -3885,6 +3986,18 @@ function Atr_ShowCurrentAuctions()
 	if (scn == nil) then
 		scn = Atr_FindScan(nil)
 	end
+
+	if Auctionator and Auctionator.Shopping and Auctionator.Shopping.ResultsListing then
+		if scn and (not scn.IsNil or not scn:IsNil()) and (scn.itemLink or scn.itemName) then
+			Auctionator.Shopping.ResultsListing.ShowSelectedItemHeader(scn.itemLink, scn.itemName, scn.itemQuality)
+		else
+			Auctionator.Shopping.ResultsListing.HideSelectedItemHeader()
+		end
+	end
+
+	if not scn or (scn.IsNil and scn:IsNil()) or not scn.sortedData then
+		return
+	end
 	
 	local numrows = #scn.sortedData
 
@@ -3920,6 +4033,9 @@ function Atr_ShowCurrentAuctions()
 		lineEntry:SetID(dataOffset);
 
 		lineEntry.itemLink = nil;
+		if Auctionator and Auctionator.Shopping and Auctionator.Shopping.ResultsRow then
+			Auctionator.Shopping.ResultsRow.ClearItem(lineEntry)
+		end
 
 		if (dataOffset > numrows or not scn.sortedData[dataOffset]) then
 
@@ -3987,8 +4103,10 @@ function Atr_ShowCurrentAuctions()
 					MoneyFrame_Update (lineEntry_item_tag, zc.round(data.buyoutPrice/data.stackSize) );
 
 					if (data.stackSize > 1) then
-						lineEntry_stack:SetText (zc.priceToString(data.buyoutPrice));
-						lineEntry_stack:SetTextColor (0.6, 0.6, 0.6);
+						-- Use Blizzard money icons here too, matching the per-item
+						-- price instead of displaying the compact "1g 28s 00c" text.
+						lineEntry_stack:SetText (zc.priceToMoneyString(data.buyoutPrice, false));
+						lineEntry_stack:SetTextColor (1, 1, 1);
 					end
 				end
 			

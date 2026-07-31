@@ -376,5 +376,7 @@ AtrL["your most recent posting"] = "su más reciente subasta"
 AtrL["yours"] = "su subasta"
 AtrL["Spanish translation courtesy of %s"] = "Traducción a español por cortesía de %s"
 AtrL["Items owned"] = "En propiedad"
+AtrL["Loading auction results..."] = "Cargando resultados de la subasta..."
+AtrL["SHOPPING_LISTS"] = "Listas de compras"
 
 end

@@ -296,9 +296,12 @@ function AtrSearch:Start ()
 	
 	if Atr_IsCompoundSearch( self.searchText ) then
 			
-		local _, itemClass = Atr_ParseCompoundSearch (self.searchText);
+		local queryString, itemClass, _, minLevel, maxLevel, minItemLevel, maxItemLevel, qualityIndex = Atr_ParseCompoundSearch (self.searchText);
 	
-		if (itemClass == 0) then
+		-- QueryAuctionItems accepts class 0. Permit quality and level filters
+		-- across all categories, but continue rejecting malformed compound text.
+		local hasKnownFilter = qualityIndex ~= nil or minLevel ~= nil or maxLevel ~= nil or minItemLevel ~= nil or maxItemLevel ~= nil;
+		if (itemClass == 0 and not hasKnownFilter) then
 			Atr_Error_Display (ZT("The first part of this compound\n\nsearch is not a valid category."));
 			return;
 		end
@@ -648,7 +651,85 @@ end
 
 -----------------------------------------
 
+local function Atr_SplitPreserveEmpty(text, delimiter)
+	local result = {}
+	local start = 1
+	text = text or ""
+	delimiter = delimiter or ";"
+
+	while true do
+		local position = string.find(text, delimiter, start, true)
+		if not position then
+			table.insert(result, string.sub(text, start))
+			break
+		end
+		table.insert(result, string.sub(text, start, position - 1))
+		start = position + string.len(delimiter)
+	end
+
+	return result
+end
+
+local function Atr_TrimSearchField(text)
+	text = text or ""
+	text = string.gsub(text, "^%s+", "")
+	text = string.gsub(text, "%s+$", "")
+	return text
+end
+
+-- Auctionator Retail serializes extended shopping-list searches as 14
+-- semicolon-separated fields:
+-- name;category/subcategory;itemMin;itemMax;levelMin;levelMax;
+-- craftedMin;craftedMax;priceMin;priceMax;quality;#;;quantity
+-- Wrath's auction API cannot apply crafted-level, price or quantity filters,
+-- but the values are preserved verbatim in the shopping list/export. The
+-- supported fields are translated here for the original 3.3.5 search engine.
+local function Atr_ParseRetailShoppingSearch(searchString)
+	local fields = Atr_SplitPreserveEmpty(searchString, ";")
+	if #fields < 14 then
+		return nil
+	end
+
+	local queryString = Atr_TrimSearchField(fields[1])
+	local categoryPath = Atr_TrimSearchField(fields[2])
+	local minItemLevel = tonumber(Atr_TrimSearchField(fields[3]))
+	local maxItemLevel = tonumber(Atr_TrimSearchField(fields[4]))
+	local minLevel = tonumber(Atr_TrimSearchField(fields[5]))
+	local maxLevel = tonumber(Atr_TrimSearchField(fields[6]))
+	local qualityField = Atr_TrimSearchField(fields[11])
+	local qualityIndex = tonumber(qualityField)
+
+	if qualityIndex == nil and qualityField ~= "" then
+		qualityIndex = Atr_ItemRariryText2QualityIndex(qualityField)
+	end
+
+	local itemClass = 0
+	local itemSubclass = 0
+	if categoryPath ~= "" then
+		local slash = string.find(categoryPath, "/", 1, true)
+		local classText = slash and Atr_TrimSearchField(string.sub(categoryPath, 1, slash - 1)) or categoryPath
+		local subclassText = slash and Atr_TrimSearchField(string.sub(categoryPath, slash + 1)) or ""
+
+		itemClass = Atr_ItemType2AuctionClass(classText) or 0
+		if itemClass > 0 and subclassText ~= "" then
+			itemSubclass = Atr_SubType2AuctionSubclass(itemClass, subclassText) or 0
+		end
+	end
+
+	return queryString, itemClass, itemSubclass, minLevel, maxLevel,
+		minItemLevel, maxItemLevel, qualityIndex
+end
+
 function Atr_ParseCompoundSearch (searchString)
+  	local retailQuery, retailClass, retailSubclass, retailMinLevel,
+		retailMaxLevel, retailMinItemLevel, retailMaxItemLevel, retailQuality =
+		Atr_ParseRetailShoppingSearch(searchString)
+
+	if retailQuery ~= nil then
+		return retailQuery, retailClass, retailSubclass, retailMinLevel,
+			retailMaxLevel, retailMinItemLevel, retailMaxItemLevel, retailQuality
+	end
+
   	local delimiter = Auctionator.Constants.AdvancedSearchDivider
 
 	if (zc.StringContains (searchString, ">")) then
@@ -731,7 +812,7 @@ end
 
 function Atr_ItemRariryText2QualityIndex(itemRarity)
 
-	local Rarity2Quality = {[0] = "Poor", [1] = "Common", [2] = "Uncommon",[3] = "Rare", [4] = "Epic"}
+	local Rarity2Quality = {[0] = "Poor", [1] = "Common", [2] = "Uncommon", [3] = "Rare", [4] = "Epic", [5] = "Legendary"}
 	for RarityIndex, RariryString in pairs(Rarity2Quality) do
 		if (zc.StringSame (RariryString, itemRarity)) then
 			return RarityIndex
@@ -746,6 +827,14 @@ end
 
 function AtrSearch:Continue()
   local canQuery = CanSendAuctionQuery()
+
+  if Auctionator and Auctionator.Shopping and Auctionator.Shopping.ProgressiveDebug then
+    Auctionator.Shopping.ProgressiveDebug("AtrSearch:Continue entered; canQuery=" .. tostring(canQuery)
+      .. " state=" .. tostring(self.processing_state)
+      .. " current_page=" .. tostring(self.current_page)
+      .. " paused=" .. tostring(self.auctionatorPausedForMore)
+      .. " loadingRemaining=" .. tostring(self.auctionatorLoadingRemainingPages))
+  end
   
   Auctionator.Debug.Message( 'AtrSearch:Continue', canQuery )
 
@@ -806,12 +895,26 @@ function AtrSearch:Continue()
 	      { queryString, minLevel, maxLevel, self.current_page, nil, nil, false, exactMatch, filter },
 	      'QUERY AUCTION ITEMS PARAMS'
 	    )	
+		if Auctionator and Auctionator.Shopping and Auctionator.Shopping.ProgressiveDebug then
+			Auctionator.Shopping.ProgressiveDebug("QueryAuctionItems about to send; query=" .. tostring(queryString)
+				.. " page=" .. tostring(self.current_page)
+				.. " quality=" .. tostring(qualityIndex)
+				.. " class=" .. tostring(itemClass)
+				.. " subclass=" .. tostring(itemSubclass))
+		end
 		QueryAuctionItems (queryString, minLevel, maxLevel, 0, itemClass, itemSubclass, self.current_page, 0, qualityIndex);
 
 		self.query_sent_when	= gAtr_ptime;
     self.processing_state = Auctionator.Constants.SearchStates.POST_QUERY;
 
 		self.current_page		= self.current_page + 1;
+		if Auctionator and Auctionator.Shopping and Auctionator.Shopping.ProgressiveDebug then
+			Auctionator.Shopping.ProgressiveDebug("Query sent; new state=" .. tostring(self.processing_state) .. " next current_page=" .. tostring(self.current_page))
+		end
+	else
+		if Auctionator and Auctionator.Shopping and Auctionator.Shopping.ProgressiveDebug then
+			Auctionator.Shopping.ProgressiveDebug("AtrSearch:Continue waiting because CanSendAuctionQuery=false")
+		end
 	end
 
 end

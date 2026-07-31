@@ -4,18 +4,18 @@
     Las referencias antiguas se enlazarán desde ResultsListing.lua.
   -->
   <Frame name="AuctionatorShoppingResultsListingTemplate" virtual="true">
-    <Size><AbsDimension x="605" y="286"/></Size>
+    <Size><AbsDimension x="575" y="286"/></Size>
 
     <Frames>
       <!-- Cabeceras -->
       <Frame name="$parentHeadingsBar">
-        <Size><AbsDimension x="605" y="64"/></Size>
+        <Size><AbsDimension x="575" y="64"/></Size>
         <Anchors><Anchor point="TOPLEFT"/></Anchors>
 
         <Layers>
           <Layer level="ARTWORK">
             <Texture name="$parentMiddle" file="Interface\Glues\CharacterCreate\CharacterCreate-LabelFrame">
-              <Size><AbsDimension x="605" y="64"/></Size>
+              <Size><AbsDimension x="575" y="64"/></Size>
               <Anchors><Anchor point="TOPLEFT"/></Anchors>
               <TexCoords left="0.1953125" right="0.8046875" top="0" bottom="1"/>
             </Texture>
@@ -58,6 +58,44 @@
             <Scripts><OnClick>Atr_Onclick_Back();</OnClick></Scripts>
           </Button>
 
+
+          <!-- Cabecera del objeto seleccionado, visible al mostrar sus lotes. -->
+          <Button name="$parentSelectedItemButton" hidden="true">
+            <Size><AbsDimension x="455" y="36"/></Size>
+            <Anchors>
+              <Anchor point="TOPLEFT" relativeTo="$parentBackButton" relativePoint="TOPRIGHT">
+                <Offset><AbsDimension x="10" y="3"/></Offset>
+              </Anchor>
+            </Anchors>
+            <Layers>
+              <Layer level="ARTWORK">
+                <Texture name="$parentIcon">
+                  <Size><AbsDimension x="32" y="32"/></Size>
+                  <Anchors><Anchor point="LEFT"/></Anchors>
+                  <TexCoords left="0.07" right="0.93" top="0.07" bottom="0.93"/>
+                </Texture>
+                <FontString name="$parentName" inherits="GameFontNormalLarge" justifyH="LEFT">
+                  <Anchors>
+                    <Anchor point="LEFT" relativeTo="$parentIcon" relativePoint="RIGHT">
+                      <Offset><AbsDimension x="8" y="0"/></Offset>
+                    </Anchor>
+                    <Anchor point="RIGHT">
+                      <Offset><AbsDimension x="-4" y="0"/></Offset>
+                    </Anchor>
+                  </Anchors>
+                </FontString>
+              </Layer>
+            </Layers>
+            <HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD">
+              <TexCoords left="0" right="1" top="0" bottom="1"/>
+            </HighlightTexture>
+            <Scripts>
+              <OnClick>Auctionator.Shopping.ResultsListing.SelectedItemOnClick(self);</OnClick>
+              <OnEnter>Auctionator.Shopping.ResultsListing.SelectedItemOnEnter(self);</OnEnter>
+              <OnLeave>Auctionator.Shopping.ResultsListing.SelectedItemOnLeave(self);</OnLeave>
+            </Scripts>
+          </Button>
+
           <Button name="$parentSaveThisListButton" text="AUCTIONATOR_SAVE_THIS_SHPLIST" inherits="Atr_SmallButtonTemplate" hidden="true">
             <Size><AbsDimension x="200" y="20"/></Size>
             <Anchors>
@@ -92,7 +130,7 @@
 
       <!-- Listado desplazable -->
       <ScrollFrame name="$parentScrollFrame" inherits="FauxScrollFrameTemplate">
-        <Size><AbsDimension x="588" y="196"/></Size>
+        <Size><AbsDimension x="558" y="196"/></Size>
         <Anchors>
           <Anchor point="TOPLEFT" relativeTo="$parentHeadingsBar" relativePoint="BOTTOMLEFT">
             <Offset><AbsDimension x="-6" y="0"/></Offset>
@@ -161,6 +199,136 @@
           </OnLeave>
         </Scripts>
       </Button>
+
+
+      <!-- Enlace moderno para continuar desde la segunda página. -->
+      <Button name="$parentLoadMoreButton" hidden="true">
+        <Size><AbsDimension x="470" y="22"/></Size>
+        <Anchors>
+          <Anchor point="BOTTOM" relativePoint="BOTTOM">
+            <Offset><AbsDimension x="0" y="-5"/></Offset>
+          </Anchor>
+        </Anchors>
+        <Layers>
+          <Layer level="BACKGROUND">
+            <Texture name="$parentHighlight" hidden="true">
+              <Anchors><Anchor point="TOPLEFT"/><Anchor point="BOTTOMRIGHT"/></Anchors>
+              <Color r="0.45" g="0.02" b="0.02" a="0.78"/>
+            </Texture>
+          </Layer>
+          <Layer level="ARTWORK">
+            <FontString name="$parentText" inherits="GameFontNormal" text="Cargar más resultados" justifyH="CENTER">
+              <Anchors><Anchor point="CENTER"/></Anchors>
+            </FontString>
+          </Layer>
+        </Layers>
+        <Scripts>
+          <OnLoad>
+            self.Highlight = _G[self:GetName() .. "Highlight"];
+          </OnLoad>
+          <OnEnter>Auctionator.Shopping.ResultsListing.LoadMoreOnEnter(self);</OnEnter>
+          <OnLeave>Auctionator.Shopping.ResultsListing.LoadMoreOnLeave(self);</OnLeave>
+          <OnClick>Auctionator.Shopping.ResultsListing.LoadMoreOnClick(self);</OnClick>
+        </Scripts>
+      </Button>
+
+      <!-- Overlay moderno de carga. No usa texturas externas: el spinner
+           se dibuja con ocho puntos animados, compatible con WoW 3.3.5. -->
+      <Frame name="$parentLoadingOverlay" hidden="true" enableMouse="true">
+        <Size><AbsDimension x="575" y="320"/></Size>
+        <Anchors><Anchor point="TOPLEFT"/></Anchors>
+
+        <Layers>
+          <Layer level="BACKGROUND">
+            <Texture name="$parentBackground">
+              <Anchors>
+                <Anchor point="TOPLEFT">
+                    <Offset>
+                        <AbsDimension x="0" y="-20"/>
+                    </Offset>
+                </Anchor>
+
+                <Anchor point="BOTTOMRIGHT">
+                    <Offset>
+                        <AbsDimension x="0" y="-25"/>
+                    </Offset>
+                </Anchor>
+              </Anchors>
+              <Color r="0.025" g="0.025" b="0.025" a="0.93"/>
+            </Texture>
+          </Layer>
+
+          <Layer level="ARTWORK">
+            <FontString name="$parentDot1" inherits="GameFontNormalLarge" text="*"><Anchors><Anchor point="CENTER"><Offset><AbsDimension x="0" y="85"/></Offset></Anchor></Anchors></FontString>
+            <FontString name="$parentDot2" inherits="GameFontNormalLarge" text="*"><Anchors><Anchor point="CENTER"><Offset><AbsDimension x="30" y="73"/></Offset></Anchor></Anchors></FontString>
+            <FontString name="$parentDot3" inherits="GameFontNormalLarge" text="*"><Anchors><Anchor point="CENTER"><Offset><AbsDimension x="42" y="43"/></Offset></Anchor></Anchors></FontString>
+            <FontString name="$parentDot4" inherits="GameFontNormalLarge" text="*"><Anchors><Anchor point="CENTER"><Offset><AbsDimension x="30" y="13"/></Offset></Anchor></Anchors></FontString>
+            <FontString name="$parentDot5" inherits="GameFontNormalLarge" text="*"><Anchors><Anchor point="CENTER"><Offset><AbsDimension x="0" y="1"/></Offset></Anchor></Anchors></FontString>
+            <FontString name="$parentDot6" inherits="GameFontNormalLarge" text="*"><Anchors><Anchor point="CENTER"><Offset><AbsDimension x="-30" y="13"/></Offset></Anchor></Anchors></FontString>
+            <FontString name="$parentDot7" inherits="GameFontNormalLarge" text="*"><Anchors><Anchor point="CENTER"><Offset><AbsDimension x="-42" y="43"/></Offset></Anchor></Anchors></FontString>
+            <FontString name="$parentDot8" inherits="GameFontNormalLarge" text="*"><Anchors><Anchor point="CENTER"><Offset><AbsDimension x="-30" y="73"/></Offset></Anchor></Anchors></FontString>
+
+            <FontString name="$parentTitle" inherits="GameFontNormalLarge" text="Buscando en la Casa de Subastas..." justifyH="CENTER">
+              <Size><AbsDimension x="500" y="24"/></Size>
+              <Anchors><Anchor point="CENTER"><Offset><AbsDimension x="0" y="-30"/></Offset></Anchor></Anchors>
+            </FontString>
+
+            <FontString name="$parentSubtitle" inherits="GameFontHighlight" text="Esto puede tardar unos segundos." justifyH="CENTER">
+              <Size><AbsDimension x="500" y="20"/></Size>
+              <Anchors><Anchor point="TOP" relativeTo="$parentTitle" relativePoint="BOTTOM"><Offset><AbsDimension x="0" y="-7"/></Offset></Anchor></Anchors>
+            </FontString>
+
+            <FontString name="$parentSearchText" inherits="GameFontHighlightSmall" justifyH="CENTER">
+              <Size><AbsDimension x="500" y="20"/></Size>
+              <Anchors><Anchor point="TOP" relativeTo="$parentSubtitle" relativePoint="BOTTOM"><Offset><AbsDimension x="0" y="-8"/></Offset></Anchor></Anchors>
+            </FontString>
+
+            <FontString name="$parentPageText" inherits="GameFontNormal" text="Preparando búsqueda..." justifyH="CENTER">
+              <Size><AbsDimension x="500" y="20"/></Size>
+              <Anchors><Anchor point="TOP" relativeTo="$parentSearchText" relativePoint="BOTTOM"><Offset><AbsDimension x="0" y="-7"/></Offset></Anchor></Anchors>
+            </FontString>
+
+            <FontString name="$parentTotalText" inherits="GameFontHighlightSmall" text="" justifyH="CENTER">
+              <Size><AbsDimension x="500" y="18"/></Size>
+              <Anchors><Anchor point="TOP" relativeTo="$parentPageText" relativePoint="BOTTOM"><Offset><AbsDimension x="0" y="-5"/></Offset></Anchor></Anchors>
+            </FontString>
+          </Layer>
+        </Layers>
+
+        <Frames>
+          <Frame name="$parentProgressBar">
+            <Size><AbsDimension x="250" y="10"/></Size>
+            <Anchors><Anchor point="TOP" relativeTo="$parentTotalText" relativePoint="BOTTOM"><Offset><AbsDimension x="0" y="-10"/></Offset></Anchor></Anchors>
+            <Layers>
+              <Layer level="BACKGROUND">
+                <Texture name="$parentBackground">
+                  <Anchors><Anchor point="TOPLEFT"/><Anchor point="BOTTOMRIGHT"/></Anchors>
+                  <Color r="0.12" g="0.12" b="0.12" a="1"/>
+                </Texture>
+              </Layer>
+              <Layer level="ARTWORK">
+                <Texture name="$parentFill">
+                  <Size><AbsDimension x="1" y="8"/></Size>
+                  <Anchors><Anchor point="LEFT"><Offset><AbsDimension x="1" y="0"/></Offset></Anchor></Anchors>
+                  <Color r="1" g="0.82" b="0" a="0.95"/>
+                </Texture>
+              </Layer>
+              <Layer level="OVERLAY">
+                <Texture name="$parentBorder">
+                  <Anchors><Anchor point="TOPLEFT"/><Anchor point="BOTTOMRIGHT"/></Anchors>
+                  <Color r="0.35" g="0.35" b="0.35" a="0.45"/>
+                </Texture>
+          </Layer>
+        </Layers>
+          </Frame>
+        </Frames>
+
+        <Scripts>
+          <OnUpdate>
+            Auctionator.Shopping.ResultsListing.LoadingOnUpdate(self, elapsed);
+          </OnUpdate>
+        </Scripts>
+      </Frame>
 
       <!-- Acción principal -->
       <Button name="$parentBuyButton" text="Buy" inherits="UIPanelButtonTemplate">

@@ -43,6 +43,14 @@ function Atr_ShoppingListsInit ()
 	for x = 1,num do
 		setmetatable (AUCTIONATOR_SHOPPING_LISTS[x], Atr_SList);
 	end
+
+	-- The first list is always Recent Searches. Older SavedVariables can lose
+	-- the isRecents marker, which makes DisplayX sort it alphabetically and
+	-- AddItem append new searches instead of inserting them at the top.
+	if (AUCTIONATOR_SHOPPING_LISTS[1]) then
+		AUCTIONATOR_SHOPPING_LISTS[1].isRecents = 1
+		AUCTIONATOR_SHOPPING_LISTS[1].isSorted = nil
+	end
 	
 	for x = 1,num do
 		local slist = AUCTIONATOR_SHOPPING_LISTS[x]
@@ -351,6 +359,11 @@ function Atr_Search_Onclick ()
 
   currentPane:DoSearch( searchText )
 
+  if currentPane.activeSearch and Auctionator and Auctionator.Shopping and Auctionator.Shopping.Frame and Auctionator.Shopping.Frame:IsShown() then
+    currentPane.activeSearch.auctionatorProgressiveMode = true
+    currentPane.activeSearch.auctionatorPausedOnce = false
+  end
+
   Atr_ClearHistory()
 end
 
@@ -378,36 +391,38 @@ end
 
 -----------------------------------------
 
-function Atr_AddToRecents (searchText)
-	Auctionator.Debug.Message( 'Atr_AddToRecents', searchText )
+function Atr_AddToRecents(searchText)
+    Auctionator.Debug.Message("Atr_AddToRecents", searchText)
 
-	local recentsList = AUCTIONATOR_SHOPPING_LISTS[1];
+    local recentsList = AUCTIONATOR_SHOPPING_LISTS[1]
 
-	-- Added check to ensure recentsList is an AtrList, per issue #1
-	-- Todo: Understand how lists are getting created without the Atr_SList metatable...
-	if (recentsList and getmetatable(recentsList) == Atr_SList) then
+    if recentsList and getmetatable(recentsList) == Atr_SList then
+        -- Keep compatibility with SavedVariables created by older versions.
+        -- Without this marker the list is sorted alphabetically by DisplayX.
+        recentsList.isRecents = 1
+        recentsList.isSorted = nil
+        local isRecentsShown = (gCurrentSList == recentsList)
 
-		local isRecentsShown = (gCurrentSList == recentsList);
-		
-		local n = recentsList:FindItemIndex(searchText);
+        local index = recentsList:FindItemIndex(searchText)
 
-		if (n > 14 or (not isRecentsShown and n > 0)) then
-			table.remove (recentsList.items, n);
-		end
-		
-		n = recentsList:FindItemIndex(searchText);
-		
-		if (n == 0) then
-			recentsList:AddItem (searchText);
-		end
-		
-		if (isRecentsShown) then
-			FauxScrollFrame_SetOffset (Atr_Hlist_ScrollFrame, 0);
-			Atr_Hlist_ScrollFrame:SetVerticalScroll(0);
-		end
-		
-	end
+        if index > 0 then
+            table.remove(recentsList.items, index)
+        end
 
+        recentsList:AddItem(searchText)
+
+        if isRecentsShown then
+            FauxScrollFrame_SetOffset(Atr_Hlist_ScrollFrame, 0)
+            Atr_Hlist_ScrollFrame:SetVerticalScroll(0)
+        end
+
+        if Auctionator
+           and Auctionator.Shopping
+           and Auctionator.Shopping.Sidebar
+           and Auctionator.Shopping.Sidebar.Refresh then
+            Auctionator.Shopping.Sidebar.Refresh()
+        end
+    end
 end
 
 -----------------------------------------
@@ -416,6 +431,13 @@ function Atr_SetSearchText (searchText)
 
 	Atr_Search_Box:SetText (searchText)
 	Atr_Search_Box:ClearFocus()
+
+	-- Keep the modern Shopping field synchronized with searches composed in
+	-- Auctionator's original advanced-search dialog.
+	if (Auctionator and Auctionator.Shopping and Auctionator.Shopping.Frame and Auctionator.Shopping.Frame.SearchBox) then
+		Auctionator.Shopping.Frame.SearchBox:SetText (searchText)
+		Auctionator.Shopping.Frame.SearchBox:ClearFocus()
+	end
 
 end
 
@@ -993,66 +1015,111 @@ end
 
 -----------------------------------------
 
+function Atr_BuildAdvancedSearchString(itemRarity, itemClass, itemSubclass, minLevel, maxLevel, minItemLevel, maxItemLevel, text)
+	local divider = Auctionator.Constants.AdvancedSearchDivider
+	local parts = {}
+
+	itemClass = tonumber(itemClass) or 0
+	itemSubclass = tonumber(itemSubclass) or 0
+	minLevel = tonumber(minLevel) or 0
+	maxLevel = tonumber(maxLevel) or 0
+	minItemLevel = tonumber(minItemLevel) or 0
+	maxItemLevel = tonumber(maxItemLevel) or 0
+	text = string.gsub(string.gsub(text or "", "^%s+", ""), "%s+$", "")
+
+	if itemRarity and itemRarity ~= "" and not zc.StringContains(itemRarity, "-") then
+		table.insert(parts, itemRarity)
+	end
+
+	if itemClass > 0 then
+		local itemClassList = Atr_GetAuctionClasses()
+		local className = itemClassList[itemClass]
+		if className then
+			table.insert(parts, className)
+
+			if itemSubclass > 0 then
+				local itemSubclassList = Atr_GetAuctionSubclasses(itemClass)
+				local subclassName = itemSubclassList[itemSubclass]
+				if subclassName then
+					table.insert(parts, subclassName)
+				end
+			end
+		end
+	end
+
+	if maxLevel > 0 and minLevel == 0 then
+		minLevel = 1
+	end
+	if minLevel > 0 then table.insert(parts, tostring(minLevel)) end
+	if maxLevel > 0 then table.insert(parts, tostring(maxLevel)) end
+
+	if itemClass == WEAPON or itemClass == ARMOR then
+		if minItemLevel > 0 then table.insert(parts, "i" .. minItemLevel) end
+		if maxItemLevel > 0 then table.insert(parts, "i" .. maxItemLevel) end
+	end
+
+	if text ~= "" then
+		table.insert(parts, text)
+	end
+
+	-- No filters: this is a normal text search, not a compound search.
+	if #parts == 0 then
+		return ""
+	end
+	if #parts == 1 and text ~= "" and not itemRarity and itemClass == 0 and minLevel == 0 and maxLevel == 0 then
+		return text
+	end
+
+	local searchText = table.concat(parts, divider)
+
+	-- Keep category-only and filter-only searches in compound-search mode.
+	if text == "" then
+		searchText = searchText .. divider
+	end
+
+	return searchText
+end
+
+
+function Atr_ExecuteAdvancedSearch(itemRarity, itemClass, itemSubclass, minLevel, maxLevel, minItemLevel, maxItemLevel, text)
+	local searchText = Atr_BuildAdvancedSearchString(
+		itemRarity, itemClass, itemSubclass,
+		minLevel, maxLevel, minItemLevel, maxItemLevel, text
+	)
+
+	if searchText == "" then
+		return false, "EMPTY_SEARCH"
+	end
+
+	Atr_SetSearchText(searchText)
+	Atr_Search_Onclick()
+	return true, searchText
+end
+
 function Atr_Adv_Search_Do()
+	local itemRarity = UIDropDownMenu_GetSelectedValue(Atr_ASDD_Rarity)
+	if itemRarity and zc.StringContains(itemRarity, "-") then itemRarity = nil end
 
-	local itemRarity = UIDropDownMenu_GetSelectedValue (Atr_ASDD_Rarity)
-	if (zc.StringContains(itemRarity, "-")) then itemRarity = nil end
-	
+	local itemClass = UIDropDownMenu_GetSelectedValue(Atr_ASDD_Class) or 0
+	local itemSubclass = UIDropDownMenu_GetSelectedValue(Atr_ASDD_Subclass) or 0
 
-	local itemClass		= UIDropDownMenu_GetSelectedValue (Atr_ASDD_Class);
-	local itemSublass	= UIDropDownMenu_GetSelectedValue (Atr_ASDD_Subclass);
+	local success = Atr_ExecuteAdvancedSearch(
+		itemRarity,
+		itemClass,
+		itemSubclass,
+		Atr_AS_Minlevel:GetNumber(),
+		Atr_AS_Maxlevel:GetNumber(),
+		Atr_AS_MinItemlevel:GetNumber(),
+		Atr_AS_MaxItemlevel:GetNumber(),
+		Atr_AS_Searchtext:GetText()
+	)
 
-	local itemClassList		= Atr_GetAuctionClasses();
-	local itemSubclassList	= Atr_GetAuctionSubclasses(itemClass);
-	
-	local searchText = itemClassList[itemClass];
-
-	if (searchText == nil) then
-		zc.msg_anm ("|cffff0000Error getting itemClass from menu|r.  itemClass = ", itemClass)
-		Atr_Adv_Search_Dialog:Hide()
+	if not success then
+		Atr_AS_Searchtext:SetFocus()
 		return
 	end
 
-	if (itemSublass > 0) then
-		searchText = searchText.."/"..itemSubclassList[itemSublass];
-	end
-	
-	local minLevel		= Atr_AS_Minlevel:GetNumber ();
-	local maxLevel		= Atr_AS_Maxlevel:GetNumber ();
-	local text			= Atr_AS_Searchtext:GetText();
-
-	if (maxLevel > 0 and minLevel == 0) then
-		minLevel = 1;
-	end
-	
-	if (minLevel > 0)		then	searchText = searchText.."/"..minLevel;				end
-	if (maxLevel > 0)		then	searchText = searchText.."/"..maxLevel;				end
-
-	if (itemClass and (itemClass == WEAPON or itemClass == ARMOR)) then
-		local minItemLevel	= Atr_AS_MinItemlevel:GetNumber()
-		local maxItemLevel	= Atr_AS_MaxItemlevel:GetNumber()
-		if (minItemLevel > 0)	then	searchText = searchText.."/i"..minItemLevel;		end
-		if (maxItemLevel > 0)	then	searchText = searchText.."/i"..maxItemLevel;		end
-	end
-	
-	if (text ~= "")			then	searchText = searchText.."/"..text;					end
-
-	-- handle category only search
-	
-	if (not zc.StringContains (searchText, "/")) then
-		searchText = searchText.."/"
-	end
-	
-	if (itemRarity ~= nil) then searchText = itemRarity.."/"..searchText end
-
-	searchText = string.gsub(searchText, "/", Auctionator.Constants.AdvancedSearchDivider) -- Make searches compatible with modern Auctionator
-	
-	Atr_SetSearchText(searchText);
-
-	Atr_Search_Onclick();
-
-	Atr_Adv_Search_Dialog:Hide();
-
+	Atr_Adv_Search_Dialog:Hide()
 end
 
 -----------------------------------------
