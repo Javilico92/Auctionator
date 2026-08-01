@@ -1354,7 +1354,7 @@ function Atr_AuctionFrameTab_OnClick (self, index, down)
 		if (index == Atr_FindTabIndex(BUY_TAB))		then gCurrentPane = gShopPane; end;
 		if (index == Atr_FindTabIndex(MORE_TAB))	then gCurrentPane = gMorePane; end;
 
-    if (index == Atr_FindTabIndex(SELL_TAB))  then AuctionatorTitle:SetText ("Auctionator - "..ZT("Sell"));     end;
+    if (index == Atr_FindTabIndex(SELL_TAB))  then AuctionatorTitle:SetText ("Auctionator - "..ZT("CONFIG_SELLING_CATEGORY"));     end;
     if (index == Atr_FindTabIndex(BUY_TAB))   then AuctionatorTitle:SetText ("Auctionator - "..ZT("CONFIG_SHOPPING_CATEGORY"));      end;
     if (index == Atr_FindTabIndex(MORE_TAB))  then AuctionatorTitle:SetText ("Auctionator - "..ZT("More").."...");  end;
 
@@ -1464,10 +1464,23 @@ function Atr_AuctionFrameTab_OnClick (self, index, down)
 	Atr_HideElems (recommendElements);
 
 	if index == Atr_FindTabIndex(BUY_TAB) then
+		if Auctionator.Tabs and Auctionator.Tabs.Selling then
+			Auctionator.Tabs.Selling:Hide()
+		end
   		_G["Atr_Main_Panel"]:Hide()
 		Auctionator.Shopping.Show()
+	elseif index == Atr_FindTabIndex(SELL_TAB) then
+		Auctionator.Shopping.Hide()
+		if Auctionator.Tabs and Auctionator.Tabs.Selling then
+			Auctionator.Tabs.Selling:Show()
+		else
+			_G["Atr_Main_Panel"]:Show()
+		end
 	else
 		Auctionator.Shopping.Hide()
+		if Auctionator.Tabs and Auctionator.Tabs.Selling then
+			Auctionator.Tabs.Selling:Hide()
+		end
 		_G["Atr_Main_Panel"]:Show()
 	end
 
@@ -1963,6 +1976,10 @@ function Atr_AddMainPanel ()
 	frame:Hide();
 
 	UIDropDownMenu_SetWidth (Atr_Duration, 95);
+
+	if Auctionator and Auctionator.Tabs and Auctionator.Tabs.Selling then
+		Auctionator.Tabs.Selling:Initialize();
+	end
 
 end
 

@@ -212,7 +212,7 @@ AtrL["stack for"] = "Stack für"            -- information on the shopping dialo
 AtrL["stacks for"] = "Stacks für"        -- e.g. "buy 3 stacks for 45g"
 
 -- sell pane texts
-AtrL["Sell"] = "Verkaufe"                        -- tab name
+AtrL["CONFIG_SELLING_CATEGORY"] = "Verkaufen"                        -- tab name
 AtrL["Recommended Buyout Price"] = "Vorgeschlagener Sofortkaufpreis"
 AtrL["for your stack of %d"] = "für deinen Stack von %d"
 AtrL["per stack"] = "pro Stack"
