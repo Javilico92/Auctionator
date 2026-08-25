@@ -886,33 +886,22 @@ end
 	
 -----------------------------------------
 
-function Atr_STWP_AddAuctionInfo (tip, xstring, link, auctionPrice, lastScan)
+function Atr_STWP_AddAuctionInfo (tip, xstring, link, auctionPrice, lastScan, isAuctionable)
 	
+	-- Do not show any Auctionator auction-price line for items that cannot be
+	-- posted. Vendor and disenchant information are handled independently.
+	if (AUCTIONATOR_A_TIPS ~= 1 or isAuctionable == false) then
+		return;
+	end
 	
-	if (AUCTIONATOR_A_TIPS == 1) then
+	if lastScan then
+		tip:AddDoubleLine ("Last Scanned", lastScan);
+	end
 	
-		if lastScan then
-			tip:AddDoubleLine ("Last Scanned", lastScan);
-		end
-	
-		
-		
-		local itemID = zc.RawItemIDfromLink (link);
-		itemID = tonumber(itemID);
-	
-		local bondtype = Atr_GetBondType (itemID);
-		
-		if (bondtype == ATR_BIND_ON_PICKUP) then
-			tip:AddDoubleLine (ZT("Auction")..xstring, "|cFFFFFFFF"..ZT("BOP").."  ");		
-		elseif (bondtype == ATR_BINDS_TO_ACCOUNT) then
-			tip:AddDoubleLine (ZT("Auction")..xstring, "|cFFFFFFFF"..ZT("BOA").."  ");		
-		elseif (bondtype == ATR_QUEST_ITEM) then
-			tip:AddDoubleLine (ZT("Auction")..xstring, "|cFFFFFFFF"..ZT("Quest Item").."  ");		
-		elseif (auctionPrice ~= nil) then
-			tip:AddDoubleLine (ZT("Auction")..xstring, "|cFFFFFFFF"..zc.priceToMoneyString (auctionPrice));
-		else
-			tip:AddDoubleLine (ZT("Auction")..xstring, "|cFFFFFFFF"..ZT("unknown").."  ");
-		end
+	if (auctionPrice ~= nil) then
+		tip:AddDoubleLine (ZT("Auction")..xstring, "|cFFFFFFFF"..zc.priceToMoneyString (auctionPrice));
+	else
+		tip:AddDoubleLine (ZT("Auction")..xstring, "|cFFFFFFFF"..ZT("unknown").."  ");
 	end
 		
 end
@@ -933,14 +922,14 @@ end
 	
 -----------------------------------------
 
-function Atr_STWP_GetPrices (link, num, showStackPrices, itemVendorPrice, itemName, itemType, itemRarity, itemLevel)
+function Atr_STWP_GetPrices (link, num, showStackPrices, itemVendorPrice, itemName, itemType, itemRarity, itemLevel, isAuctionable)
 
 	local vendorPrice	= 0;
-	local auctionPrice	= 0;
+	local auctionPrice	= nil;
 	local dePrice		= nil;
 	
 	if (AUCTIONATOR_V_TIPS == 1) then vendorPrice	= itemVendorPrice; end;
-	if (AUCTIONATOR_A_TIPS == 1) then auctionPrice	= Atr_GetAuctionPrice (itemName); end;
+	if (AUCTIONATOR_A_TIPS == 1 and isAuctionable ~= false) then auctionPrice = Atr_GetAuctionPrice (itemName); end;
 	if (AUCTIONATOR_D_TIPS == 1) then dePrice		= Atr_CalcDisenchantPrice (itemType, itemRarity, itemLevel); end;
 	
 	if (num and showStackPrices) then
@@ -1002,6 +991,11 @@ function Atr_ShowTipWithPricing (tip, link, num)
 	end
 	
 	local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, _, _, _, _, itemVendorPrice = GetItemInfo (link);
+	
+	local isAuctionable = true;
+	if Auctionator.ItemAuctionability and Auctionator.ItemAuctionability.IsTooltipAuctionable then
+		isAuctionable = Auctionator.ItemAuctionability.IsTooltipAuctionable(tip);
+	end
 		
 
 	local showStackPrices = IsShiftKeyDown();
@@ -1015,7 +1009,7 @@ function Atr_ShowTipWithPricing (tip, link, num)
 	end
 
 
-	local vendorPrice, auctionPrice, dePrice = Atr_STWP_GetPrices (link, num, showStackPrices, itemVendorPrice, itemName, itemType, itemRarity, itemLevel);
+	local vendorPrice, auctionPrice, dePrice = Atr_STWP_GetPrices (link, num, showStackPrices, itemVendorPrice, itemName, itemType, itemRarity, itemLevel, isAuctionable);
 
 	-- vendor info
 
@@ -1035,10 +1029,10 @@ function Atr_ShowTipWithPricing (tip, link, num)
 		end
 		local MakeTimeString = format(timeColor.."%s ago".."|r", SecondsToTime(TimeDiff))
 		
-		Atr_STWP_AddAuctionInfo (tip, xstring, link, auctionPrice, MakeTimeString)
+		Atr_STWP_AddAuctionInfo (tip, xstring, link, auctionPrice, MakeTimeString, isAuctionable)
 		
 	else
-		Atr_STWP_AddAuctionInfo (tip, xstring, link, auctionPrice)
+		Atr_STWP_AddAuctionInfo (tip, xstring, link, auctionPrice, nil, isAuctionable)
 	end
 
 	-- disenchanting info

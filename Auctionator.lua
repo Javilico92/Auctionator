@@ -41,8 +41,9 @@ AUCTIONATOR_OPEN_FIRST		= 0;	-- obsolete - just needed for migration
 AUCTIONATOR_OPEN_BUY		= 0;	-- obsolete - just needed for migration
 
 local SELL_TAB		= 1;
-local MORE_TAB		= 2;
+local CANCELLING_TAB		= 2;
 local BUY_TAB 		= 3;
+local AUCTIONATOR_TAB	= 4;
 
 
 -- saved variables - amounts to undercut
@@ -104,7 +105,8 @@ local gHlistNeedsUpdate = false;
 local gAtr_SellTriggeredByAuctionator = false;
 
 local gSellPane;
-local gMorePane;
+local gCancellingPane;
+local gAuctionatorPane;
 local gActivePane;
 local gShopPane;
 
@@ -1172,10 +1174,19 @@ function Atr_Init()
 	end
 
 	gShopPane	= Atr_AddSellTab (ZT("CONFIG_SHOPPING_CATEGORY"),			BUY_TAB);
-	gSellPane	= Atr_AddSellTab (ZT("Sell"),			SELL_TAB);
-	gMorePane	= Atr_AddSellTab (ZT("More").."...",	MORE_TAB);
+	gSellPane	= Atr_AddSellTab (ZT("CONFIG_SELLING_CATEGORY"),			SELL_TAB);
+	gCancellingPane = Atr_AddSellTab (ZT("CANCELLING_TAB"), CANCELLING_TAB);
+	gAuctionatorPane = Atr_AddSellTab (ZT("AUCTIONATOR_TAB"), AUCTIONATOR_TAB);
 
 	Atr_AddMainPanel ();
+
+	if Auctionator.Tabs and Auctionator.Tabs.Cancelling then
+		Auctionator.Tabs.Cancelling:Initialize()
+	end
+
+	if Auctionator.Tabs and Auctionator.Tabs.Auctionator then
+		Auctionator.Tabs.Auctionator:Initialize()
+	end
 
 	Auctionator.Shopping.Initialize(AuctionFrame) -- Modern logic
 
@@ -1303,60 +1314,85 @@ function Atr_AuctionFrameTab_OnClick (self, index, down)
 
 	_G["Atr_Main_Panel"]:Hide();
 
+	if Auctionator.Tabs and Auctionator.Tabs.Cancelling then
+		Auctionator.Tabs.Cancelling:Hide()
+	end
+
+	if Auctionator.Tabs and Auctionator.Tabs.Auctionator then
+		Auctionator.Tabs.Auctionator:Hide()
+	end
+
 	Auctionator.Shopping.Hide() -- Modern structure
 
-	gBuyState = ATR_BUY_NULL;			-- just in case
-	gItemPostingInProgress = false;		-- just in case
-	
+	gBuyState = ATR_BUY_NULL;
+	gItemPostingInProgress = false;
+
 	auctionator_orig_AuctionFrameTab_OnClick (self, index, down);
 
 	if (not Atr_IsAuctionatorTab(index)) then
+		if Auctionator.Tabs and Auctionator.Tabs.Selling then
+			Auctionator.Tabs.Selling:Hide()
+		end
+
 		gForceMsgAreaUpdate = true;
 		Atr_HideAllDialogs();
-		
-		if (index >= 1 and index <= 3) then		-- if it's one of Blizzard's tabs
+
+		if (index >= 1 and index <= 3) then
 			AuctionFrameMoneyFrame:Show();
 		end
-		
-		if (AP_Bid_MoneyFrame) then		-- for the addon 'Auction Profit'
-			if (AP_ShowBid)	then	AP_ShowHide_Bid_Button(1);	end;
-			if (AP_ShowBO)	then	AP_ShowHide_BO_Button(1);	end;
+
+		if (AP_Bid_MoneyFrame) then
+			if (AP_ShowBid) then AP_ShowHide_Bid_Button(1); end;
+			if (AP_ShowBO) then AP_ShowHide_BO_Button(1); end;
 		end
 
-	elseif (Atr_IsAuctionatorTab(index)) then
-	
-		AuctionFrameAuctions:Hide();
-		AuctionFrameBrowse:Hide();
-		AuctionFrameBid:Hide();
-		PlaySound(SOUNDKIT.IG_CHARACTER_INFO_TAB);
+		return
+	end
 
-		PanelTemplates_SetTab(AuctionFrame, index);
+	AuctionFrameAuctions:Hide();
+	AuctionFrameBrowse:Hide();
+	AuctionFrameBid:Hide();
+	PlaySound(SOUNDKIT.IG_CHARACTER_INFO_TAB);
+	PanelTemplates_SetTab(AuctionFrame, index);
 
-		AuctionFrameTopLeft:SetTexture	("Interface\\AddOns\\Auctionator\\Images\\Atr_topleft");
-		AuctionFrameBotLeft:SetTexture	("Interface\\AddOns\\Auctionator\\Images\\Atr_botleft");
-		AuctionFrameTop:SetTexture		("Interface\\AddOns\\Auctionator\\Images\\Atr_top");
-		AuctionFrameTopRight:SetTexture	("Interface\\AddOns\\Auctionator\\Images\\Atr_topright");
-		AuctionFrameBot:SetTexture		("Interface\\AddOns\\Auctionator\\Images\\Atr_bot");
-		AuctionFrameBotRight:SetTexture	("Interface\\AddOns\\Auctionator\\Images\\Atr_botright");
-		
-		if gCurrentPane ~= nil then gCurrentPane.activeSearch:Abort(); end --abort scan when changing tab
-		if (index == Atr_FindTabIndex(SELL_TAB))	then gCurrentPane = gSellPane; end;
-		
-		if not (index == Atr_FindTabIndex(SELL_TAB)) then
-			if not (gSellPane.currIndex ~= nil) then
-				if (AuctionsItemButtonName:GetText() ~= nil) then
-					ClickAuctionSellItemButton();
-					ClearCursor();
-				end
-			end	
+	AuctionFrameTopLeft:SetTexture   ("Interface\\AddOns\\Auctionator\\Images\\Atr_topleft");
+	AuctionFrameBotLeft:SetTexture   ("Interface\\AddOns\\Auctionator\\Images\\Atr_botleft");
+	AuctionFrameTop:SetTexture       ("Interface\\AddOns\\Auctionator\\Images\\Atr_top");
+	AuctionFrameTopRight:SetTexture  ("Interface\\AddOns\\Auctionator\\Images\\Atr_topright");
+	AuctionFrameBot:SetTexture       ("Interface\\AddOns\\Auctionator\\Images\\Atr_bot");
+	AuctionFrameBotRight:SetTexture  ("Interface\\AddOns\\Auctionator\\Images\\Atr_botright");
+
+	if gCurrentPane and gCurrentPane.activeSearch then
+		gCurrentPane.activeSearch:Abort();
+	end
+
+	if (index == Atr_FindTabIndex(SELL_TAB)) then gCurrentPane = gSellPane; end;
+	if (index == Atr_FindTabIndex(BUY_TAB)) then gCurrentPane = gShopPane; end;
+	if (index == Atr_FindTabIndex(CANCELLING_TAB)) then gCurrentPane = gCancellingPane; end;
+	if (index == Atr_FindTabIndex(AUCTIONATOR_TAB)) then gCurrentPane = gAuctionatorPane; end;
+
+	if not (index == Atr_FindTabIndex(SELL_TAB)) then
+		if not (gSellPane.currIndex ~= nil) then
+			if (AuctionsItemButtonName:GetText() ~= nil) then
+				ClickAuctionSellItemButton();
+				ClearCursor();
+			end
 		end
-		
-		if (index == Atr_FindTabIndex(BUY_TAB))		then gCurrentPane = gShopPane; end;
-		if (index == Atr_FindTabIndex(MORE_TAB))	then gCurrentPane = gMorePane; end;
+	end
 
-    if (index == Atr_FindTabIndex(SELL_TAB))  then AuctionatorTitle:SetText ("Auctionator - "..ZT("CONFIG_SELLING_CATEGORY"));     end;
-    if (index == Atr_FindTabIndex(BUY_TAB))   then AuctionatorTitle:SetText ("Auctionator - "..ZT("CONFIG_SHOPPING_CATEGORY"));      end;
-    if (index == Atr_FindTabIndex(MORE_TAB))  then AuctionatorTitle:SetText ("Auctionator - "..ZT("More").."...");  end;
+	if (index == Atr_FindTabIndex(SELL_TAB)) then
+		AuctionatorTitle:SetText("Auctionator - "..ZT("CONFIG_SELLING_CATEGORY"));
+	elseif (index == Atr_FindTabIndex(BUY_TAB)) then
+		AuctionatorTitle:SetText("Auctionator - "..ZT("CONFIG_SHOPPING_CATEGORY"));
+	elseif (index == Atr_FindTabIndex(CANCELLING_TAB)) then
+		AuctionatorTitle:SetText("Auctionator - "..ZT("CANCELLING_TAB"));
+	else
+		local auctionatorTitle = "Auctionator"
+		if Auctionator.Tabs and Auctionator.Tabs.Auctionator and Auctionator.Tabs.Auctionator.GetTitle then
+			auctionatorTitle = Auctionator.Tabs.Auctionator:GetTitle()
+		end
+		AuctionatorTitle:SetText("Auctionator - "..auctionatorTitle);
+	end
 
 	Atr_ClearHlist();
 	Atr_SellControls:Hide();
@@ -1370,45 +1406,34 @@ function Atr_AuctionFrameTab_OnClick (self, index, down)
 	Atr_RemFromSListButton:Hide();
 	Atr_NewSListButton:Hide();
 	Atr_MngSListsButton:Hide();
-	Atr_SrchSListButton:Hide()
+	Atr_SrchSListButton:Hide();
 	Atr_ActiveItems_Text:Hide();
 	Atr_DropDownSL:Hide();
 	Atr_CheckActiveButton:Hide();
-	Atr_Back_Button:Hide()
-	Atr_SaveThisList_Button:Hide()
-	
+	Atr_Back_Button:Hide();
+	Atr_SaveThisList_Button:Hide();
 	AuctionFrameMoneyFrame:Hide();
-	
 	Atr_HeadingsBar:Hide();
 	Atr_ListTabs:Hide();
-	
-	Atr_HideAllDialogs();		
+	Atr_Hilite1_btn:Hide();
+
+	Atr_HideAllDialogs();
 	Atr_CheckingActive_Finish();
-	if (gCurrentPane.currIndex ~= nil) then
-		Atr_HeadingsBar:Show();
-		Atr_ListTabs:Show();		
-	else
-		if (index == Atr_FindTabIndex(SELL_TAB)) then 
+	Atr_HideElems(recommendElements);
+
+	if (index == Atr_FindTabIndex(SELL_TAB)) then
+		if (gCurrentPane.currIndex == nil) then
 			gSellPane:ClearSearch();
-			
-			-- remove item from browse tab
+
 			if (AuctionsItemButtonName:GetText() ~= nil) then
 				ClickAuctionSellItemButton();
 				ClearCursor();
 			end
 		end
-		
-		-- if (index == Atr_FindTabIndex(BUY_TAB))	then 
-			-- ShopPane:ClearSearch();
-		-- end
-		
-		if (index == Atr_FindTabIndex(MORE_TAB)) then
-			gMorePane:ClearSearch();
-		end
-	end
-	
-	if (index == Atr_FindTabIndex(SELL_TAB)) then	
+
 		if (gCurrentPane.currIndex ~= nil) then
+			Atr_HeadingsBar:Show();
+			Atr_ListTabs:Show();
 			Atr_SellControls:Show();
 			Atr_Hilite1:SetSize(610, 116);
 			Atr_Hilite1_btn:SetSize(610, 116);
@@ -1417,76 +1442,86 @@ function Atr_AuctionFrameTab_OnClick (self, index, down)
 			Atr_Hilite1_btn:SetSize(805, 341);
 		end
 		Atr_Hilite1_btn:Show();
-	else
-		Atr_Hlist:Show();
-		Atr_Hlist_ScrollFrame:Show();
-		if (gJustPosted.ItemName) then
-			gJustPosted.ItemName = nil;
-			gSellPane:ClearSearch ();
-		end
-		Atr_Hilite1_btn:Hide();
-	end
-
-
-	if (index == Atr_FindTabIndex(MORE_TAB)) then	
-		FauxScrollFrame_SetOffset (Atr_Hlist_ScrollFrame, gCurrentPane.hlistScrollOffset);
-		Atr_DisplayHlist();
-		Atr_ActiveItems_Text:Show();
-		Atr_CheckActiveButton:Show();
-	end
-	
-	
-	if (index == Atr_FindTabIndex(BUY_TAB)) then
-		Atr_Search_Box:Show();
-		Atr_Search_Button:Show();
-		Atr_Adv_Search_Button:Show();
-		Atr_Exact_Search_Button:Show();
-		AuctionFrameMoneyFrame:Show();
-		Atr_BuildGlobalHistoryList(true); -- Keep in 335
-		Atr_AddToSListButton:Show();
-		Atr_RemFromSListButton:Show();
-		Atr_NewSListButton:Show();
-		Atr_MngSListsButton:Show();
-		Atr_SrchSListButton:Show()
-		Atr_DropDownSL:Show();
-		Atr_Hlist:SetHeight (252);
-		Atr_Hlist_ScrollFrame:SetHeight (252);
-	else
-		Atr_Hlist:SetHeight (335);
-		Atr_Hlist_ScrollFrame:SetHeight (335);
-	end
-
-	if (index == Atr_FindTabIndex(BUY_TAB) or index == Atr_FindTabIndex(SELL_TAB)) then
 		Atr_Buy1_Button:Show();
 		Atr_Buy1_Button:Disable();
-	end
 
-	Atr_HideElems (recommendElements);
-
-	if index == Atr_FindTabIndex(BUY_TAB) then
-		if Auctionator.Tabs and Auctionator.Tabs.Selling then
-			Auctionator.Tabs.Selling:Hide()
-		end
-  		_G["Atr_Main_Panel"]:Hide()
-		Auctionator.Shopping.Show()
-	elseif index == Atr_FindTabIndex(SELL_TAB) then
-		Auctionator.Shopping.Hide()
+		Auctionator.Shopping.Hide();
 		if Auctionator.Tabs and Auctionator.Tabs.Selling then
 			Auctionator.Tabs.Selling:Show()
 		else
 			_G["Atr_Main_Panel"]:Show()
 		end
-	else
-		Auctionator.Shopping.Hide()
+
+		-- Keep Blizzard's player-money display visible in every Auctionator tab,
+		-- matching the Shopping tab and the native Auction House panels.
+		if AuctionFrameMoneyFrame then
+			AuctionFrameMoneyFrame:Show();
+		end
+
+	elseif (index == Atr_FindTabIndex(BUY_TAB)) then
 		if Auctionator.Tabs and Auctionator.Tabs.Selling then
 			Auctionator.Tabs.Selling:Hide()
 		end
-		_G["Atr_Main_Panel"]:Show()
+
+		Atr_Hlist:Show();
+		Atr_Hlist_ScrollFrame:Show();
+		Atr_Search_Box:Show();
+		Atr_Search_Button:Show();
+		Atr_Adv_Search_Button:Show();
+		Atr_Exact_Search_Button:Show();
+		AuctionFrameMoneyFrame:Show();
+		Atr_BuildGlobalHistoryList(true);
+		Atr_AddToSListButton:Show();
+		Atr_RemFromSListButton:Show();
+		Atr_NewSListButton:Show();
+		Atr_MngSListsButton:Show();
+		Atr_SrchSListButton:Show();
+		Atr_DropDownSL:Show();
+		Atr_Hlist:SetHeight(252);
+		Atr_Hlist_ScrollFrame:SetHeight(252);
+		Atr_Buy1_Button:Show();
+		Atr_Buy1_Button:Disable();
+
+		_G["Atr_Main_Panel"]:Hide();
+		Auctionator.Shopping.Show();
+
+	elseif (index == Atr_FindTabIndex(CANCELLING_TAB)) then
+		if Auctionator.Tabs and Auctionator.Tabs.Selling then
+			Auctionator.Tabs.Selling:Hide()
+		end
+
+		gCancellingPane:ClearSearch();
+		_G["Atr_Main_Panel"]:Hide();
+		Auctionator.Shopping.Hide();
+
+		if Auctionator.Tabs and Auctionator.Tabs.Cancelling then
+			Auctionator.Tabs.Cancelling:Show()
+		end
+
+		if AuctionFrameMoneyFrame then
+			AuctionFrameMoneyFrame:Show();
+		end
+
+	else
+		if Auctionator.Tabs and Auctionator.Tabs.Selling then
+			Auctionator.Tabs.Selling:Hide()
+		end
+
+		gAuctionatorPane:ClearSearch();
+		_G["Atr_Main_Panel"]:Hide();
+		Auctionator.Shopping.Hide();
+
+		if Auctionator.Tabs and Auctionator.Tabs.Auctionator then
+			Auctionator.Tabs.Auctionator:Show()
+		end
+
+		if AuctionFrameMoneyFrame then
+			AuctionFrameMoneyFrame:Show();
+		end
 	end
 
-	gCurrentPane.UINeedsUpdate = true
-
-	gCurrentPane.UINeedsUpdate = true;
+	if gCurrentPane then
+		gCurrentPane.UINeedsUpdate = true;
 	end
 end
 
@@ -1537,10 +1572,15 @@ end
 
 -----------------------------------------
 
-function Atr_IsModeActiveAuctions ()
-  -- Auctionator.Debug.Message( 'Atr_IsModeActiveAuctions' )
+function Atr_IsModeCancelling ()
+  -- Auctionator.Debug.Message( 'Atr_IsModeCancelling' )
 
-	return (Atr_IsTabSelected(MORE_TAB));
+	return (Atr_IsTabSelected(CANCELLING_TAB));
+end
+
+-- Compatibility alias retained for old external integrations.
+function Atr_IsModeActiveAuctions ()
+	return Atr_IsModeCancelling();
 end
 
 -----------------------------------------
@@ -1814,7 +1854,7 @@ function Atr_OnAuctionOwnedUpdate ()
 
 	gItemPostingInProgress = false;
 	
-	if (Atr_IsModeActiveAuctions()) then
+	if (Atr_IsModeCancelling()) then
 		gHlistNeedsUpdate = true;
 	end
 
@@ -1824,6 +1864,10 @@ function Atr_OnAuctionOwnedUpdate ()
 	end;
 
 	gActiveAuctions = {};		-- always flush this cache
+
+	if Auctionator.Tabs and Auctionator.Tabs.Cancelling then
+		Auctionator.Tabs.Cancelling:OnOwnedAuctionsUpdate()
+	end
 
 	if (gAtr_SellTriggeredByAuctionator) then
 	
@@ -2147,7 +2191,7 @@ end
 function Atr_OnSearchComplete ()
   Auctionator.Debug.Message( 'Atr_OnSearchComplete' )
 
-  if Auctionator and Auctionator.Shopping then
+  if Atr_IsModeBuy() and Auctionator and Auctionator.Shopping then
     local totalAuctions = 0
 
     if gCurrentPane and gCurrentPane.activeSearch then
@@ -2170,6 +2214,14 @@ function Atr_OnSearchComplete ()
 	local count = gCurrentPane.activeSearch:NumScans();
 	if (count == 1) then
 		gCurrentPane.activeScan = gCurrentPane.activeSearch:GetFirstScan();
+	end
+
+	if (Atr_IsModeCancelling()) then
+		if Auctionator.Tabs and Auctionator.Tabs.Cancelling then
+			Auctionator.Tabs.Cancelling:OnSearchComplete()
+		end
+		gCurrentPane.UINeedsUpdate = true;
+		return
 	end
 
 	if (Atr_IsModeCreateAuction()) then
@@ -2199,10 +2251,6 @@ function Atr_OnSearchComplete ()
 		Atr_UpdateRecommendation(true);
 		Atr_SellControls:Show();
 	else
-		if (Atr_IsModeActiveAuctions()) then
-			Atr_DisplayHlist();
-		end
-		
 		Atr_FindBestCurrentAuction ();
 	end
 	
@@ -2612,6 +2660,34 @@ function Atr_UpdateRecommendation (updatePrices)
 
 		if (#scn.sortedData == 0) then
 			Atr_SetMessage (ZT("No current auctions found"));
+
+			-- A search with no competing auctions has no market price from which
+			-- Auctionator can build its recommendation. Previously the three
+			-- money fields remained at zero, which kept Create Auction disabled
+			-- even though a valid item and stack were selected.
+			--
+			-- Provide a conservative, editable fallback based on twice the
+			-- vendor sell value. Items without a vendor value start at one copper.
+			-- Never overwrite a price the player has already entered manually.
+			if updatePrices and gCurrentPane == gSellPane and Atr_StackSize() > 0 then
+				local currentStackPrice = MoneyInputFrame_GetCopper(Atr_StackPrice) or 0;
+
+				if currentStackPrice <= 0 then
+					local vendorPrice = 0;
+					if scn.itemLink then
+						vendorPrice = tonumber(select(11, GetItemInfo(scn.itemLink))) or 0;
+					end
+
+					local fallbackItemPrice = math.max(vendorPrice * 2, 1);
+					local fallbackStackPrice = fallbackItemPrice * Atr_StackSize();
+					local fallbackStartPrice = math.max(Atr_CalcStartPrice(fallbackItemPrice), 1) * Atr_StackSize();
+
+					MoneyInputFrame_SetCopper(Atr_ItemPrice, fallbackItemPrice);
+					MoneyInputFrame_SetCopper(Atr_StackPrice, fallbackStackPrice);
+					MoneyInputFrame_SetCopper(Atr_StartingPrice, fallbackStartPrice);
+				end
+			end
+
 			return;
 		end
 
@@ -2919,7 +2995,7 @@ function Atr_OnAuctionHouseShow()
 
 	if (AUCTIONATOR_DEFTAB == 1) then		Atr_SelectPane (SELL_TAB);	end
 	if (AUCTIONATOR_DEFTAB == 2) then		Atr_SelectPane (BUY_TAB);	end
-	if (AUCTIONATOR_DEFTAB == 3) then		Atr_SelectPane (MORE_TAB);	end
+	if (AUCTIONATOR_DEFTAB == 3) then		Atr_SelectPane (CANCELLING_TAB);	end
 
 	Atr_ResetDuration();
 
@@ -2944,7 +3020,14 @@ function Atr_OnAuctionHouseClosed()
 			
 	gSellPane:ClearSearch();
 	gShopPane:ClearSearch();
-	gMorePane:ClearSearch();
+	gCancellingPane:ClearSearch();
+	gAuctionatorPane:ClearSearch();
+	if Auctionator.Tabs and Auctionator.Tabs.Cancelling then
+		Auctionator.Tabs.Cancelling:OnAuctionHouseClosed()
+	end
+	if Auctionator.Tabs and Auctionator.Tabs.Auctionator then
+		Auctionator.Tabs.Auctionator:OnAuctionHouseClosed()
+	end
 	OpenAllBags(false);
 	gAtr_FullScanState	= ATR_FS_NULL --reset state too
 
@@ -3208,6 +3291,20 @@ function Atr_UpdateUI ()
   -- Auctionator.Debug.Message( 'Atr_UpdateUI' )
 
 	local needsUpdate = gCurrentPane.UINeedsUpdate;
+
+	if (Atr_IsModeCancelling()) then
+		gCurrentPane.UINeedsUpdate = false;
+		if (gHlistNeedsUpdate) then
+			gHlistNeedsUpdate = false;
+			if Auctionator.Tabs and Auctionator.Tabs.Cancelling then
+				Auctionator.Tabs.Cancelling:OnOwnedAuctionsUpdate()
+			end
+		end
+		if Auctionator.Tabs and Auctionator.Tabs.Cancelling and Auctionator.Tabs.Cancelling:IsShown() then
+			Auctionator.Tabs.Cancelling:HideLegacyUI()
+		end
+		return
+	end
 	
 	if (gCurrentPane.UINeedsUpdate) then
 
@@ -3258,13 +3355,6 @@ function Atr_UpdateUI ()
 			Atr_Shop_UpdateUI();
 		end
 		
-	end
-	
-	-- update the hlist if needed
-
-	if (gHlistNeedsUpdate and Atr_IsModeActiveAuctions()) then
-		gHlistNeedsUpdate = false;
-		Atr_DisplayHlist();
 	end
 	
 	if (Atr_IsTabSelected(SELL_TAB)) then
@@ -4891,7 +4981,7 @@ function Atr_IsTabSelected(whichTab)
 	end
 
 	if (not whichTab) then
-		return (Atr_IsTabSelected(SELL_TAB) or Atr_IsTabSelected(MORE_TAB) or Atr_IsTabSelected(BUY_TAB));
+		return (Atr_IsTabSelected(SELL_TAB) or Atr_IsTabSelected(CANCELLING_TAB) or Atr_IsTabSelected(BUY_TAB) or Atr_IsTabSelected(AUCTIONATOR_TAB));
 	end
 
 	return (PanelTemplates_GetSelectedTab (AuctionFrame) == Atr_FindTabIndex(whichTab));
@@ -4902,7 +4992,7 @@ end
 function Atr_IsAuctionatorTab (tabIndex)
   Auctionator.Debug.Message( 'Atr_IsAuctionatorTab', tabIndex )
 
-	if (tabIndex == Atr_FindTabIndex(SELL_TAB) or tabIndex == Atr_FindTabIndex(MORE_TAB) or tabIndex == Atr_FindTabIndex(BUY_TAB) ) then
+	if (tabIndex == Atr_FindTabIndex(SELL_TAB) or tabIndex == Atr_FindTabIndex(CANCELLING_TAB) or tabIndex == Atr_FindTabIndex(BUY_TAB) or tabIndex == Atr_FindTabIndex(AUCTIONATOR_TAB) ) then
 
 		return true;
 

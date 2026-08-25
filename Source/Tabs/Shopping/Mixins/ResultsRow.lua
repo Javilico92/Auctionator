@@ -21,8 +21,17 @@ function ResultsRow.OnLoad(row)
   row.PerItemText = GetObject(rowName .. "_PerItem_Text")
   row.PerItemPrice = GetObject(rowName .. "_PerItem_Price")
   row.StackPrice = GetObject(rowName .. "_StackPrice")
+  row.Stripe = GetObject(rowName .. "Stripe")
 
   row.ResultIndex = tonumber(string.match(rowName or "", "Entry(%d+)$"))
+
+  if row.Stripe then
+    if row.ResultIndex and row.ResultIndex % 2 == 0 then
+      row.Stripe:SetVertexColor(0.12, 0.12, 0.12, 0.45)
+    else
+      row.Stripe:SetVertexColor(0.02, 0.02, 0.02, 0.18)
+    end
+  end
 
   parent.Rows = parent.Rows or {}
 

@@ -87,17 +87,23 @@ function Atr_Buy1_Onclick ()
 	if (not Atr_IsSelectedTab_Current()) then
 		return;
 	end
+
+	local currentPane = Atr_GetCurrentPane and Atr_GetCurrentPane();
+	local scan = currentPane and currentPane.activeScan;
+	local selectedIndex = currentPane and tonumber(currentPane.currIndex);
+	local data = scan and scan.sortedData and selectedIndex and scan.sortedData[selectedIndex];
+
+	if (not data or data.yours or data.altname or (tonumber(data.buyoutPrice) or 0) <= 0) then
+		if (Atr_Buy1_Button) then
+			Atr_Buy1_Button:Disable();
+		end
+		return;
+	end
 	
 	gAtr_Buy_Query			= Atr_NewQuery();
 	gAtr_Buy_NumUserWants	= -1;
 	gAtr_Buy_NumBought		= 0;
 	
-	local currentPane = Atr_GetCurrentPane();
-	
-	local scan = currentPane.activeScan;
-	
-	local data = scan.sortedData[currentPane.currIndex];
-
 	gAtr_Buy_BuyoutPrice	= data.buyoutPrice;
 	gAtr_Buy_ItemName		= scan.itemName;
 	gAtr_Buy_ItemLink		= scan.itemLink;

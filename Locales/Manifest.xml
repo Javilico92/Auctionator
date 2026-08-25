@@ -1,4 +1,9 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <Script file="Modern\Main.lua" />
+  <Script file="Modern\enUS.lua" />
+  <Script file="Modern\esES.lua" />
+  <Script file="Modern\esMX.lua" />
+
   <Script file="enUS.lua" />
   <Script file="deDE.lua" />
   <Script file="ruRU.lua" />

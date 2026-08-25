@@ -51,15 +51,133 @@ local gGetAllTotalAuctions
 local gGetAllNumBatchAuctions
 local gGetAllSuccess
 
+-- Some 3.3.5 realms advertise getAll support but never return
+-- AUCTION_ITEM_LIST_UPDATE. Keep a watchdog around the fast request and
+-- remember incompatibility for the rest of the current login session.
+local FAST_SCAN_TIMEOUT_SECONDS = 15
+local gFastScanQueryStartedAt
+local gFastScanUnavailableForSession = false
+local gFastScanFailureReason
+
+local function Atr_FullScanL(key)
+  if Auctionator and Auctionator.Localize then
+    return Auctionator.Localize(key)
+  end
+  return ZT(key)
+end
+
+local function Atr_FullScanSetIdleAfterFailure()
+  gAtr_FullScanState = ATR_FS_NULL
+  gFastScanQueryStartedAt = nil
+  gFullScanPosition = nil
+  gDoSlowScan = false
+
+  if Atr_FullScanStartButton then
+    Atr_FullScanStartButton:SetText(Atr_FullScanL("FULL_SCAN"))
+    Atr_FullScanStartButton:Enable()
+  end
+  if Atr_FullScanDone then
+    Atr_FullScanDone:Enable()
+  end
+  if Atr_FullScanStatus then
+    Atr_FullScanStatus:SetText(Atr_FullScanL("FULL_SCAN_FAST_FAILED_STATUS"))
+  end
+end
+
+function Atr_FullScanStartSlowFallback()
+  gDoSlowScan = true
+  Atr_ShowFullScanFrame()
+
+  if Atr_FullScanStartButton then
+    Atr_FullScanStartButton:SetText(Atr_FullScanL("FULL_SCAN_PAGE_BY_PAGE"))
+    Atr_FullScanStartButton:Enable()
+  end
+
+  Atr_FullScanStart()
+end
+
+local function Atr_FullScanOfferSlowFallback(reason)
+  gFastScanFailureReason = reason
+
+  if StaticPopupDialogs and StaticPopup_Show then
+    StaticPopup_Show("AUCTIONATOR_FAST_SCAN_FAILED")
+  else
+    zc.msg_anm("|cffff3333Auctionator:|r " .. Atr_FullScanL("FULL_SCAN_FAST_FAILED_MESSAGE"))
+  end
+end
+
+function Atr_FullScanHandleFastFailure(reason)
+  -- Ignore duplicate watchdog/event failures for the same request.
+  if gAtr_FullScanState ~= ATR_FS_STARTED then
+    return
+  end
+
+  gFastScanUnavailableForSession = true
+  gGetAllSuccess = false
+
+  Atr_FullScanSetIdleAfterFailure()
+  Atr_FullScanOfferSlowFallback(reason)
+end
+
+StaticPopupDialogs = StaticPopupDialogs or {}
+StaticPopupDialogs["AUCTIONATOR_FAST_SCAN_FAILED"] = {
+  text = Atr_FullScanL("FULL_SCAN_FAST_FAILED_MESSAGE"),
+  button1 = Atr_FullScanL("FULL_SCAN_PAGE_BY_PAGE"),
+  button2 = CANCEL,
+  OnAccept = function()
+    Atr_FullScanStartSlowFallback()
+  end,
+  timeout = 0,
+  whileDead = true,
+  hideOnEscape = true,
+}
+
+-----------------------------------------
+
+function Atr_StartFullScanFromAuctionatorTab(forcePageScan)
+
+	-- If a scan is already running, simply bring its progress window forward.
+	if (gAtr_FullScanState ~= ATR_FS_NULL) then
+		Atr_ShowFullScanFrame();
+		return;
+	end
+
+	Atr_ShowFullScanFrame();
+	Atr_UpdateFullScanFrame();
+
+	-- Normal click uses the fast getAll request. Shift-click forces the
+	-- page-by-page engine, which works even on realms that disable getAll.
+	gDoSlowScan = forcePageScan and true or false;
+
+	if (not gDoSlowScan and gFastScanUnavailableForSession) then
+		Atr_FullScanSetIdleAfterFailure()
+		Atr_FullScanOfferSlowFallback("session")
+		return
+	end
+
+	if (gDoSlowScan) then
+		Atr_FullScanStartButton:SetText (Atr_FullScanL("FULL_SCAN_PAGE_BY_PAGE"));
+		Atr_FullScanStartButton:Enable();
+	else
+		Atr_FullScanStartButton:SetText (ZT("Start Scanning"));
+	end
+
+	Atr_FullScanStart();
+end
+
 -----------------------------------------
 
 function Atr_FullScanStart()
 
-	local canStart = gCanQueryAll
-
-	if (gDoSlowScan) then
-		canStart = CanSendAuctionQuery();
+	if (not gDoSlowScan and gFastScanUnavailableForSession) then
+		Atr_FullScanSetIdleAfterFailure()
+		Atr_FullScanOfferSlowFallback("session")
+		return
 	end
+
+	-- A page scan may be queued even while the normal query throttle is active;
+	-- ATR_FS_SLOW_QUERY_NEEDED will wait until CanSendAuctionQuery() is true.
+	local canStart = gDoSlowScan or gCanQueryAll
 	
 	if (canStart) then
 	
@@ -80,23 +198,30 @@ function Atr_FullScanStart()
 		gNumAdded   = 0
 		gNumUpdated = 0
 		gNumScanned = 0
+		gLowPrices = {}
+		gQualities = {}
 		
 		gGetAllSuccess = true
 
 		gDeniedCounter = 0;
 		
 		if (gDoSlowScan) then
+			gFastScanQueryStartedAt = nil
 			gAtr_FullScanState = ATR_FS_SLOW_QUERY_NEEDED;
 			gSlowScanPage = 0
+			gSlowScanTotalPages = nil
 		else
 			gAtr_FullScanState = ATR_FS_STARTED;
-			QueryAuctionItems ("", nil, nil, 0, 0, 0, 0, false, -1, true);
+			gFastScanQueryStartedAt = time()
 
       if not ITEM_QUALITY_COLORS[-1] then
         ITEM_QUALITY_COLORS[-1] = {r=0, b=0, g=0}
       end
 
-      QueryAuctionItems( "", nil, nil, 0, nil, nil, true, false, nil )
+      -- Send one canonical Wrath 3.3.5 getAll request. The previous code sent
+      -- a second query with a different signature, which could overwrite the
+      -- first request on stricter realms.
+			QueryAuctionItems ("", nil, nil, 0, 0, 0, 0, false, -1, true);
 		end
 		
 	end
@@ -111,10 +236,10 @@ function Atr_FullScanFrameIdle()
 	
 	if (gAtr_FullScanState == ATR_FS_NULL) then
 
-		gDoSlowScan = IsControlKeyDown()
+		gDoSlowScan = gFastScanUnavailableForSession or IsControlKeyDown()
 
 		if (gDoSlowScan) then
-			Atr_FullScanStartButton:SetText (ZT("Slow scan"));
+			Atr_FullScanStartButton:SetText (Atr_FullScanL("FULL_SCAN_PAGE_BY_PAGE"));
 			Atr_FullScanStartButton:Enable();
 		else
 			Atr_FullScanStartButton:SetText (ZT("Start Scanning"));
@@ -126,6 +251,14 @@ function Atr_FullScanFrameIdle()
 		end
 
 		return false;
+	end
+
+	if (gAtr_FullScanState == ATR_FS_STARTED and gFastScanQueryStartedAt) then
+		local waited = time() - gFastScanQueryStartedAt
+		if waited >= FAST_SCAN_TIMEOUT_SECONDS then
+			Atr_FullScanHandleFastFailure("timeout")
+			return true
+		end
 	end
 	
 	-- processing stuff --
@@ -185,9 +318,23 @@ end
 
 function Atr_FullScanBeginAnalyzePhase()
 
-	gAtr_FullScanState = ATR_FS_ANALYZING;
-
 	local numBatchAuctions, totalAuctions, returnedTotalAuction = Atr_GetNumAuctionItems("list");
+
+	if (not gDoSlowScan) then
+		gFastScanQueryStartedAt = nil
+
+		-- A successful getAll response should contain every auction in the
+		-- returned batch. If only one page (or otherwise fewer rows than the
+		-- advertised total) arrives, do not import a misleading partial scan.
+		local advertisedTotal = totalAuctions or returnedTotalAuction or 0
+		if advertisedTotal > numBatchAuctions then
+			gAtr_FullScanState = ATR_FS_STARTED
+			Atr_FullScanHandleFastFailure("partial")
+			return false
+		end
+	end
+
+	gAtr_FullScanState = ATR_FS_ANALYZING;
 
 	gGetAllTotalAuctions	= returnedTotalAuction
 	gGetAllNumBatchAuctions	= numBatchAuctions
@@ -208,6 +355,7 @@ function Atr_FullScanBeginAnalyzePhase()
     	zz (ZT("AUCTIONATOR_FS_CHUNK:").." ", AUCTIONATOR_FS_CHUNK)
 	end
 
+	return true
 end
 
 -----------------------------------------
@@ -444,7 +592,12 @@ function Atr_UpdateFullScanFrame()
 
   canQuery, gCanQueryAll = CanSendAuctionQuery();
 
-	if (gCanQueryAll) then
+	if (gFastScanUnavailableForSession) then
+		Atr_FullScanStatus:SetText (Atr_FullScanL("FULL_SCAN_FAST_FAILED_STATUS"));
+		Atr_FullScanStartButton:SetText (Atr_FullScanL("FULL_SCAN_PAGE_BY_PAGE"));
+		Atr_FullScanStartButton:Enable();
+		Atr_FullScanNext:SetText(Atr_FullScanL("FULL_SCAN_FAST_UNAVAILABLE"));
+	elseif (gCanQueryAll) then
 		Atr_FullScanStatus:SetText ("");
 		Atr_FullScanStartButton:Enable();
 		Atr_FullScanNext:SetText(ZT("Now"));

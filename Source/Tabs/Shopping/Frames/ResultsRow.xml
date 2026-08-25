@@ -5,7 +5,16 @@
     nombre propio para evitar colisiones con AuctionatorEntryTemplate.
   -->
   <Button name="AuctionatorShoppingResultsRowTemplate" virtual="true" hidden="true">
-    <Size><AbsDimension x="505" y="16"/></Size>
+    <Size><AbsDimension x="555" y="16"/></Size>
+
+    <Layers>
+      <Layer level="BACKGROUND">
+        <Texture name="$parentStripe">
+          <Anchors><Anchor point="TOPLEFT"/><Anchor point="BOTTOMRIGHT"/></Anchors>
+          <Color r="0.08" g="0.08" b="0.08" a="0.35"/>
+        </Texture>
+      </Layer>
+    </Layers>
 
     <Frames>
       <Frame>
@@ -79,12 +88,12 @@
       </Frame>
     </Frames>
 
-    <PushedTexture file="Interface\HelpFrame\HelpFrameButton-Highlight">
-      <TexCoords left="0.25" right="0.35" top="0.0" bottom="0.6"/>
+    <PushedTexture file="Interface\QuestFrame\UI-QuestTitleHighlight" alphaMode="ADD">
+      <Anchors><Anchor point="TOPLEFT"/><Anchor point="BOTTOMRIGHT"/></Anchors>
     </PushedTexture>
 
-    <HighlightTexture file="Interface\HelpFrame\HelpFrameButton-Highlight" alphaMode="ADD">
-      <TexCoords left="0.035" right="0.04" top="0.2" bottom="0.25"/>
+    <HighlightTexture file="Interface\QuestFrame\UI-QuestTitleHighlight" alphaMode="ADD">
+      <Anchors><Anchor point="TOPLEFT"/><Anchor point="BOTTOMRIGHT"/></Anchors>
     </HighlightTexture>
 
     <Scripts>

@@ -360,4 +360,6 @@ AtrL["Items owned"] = ""
 AtrL["Loading auction results..."] = "Loading auction results..."
 AtrL["SHOPPING_LISTS"] = "Shopping Lists"
 
+AtrL["Cancelling"] = "Cancelling"
+
 end

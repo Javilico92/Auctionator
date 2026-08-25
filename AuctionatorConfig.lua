@@ -219,7 +219,7 @@ function Atr_Opt_Deftab_Initialize(self)
   Atr_Dropdown_AddPick (self, ZT("None"), 0);
   Atr_Dropdown_AddPick (self, ZT("Sell"), 1);
   Atr_Dropdown_AddPick (self, ZT("CONFIG_SHOPPING_CATEGORY"),  2);
-  Atr_Dropdown_AddPick (self, ZT("More"), 3);
+  Atr_Dropdown_AddPick (self, ZT("Cancelling"), 3);
 end
 
 

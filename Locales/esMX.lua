@@ -377,4 +377,6 @@ AtrL["yours"] = "su subasta"
 AtrL["Spanish translation courtesy of %s"] = "Traducción a español por cortesía de %s"
 AtrL["Items owned"] = "En propiedad"
 
+AtrL["Cancelling"] = "Cancelar"
+
 end

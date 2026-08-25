@@ -17,6 +17,12 @@ function ztt.ZT (s)
 	if (s == nil or s == "") then
 		return s;
 	end
+
+	-- Modern localization keys use L["KEY"]. Only intercept known keys so
+	-- legacy calls such as ZT("Sell") continue falling through to AtrL.
+	if (Auctionator and Auctionator.HasLocalization and Auctionator.HasLocalization(s)) then
+		return Auctionator.Localize(s);
+	end
 	
 	if (AtrL) then
 		local s1 = AtrL[s];
@@ -56,6 +62,90 @@ end
 
 Atr_PickLocalizationTable (GetLocale());
 --Atr_PickLocalizationTable ("esES");
+
+-----------------------------------------
+-- Modern L["KEY"] compatibility layer
+-----------------------------------------
+
+local function Atr_GetModernLocaleTable(locale)
+	if (not AUCTIONATOR_LOCALES) then
+		return {};
+	end
+
+	local builder = AUCTIONATOR_LOCALES[locale];
+	if (type(builder) ~= "function") then
+		return {};
+	end
+
+	local ok, result = pcall(builder);
+	if (ok and type(result) == "table") then
+		return result;
+	end
+
+	return {};
+end
+
+local function Atr_InitializeModernLocalization()
+	Auctionator = Auctionator or {};
+
+	local english = Atr_GetModernLocaleTable("enUS");
+	local activeLocale = GetLocale();
+	if (activeLocale == "enGB") then
+		activeLocale = "enUS";
+	end
+	local active = Atr_GetModernLocaleTable(activeLocale);
+
+	local function ResolveModernKey(key)
+		if (key == nil or key == "") then
+			return key, false;
+		end
+
+		local value = active[key];
+		if (value and value ~= "") then
+			return value, true;
+		end
+
+		-- Some old locale files already contain modern uppercase keys.
+		if (AtrL and AtrL[key] and AtrL[key] ~= "") then
+			return AtrL[key], true;
+		end
+
+		local englishValue = english[key];
+		if (englishValue and englishValue ~= "") then
+			-- Reuse an existing legacy translation when the English text matches.
+			if (AtrL and AtrL[englishValue] and AtrL[englishValue] ~= "") then
+				return AtrL[englishValue], true;
+			end
+			return englishValue, true;
+		end
+
+		return nil, false;
+	end
+
+	function Auctionator.HasLocalization(key)
+		local _, found = ResolveModernKey(key);
+		return found;
+	end
+
+	function Auctionator.Localize(key)
+		local value, found = ResolveModernKey(key);
+		if (found) then
+			return value;
+		end
+		return key;
+	end
+
+	Auctionator.L = setmetatable({}, {
+		__index = function(_, key)
+			return Auctionator.Localize(key);
+		end
+	});
+
+	addonTable.L = Auctionator.L;
+	AUCTIONATOR_L = Auctionator.L;
+end
+
+Atr_InitializeModernLocalization();
 
 -----------------------------------------
 

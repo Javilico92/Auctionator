@@ -379,4 +379,6 @@ AtrL["Items owned"] = "En propiedad"
 AtrL["Loading auction results..."] = "Cargando resultados de la subasta..."
 AtrL["SHOPPING_LISTS"] = "Listas de compras"
 
+AtrL["Cancelling"] = "Cancelar"
+
 end

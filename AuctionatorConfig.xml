@@ -857,7 +857,7 @@
   <!-- The Scanning Options screen -->
   <Frame enableMouse="true" hidden="true" inherits="Atr_OptionsPanelTemplate" name="Atr_ScanningOptionsFrame" parent="UIParent">
     <Scripts>
-      <OnLoad>Atr_LoadOptionsSubPanel (self, gAtr_ZT("Database"));
+      <OnLoad>Atr_LoadOptionsSubPanel (self, gAtr_ZT("CONFIG_SCANNING"));
       </OnLoad>
     </Scripts>
     <Frames>

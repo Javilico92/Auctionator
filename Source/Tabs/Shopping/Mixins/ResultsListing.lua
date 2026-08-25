@@ -3,6 +3,15 @@ Auctionator.Shopping = Auctionator.Shopping or {}
 Auctionator.Shopping.ResultsListing = Auctionator.Shopping.ResultsListing or {}
 
 local ResultsListing = Auctionator.Shopping.ResultsListing
+
+local L = setmetatable({}, {
+  __index = function(_, key)
+    if Auctionator and Auctionator.Localize then
+      return Auctionator.Localize(key)
+    end
+    return key
+  end,
+})
 local NIL_VALUE = {}
 
 ResultsListing.Frame = ResultsListing.Frame or nil
@@ -42,6 +51,46 @@ end
 local function BindIfPresent(name, object)
   if object then
     BindGlobal(name, object)
+  end
+end
+
+local function GetValidSelectedAuction()
+  if not Atr_IsSelectedTab_Current or not Atr_IsSelectedTab_Current() then
+    return nil
+  end
+
+  local currentPane = Atr_GetCurrentPane and Atr_GetCurrentPane()
+  if not currentPane or not currentPane.activeScan then
+    return nil
+  end
+
+  local sortedData = currentPane.activeScan.sortedData
+  local selectedIndex = tonumber(currentPane.currIndex)
+
+  if not sortedData or not selectedIndex or selectedIndex < 1 or selectedIndex > #sortedData then
+    return nil
+  end
+
+  local data = sortedData[selectedIndex]
+  if not data or data.yours or data.altname or (tonumber(data.buyoutPrice) or 0) <= 0 then
+    return nil
+  end
+
+  return data
+end
+
+function ResultsListing.UpdateBuyButtonState()
+  local frame = ResultsListing.Frame
+  local button = frame and frame.BuyButton
+
+  if not button then
+    return
+  end
+
+  button:Disable()
+
+  if GetValidSelectedAuction() then
+    button:Enable()
   end
 end
 
@@ -109,27 +158,92 @@ function ResultsListing.OnLoad(frame)
   ResultsListing.Frame = frame
   frame.Rows = frame.Rows or {}
 
+  frame:SetBackdrop({
+    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+    edgeSize = 12,
+    insets = { left = 3, right = 3, top = 3, bottom = 3 },
+  })
+  frame:SetBackdropBorderColor(0.32, 0.32, 0.32, 1)
+
   ResolveListingObjects(frame)
+
+  -- This container only paints the table. It must never consume clicks meant
+  -- for rows or sorting buttons.
+  frame:EnableMouse(false)
 
   -- Do not depend on child OnLoad ordering in the 3.3.5 XML engine.
   local baseLevel = frame:GetFrameLevel()
 
-  -- The drag-and-drop capture button covers the results area. Keep it below
-  -- the actual result rows so it does not steal OnEnter/OnLeave from them.
   if frame.Highlight then
     frame.Highlight:SetFrameLevel(baseLevel + 1)
   end
 
+  -- The legacy drag-and-drop button covers the whole results area. On some
+  -- 3.3.5 clients it steals clicks even when rows have a higher frame level.
+  -- Keep it hidden and mouse-disabled unless an item is actually on the cursor.
   if frame.HighlightButton then
     frame.HighlightButton:SetFrameLevel(baseLevel + 1)
+    frame.HighlightButton:EnableMouse(false)
+    frame.HighlightButton:Hide()
   end
 
+  frame:SetScript("OnUpdate", function(self)
+    local capture = self.HighlightButton
+    if not capture then
+      return
+    end
+
+    local cursorType = GetCursorInfo()
+    local shouldCapture = cursorType == "item"
+
+    if shouldCapture then
+      capture:SetFrameLevel(baseLevel + 40)
+      capture:EnableMouse(true)
+      capture:Show()
+    else
+      capture:EnableMouse(false)
+      capture:Hide()
+      capture:SetFrameLevel(baseLevel + 1)
+
+      if self.Highlight then
+        self.Highlight:Hide()
+      end
+    end
+  end)
+
   if frame.ScrollFrame then
-    frame.ScrollFrame:SetFrameLevel(baseLevel + 2)
+    frame.ScrollFrame:SetFrameLevel(baseLevel + 4)
   end
 
   if frame.HeadingsBar then
-    frame.HeadingsBar:SetFrameLevel(baseLevel + 3)
+    frame.HeadingsBar:SetFrameLevel(baseLevel + 8)
+    frame.HeadingsBar:EnableMouse(false)
+
+    local middle = GetObject(frame.HeadingsBar:GetName() .. "Middle")
+    if middle then
+      middle:SetTexture("Interface\\Buttons\\WHITE8X8")
+      middle:SetVertexColor(0.14, 0.14, 0.14, 0.98)
+    end
+
+    for _, heading in ipairs({ frame.Col1Heading, frame.Col3Heading, frame.Col4Heading }) do
+      if heading then
+        heading:SetTextColor(1, 0.82, 0)
+      end
+    end
+  end
+
+  for _, button in ipairs({
+    frame.Col1HeadingButton,
+    frame.Col3HeadingButton,
+    frame.BackButton,
+    frame.SelectedItemButton,
+    frame.SaveThisListButton,
+  }) do
+    if button then
+      button:SetFrameLevel(baseLevel + 12)
+      button:EnableMouse(true)
+      button:RegisterForClicks("LeftButtonUp")
+    end
   end
 
   for index = 1, 15 do
@@ -137,7 +251,9 @@ function ResultsListing.OnLoad(frame)
 
     if row then
       frame.Rows[index] = row
-      row:SetFrameLevel(baseLevel + 4)
+      row:SetFrameLevel(baseLevel + 14)
+      row:EnableMouse(true)
+      row:RegisterForClicks("LeftButtonUp")
 
       local rowName = row:GetName()
       row.EntryText = row.EntryText or GetObject(rowName .. "_EntryText")
@@ -149,7 +265,14 @@ function ResultsListing.OnLoad(frame)
   end
 
   if frame.BuyButton then
-    frame.BuyButton:SetFrameLevel(baseLevel + 5)
+    frame.BuyButton:SetFrameLevel(baseLevel + 16)
+    frame.BuyButton:EnableMouse(true)
+    frame.BuyButton:Disable()
+  end
+
+  if frame.LoadMoreButton then
+    frame.LoadMoreButton:SetFrameLevel(baseLevel + 16)
+    frame.LoadMoreButton:EnableMouse(true)
   end
 
   if frame.LoadingOverlay then
@@ -328,6 +451,7 @@ end
 -- Keep the normal search-summary layout untouched. The extra vertical room
 -- is applied only while displaying the auctions belonging to one item.
 local DETAIL_TABLE_OFFSET = 40
+local DETAIL_COLUMNS_OFFSET = 68
 local DETAIL_HEADER_OFFSET = -24
 
 local function SetDetailLayout(enabled)
@@ -338,13 +462,14 @@ local function SetDetailLayout(enabled)
 
   local headingsName = frame.HeadingsBar:GetName()
   local middle = GetObject(headingsName .. "Middle")
-  local yOffset = enabled and -DETAIL_TABLE_OFFSET or 0
+  local tableYOffset = enabled and -DETAIL_TABLE_OFFSET or 0
+  local columnsYOffset = enabled and -DETAIL_COLUMNS_OFFSET or 0
 
   -- Move the detail table as one unit. Re-anchor the first row explicitly as
   -- well; on the 3.3.5 XML engine this avoids the rows retaining their old
   -- screen coordinates after ClearAllPoints/SetPoint on the FauxScrollFrame.
   frame.ScrollFrame:ClearAllPoints()
-  frame.ScrollFrame:SetPoint("TOPLEFT", frame.HeadingsBar, "BOTTOMLEFT", -6, yOffset)
+  frame.ScrollFrame:SetPoint("TOPLEFT", frame.HeadingsBar, "BOTTOMLEFT", -6, tableYOffset)
 
   if frame.Rows and frame.Rows[1] then
     frame.Rows[1]:ClearAllPoints()
@@ -360,7 +485,7 @@ local function SetDetailLayout(enabled)
 
   if middle then
     middle:ClearAllPoints()
-    middle:SetPoint("TOPLEFT", frame.HeadingsBar, "TOPLEFT", 0, yOffset)
+    middle:SetPoint("TOPLEFT", frame.HeadingsBar, "TOPLEFT", 0, columnsYOffset)
   end
 
   if frame.Col1Heading then
@@ -377,11 +502,11 @@ local function SetDetailLayout(enabled)
   end
   if frame.Col1HeadingButton then
     frame.Col1HeadingButton:ClearAllPoints()
-    frame.Col1HeadingButton:SetPoint("TOPLEFT", frame.HeadingsBar, "TOPLEFT", 46, -21 + yOffset)
+    frame.Col1HeadingButton:SetPoint("TOPLEFT", frame.HeadingsBar, "TOPLEFT", 46, -21 + columnsYOffset)
   end
   if frame.Col3HeadingButton then
     frame.Col3HeadingButton:ClearAllPoints()
-    frame.Col3HeadingButton:SetPoint("TOPLEFT", frame.HeadingsBar, "TOPLEFT", 220, -21 + yOffset)
+    frame.Col3HeadingButton:SetPoint("TOPLEFT", frame.HeadingsBar, "TOPLEFT", 220, -21 + columnsYOffset)
   end
 
   -- Lower the navigation/object row only in detail view. Previously the table
@@ -570,7 +695,7 @@ function ResultsListing.ShowLoadMore(loadedPages, totalPages, totalAuctions)
   button.TotalPages = tonumber(totalPages) or 1
   button.TotalAuctions = tonumber(totalAuctions) or 0
   button:Enable()
-  SetLoadMoreText(button, "Cargar más resultados")
+  SetLoadMoreText(button, L.LOAD_MORE_RESULTS)
   button:Show()
 end
 
@@ -605,7 +730,7 @@ function ResultsListing.LoadMoreOnClick(button)
   end
 
   button:Disable()
-  SetLoadMoreText(button, "Cargando...")
+  SetLoadMoreText(button, L.LOADING)
   ResultsListing.LoadMoreOnLeave(button)
 
   if Auctionator.Shopping and Auctionator.Shopping.LoadMoreResults then
@@ -629,10 +754,7 @@ function ResultsListing.LoadingOnUpdate(overlay, elapsed)
       overlay.FinishDelay = nil
       overlay:Hide()
 
-      local frame = ResultsListing.Frame
-      if frame and frame.BuyButton then
-        frame.BuyButton:Enable()
-      end
+      ResultsListing.UpdateBuyButtonState()
     end
 
     return
@@ -697,23 +819,23 @@ function ResultsListing.SetLoading(isLoading, searchText)
     overlay.FinishDelay = nil
 
     if overlay.Title then
-      overlay.Title:SetText("Buscando en la Casa de Subastas...")
+      overlay.Title:SetText(L.SHOPPING_SEARCH_TITLE)
     end
 
     if overlay.Subtitle then
-      overlay.Subtitle:SetText("Esto puede tardar unos segundos.")
+      overlay.Subtitle:SetText(L.SHOPPING_SEARCH_SUBTITLE)
     end
 
     if overlay.SearchText then
       if searchText and searchText ~= "" then
-        overlay.SearchText:SetText("Buscando: |cffffd200" .. searchText .. "|r")
+        overlay.SearchText:SetText(string.format(L.SHOPPING_SEARCHING_FOR, searchText))
       else
         overlay.SearchText:SetText("")
       end
     end
 
     if overlay.PageText then
-      overlay.PageText:SetText("Preparando búsqueda...")
+      overlay.PageText:SetText(L.SHOPPING_PREPARING_SEARCH)
     end
 
     if overlay.TotalText then
@@ -730,9 +852,7 @@ function ResultsListing.SetLoading(isLoading, searchText)
     overlay.FinishDelay = nil
     overlay:Hide()
 
-    if frame.BuyButton then
-      frame.BuyButton:Enable()
-    end
+    ResultsListing.UpdateBuyButtonState()
   end
 end
 
@@ -749,14 +869,14 @@ function ResultsListing.SetLoadingPage(currentPage, totalPages, totalAuctions)
   totalAuctions = math.max(tonumber(totalAuctions) or 0, 0)
 
   if overlay.PageText then
-    overlay.PageText:SetFormattedText("Página %d de %d", currentPage, totalPages)
+    overlay.PageText:SetFormattedText(L.SHOPPING_PAGE_X_OF_X, currentPage, totalPages)
   end
 
   if overlay.TotalText then
     if totalAuctions == 1 then
-      overlay.TotalText:SetText("1 subasta encontrada")
+      overlay.TotalText:SetText(L.SHOPPING_ONE_AUCTION_FOUND)
     else
-      overlay.TotalText:SetFormattedText("%d subastas encontradas", totalAuctions)
+      overlay.TotalText:SetFormattedText(L.SHOPPING_AUCTIONS_FOUND, totalAuctions)
     end
   end
 
@@ -768,9 +888,7 @@ function ResultsListing.FinishLoading(totalAuctions)
   local overlay = frame and frame.LoadingOverlay
 
   if not overlay or not overlay:IsShown() then
-    if frame and frame.BuyButton then
-      frame.BuyButton:Enable()
-    end
+    ResultsListing.UpdateBuyButtonState()
     return
   end
 
@@ -778,11 +896,11 @@ function ResultsListing.FinishLoading(totalAuctions)
   overlay.FinishDelay = 0.45
 
   if overlay.Title then
-    overlay.Title:SetText("Búsqueda completada")
+    overlay.Title:SetText(L.SHOPPING_SEARCH_COMPLETE)
   end
 
   if overlay.Subtitle then
-    overlay.Subtitle:SetText("Los resultados ya están disponibles.")
+    overlay.Subtitle:SetText(L.SHOPPING_RESULTS_AVAILABLE)
   end
 
   if overlay.PageText then
@@ -791,9 +909,9 @@ function ResultsListing.FinishLoading(totalAuctions)
 
   if overlay.TotalText then
     if totalAuctions == 1 then
-      overlay.TotalText:SetText("1 resultado encontrado")
+      overlay.TotalText:SetText(L.SHOPPING_ONE_RESULT_FOUND)
     else
-      overlay.TotalText:SetFormattedText("%d resultados encontrados", totalAuctions)
+      overlay.TotalText:SetFormattedText(L.SHOPPING_RESULTS_FOUND, totalAuctions)
     end
   end
 

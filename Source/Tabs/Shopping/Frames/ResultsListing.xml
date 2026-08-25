@@ -6,6 +6,18 @@
   <Frame name="AuctionatorShoppingResultsListingTemplate" virtual="true">
     <Size><AbsDimension x="575" y="286"/></Size>
 
+    <Layers>
+      <Layer level="BACKGROUND">
+        <Texture name="$parentBackground">
+          <Anchors>
+            <Anchor point="TOPLEFT"/>
+            <Anchor point="BOTTOMRIGHT"/>
+          </Anchors>
+          <Color r="0.018" g="0.018" b="0.018" a="1"/>
+        </Texture>
+      </Layer>
+    </Layers>
+
     <Frames>
       <!-- Cabeceras -->
       <Frame name="$parentHeadingsBar">
@@ -14,10 +26,14 @@
 
         <Layers>
           <Layer level="ARTWORK">
-            <Texture name="$parentMiddle" file="Interface\Glues\CharacterCreate\CharacterCreate-LabelFrame">
-              <Size><AbsDimension x="575" y="64"/></Size>
-              <Anchors><Anchor point="TOPLEFT"/></Anchors>
-              <TexCoords left="0.1953125" right="0.8046875" top="0" bottom="1"/>
+            <Texture name="$parentMiddle" file="Interface\Buttons\WHITE8X8">
+              <Size><AbsDimension x="575" y="22"/></Size>
+              <Anchors>
+                <Anchor point="TOPLEFT">
+                  <Offset><AbsDimension x="0" y="-42"/></Offset>
+                </Anchor>
+              </Anchors>
+              <Color r="0.14" g="0.14" b="0.14" a="0.98"/>
             </Texture>
 
             <FontString name="$parentCol1Heading" inherits="GameFontHighlightSmall" text="AUCTIONATOR_ITEM_PRICE" hidden="true" justifyH="CENTER">
@@ -110,7 +126,7 @@
             <Size><AbsDimension x="100" y="20"/></Size>
             <Anchors>
               <Anchor point="TOPLEFT">
-                <Offset><AbsDimension x="46" y="-21"/></Offset>
+                <Offset><AbsDimension x="46" y="-44"/></Offset>
               </Anchor>
             </Anchors>
             <Scripts><OnClick>Atr_Onclick_Col1();</OnClick></Scripts>
@@ -120,7 +136,7 @@
             <Size><AbsDimension x="108" y="20"/></Size>
             <Anchors>
               <Anchor point="TOPLEFT">
-                <Offset><AbsDimension x="220" y="-21"/></Offset>
+                <Offset><AbsDimension x="220" y="-44"/></Offset>
               </Anchor>
             </Anchors>
             <Scripts><OnClick>Atr_Onclick_Col3();</OnClick></Scripts>
@@ -206,7 +222,7 @@
         <Size><AbsDimension x="470" y="22"/></Size>
         <Anchors>
           <Anchor point="BOTTOM" relativePoint="BOTTOM">
-            <Offset><AbsDimension x="0" y="-5"/></Offset>
+            <Offset><AbsDimension x="0" y="-45"/></Offset>
           </Anchor>
         </Anchors>
         <Layers>
@@ -268,12 +284,12 @@
             <FontString name="$parentDot7" inherits="GameFontNormalLarge" text="*"><Anchors><Anchor point="CENTER"><Offset><AbsDimension x="-42" y="43"/></Offset></Anchor></Anchors></FontString>
             <FontString name="$parentDot8" inherits="GameFontNormalLarge" text="*"><Anchors><Anchor point="CENTER"><Offset><AbsDimension x="-30" y="73"/></Offset></Anchor></Anchors></FontString>
 
-            <FontString name="$parentTitle" inherits="GameFontNormalLarge" text="Buscando en la Casa de Subastas..." justifyH="CENTER">
+            <FontString name="$parentTitle" inherits="GameFontNormalLarge" text="" justifyH="CENTER">
               <Size><AbsDimension x="500" y="24"/></Size>
               <Anchors><Anchor point="CENTER"><Offset><AbsDimension x="0" y="-30"/></Offset></Anchor></Anchors>
             </FontString>
 
-            <FontString name="$parentSubtitle" inherits="GameFontHighlight" text="Esto puede tardar unos segundos." justifyH="CENTER">
+            <FontString name="$parentSubtitle" inherits="GameFontHighlight" text="" justifyH="CENTER">
               <Size><AbsDimension x="500" y="20"/></Size>
               <Anchors><Anchor point="TOP" relativeTo="$parentTitle" relativePoint="BOTTOM"><Offset><AbsDimension x="0" y="-7"/></Offset></Anchor></Anchors>
             </FontString>
@@ -283,7 +299,7 @@
               <Anchors><Anchor point="TOP" relativeTo="$parentSubtitle" relativePoint="BOTTOM"><Offset><AbsDimension x="0" y="-8"/></Offset></Anchor></Anchors>
             </FontString>
 
-            <FontString name="$parentPageText" inherits="GameFontNormal" text="Preparando búsqueda..." justifyH="CENTER">
+            <FontString name="$parentPageText" inherits="GameFontNormal" text="" justifyH="CENTER">
               <Size><AbsDimension x="500" y="20"/></Size>
               <Anchors><Anchor point="TOP" relativeTo="$parentSearchText" relativePoint="BOTTOM"><Offset><AbsDimension x="0" y="-7"/></Offset></Anchor></Anchors>
             </FontString>
@@ -332,10 +348,10 @@
 
       <!-- Acción principal -->
       <Button name="$parentBuyButton" text="Buy" inherits="UIPanelButtonTemplate">
-        <Size><AbsDimension x="90" y="22"/></Size>
+        <Size><AbsDimension x="80" y="22"/></Size>
         <Anchors>
           <Anchor point="BOTTOMRIGHT">
-            <Offset><AbsDimension x="0" y="-28"/></Offset>
+            <Offset><AbsDimension x="2" y="-80"/></Offset>
           </Anchor>
         </Anchors>
         <Scripts><OnClick>Atr_Buy1_Onclick();</OnClick></Scripts>

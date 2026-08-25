@@ -1,6 +1,6 @@
 ## Interface: 30300
 ## Title: Auctionator
-## Version: 8.2.0.2
+## Version: 8.2.0.3
 ## Author: Borjamacare, Zirco, Javilico92
 ## X-Website: https://www.curseforge.com/wow/addons/auctionator
 ## X-Category: Auction/Economy

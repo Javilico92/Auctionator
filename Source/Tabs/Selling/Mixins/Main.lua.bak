@@ -8,15 +8,6 @@ Auctionator.Tabs.Selling = Auctionator.Tabs.Selling or {}
 
 local Selling = Auctionator.Tabs.Selling
 
-local L = setmetatable({}, {
-  __index = function(_, key)
-    if Auctionator and Auctionator.Localize then
-      return Auctionator.Localize(key)
-    end
-    return key
-  end,
-})
-
 -- Temporary compatibility alias for any external code created while this panel
 -- still lived in the root-level Selling.lua file.
 Auctionator.ModernSell = Selling
@@ -52,25 +43,13 @@ local function HideFrame(frame)
   if frame then frame:Hide() end
 end
 
--- Reuse the shared tooltip-based check so Selling and the global item tooltips
--- always agree about whether a specific item can be auctioned.
-local function IsBagItemAuctionable(bag, slot)
-  local checker = Auctionator.ItemAuctionability
-
-  if checker and checker.IsBagItemAuctionable then
-    return checker.IsBagItemAuctionable(bag, slot)
-  end
-
-  return true
-end
-
 local function RestoreLegacyPanel()
   if not Atr_Main_Panel then return end
   Atr_Main_Panel:SetAlpha(1)
   Atr_Main_Panel:EnableMouse(true)
 
-  -- Some legacy controls are still shared by the classic backend. Restore them
-  -- whenever the modern Selling tab is left.
+  -- The active-auctions (More...) view still uses the original panel and its
+  -- regions. Restore them whenever the modern Selling tab is left.
   local regions = { Atr_Main_Panel:GetRegions() }
   for _, region in ipairs(regions) do
     if region and region.Show then
@@ -78,8 +57,8 @@ local function RestoreLegacyPanel()
     end
   end
 
-  -- Restore the shared legacy history list to its original position for code
-  -- paths that still reference these exact controls and row children.
+  -- Restore the shared history/active-auctions list to its original legacy
+  -- position. The More... tab expects these exact controls and row children.
   if Atr_Hlist then
     Atr_Hlist:SetParent(Atr_Main_Panel)
     Atr_Hlist:ClearAllPoints()
@@ -197,34 +176,8 @@ local function HideLegacyChrome()
 end
 
 
-local function CompactAuctionResultRow(row, rowIndex)
+local function CompactAuctionResultRow(row)
   if not row then return end
-
-  if not row.ModernStripe then
-    local stripe = row:CreateTexture(nil, "BACKGROUND")
-    stripe:SetAllPoints(row)
-    row.ModernStripe = stripe
-  end
-
-  if rowIndex and rowIndex % 2 == 0 then
-    row.ModernStripe:SetTexture(0.12, 0.12, 0.12, 0.45)
-  else
-    row.ModernStripe:SetTexture(0.02, 0.02, 0.02, 0.18)
-  end
-
-  local highlight = row:GetHighlightTexture()
-  if highlight then
-    highlight:SetTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
-    highlight:SetAllPoints(row)
-    highlight:SetBlendMode("ADD")
-  end
-
-  local pushed = row:GetPushedTexture()
-  if pushed then
-    pushed:SetTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
-    pushed:SetAllPoints(row)
-    pushed:SetBlendMode("ADD")
-  end
 
   local priceColumn, currentAuctionsColumn, packPriceColumn = row:GetChildren()
 
@@ -265,20 +218,11 @@ end
 local function CompactAuctionHeadings()
   if not Atr_HeadingsBar then return end
 
-  if Atr_HeadingsBarMiddle then
-    Atr_HeadingsBarMiddle:ClearAllPoints()
-    Atr_HeadingsBarMiddle:SetPoint("TOPLEFT", Atr_HeadingsBar, "TOPLEFT", 3, -4)
-    Atr_HeadingsBarMiddle:SetSize(474, 22)
-    Atr_HeadingsBarMiddle:SetTexture("Interface\\Buttons\\WHITE8X8")
-    Atr_HeadingsBarMiddle:SetVertexColor(0.14, 0.14, 0.14, 0.98)
-  end
-
   if Atr_Col1_Heading then
     Atr_Col1_Heading:ClearAllPoints()
     Atr_Col1_Heading:SetPoint("LEFT", Atr_HeadingsBar, "LEFT", 8, 1)
     Atr_Col1_Heading:SetWidth(108)
     Atr_Col1_Heading:SetJustifyH("CENTER")
-    Atr_Col1_Heading:SetTextColor(1, 0.82, 0)
   end
 
   if Atr_Col3_Heading then
@@ -286,7 +230,6 @@ local function CompactAuctionHeadings()
     Atr_Col3_Heading:SetPoint("LEFT", Atr_HeadingsBar, "LEFT", 122, 1)
     Atr_Col3_Heading:SetWidth(154)
     Atr_Col3_Heading:SetJustifyH("CENTER")
-    Atr_Col3_Heading:SetTextColor(1, 0.82, 0)
   end
 
   if Atr_Col4_Heading then
@@ -294,7 +237,6 @@ local function CompactAuctionHeadings()
     Atr_Col4_Heading:SetPoint("LEFT", Atr_HeadingsBar, "LEFT", 286, 1)
     Atr_Col4_Heading:SetWidth(102)
     Atr_Col4_Heading:SetJustifyH("CENTER")
-    Atr_Col4_Heading:SetTextColor(1, 0.82, 0)
   end
 
   if Atr_Col1_Heading_Button then
@@ -323,7 +265,7 @@ function Selling:SetSearchLoading(isLoading, searchText)
       overlay.SearchText:Hide()
     end
 
-    overlay.Status:SetText(L.SEARCHING)
+    overlay.Status:SetText(ZT and ZT("Searching") or "Buscando")
     overlay.DotStep = 0
     overlay.Elapsed = 0
     overlay.Dots:SetText(".")
@@ -355,22 +297,22 @@ function Selling:UpdateSearchLoading(elapsed)
       return
     elseif state == states.PRE_QUERY then
       overlay.Status:SetText(
-        L.WAITING_TO_SEND_QUERY
+        ZT and ZT("Waiting to send query") or "Preparando consulta"
       )
     elseif state == states.IN_QUERY or state == states.POST_QUERY then
       local page = tonumber(search.current_page) or 1
       overlay.Status:SetText(
         string.format(
-          L.SEARCHING_PAGE_X,
+          ZT and ZT("Searching page %d") or "Buscando página %d",
           math.max(1, page)
         )
       )
     elseif state == states.ANALYZING then
       overlay.Status:SetText(
-        L.ANALYZING_RESULTS
+        ZT and ZT("Analyzing results") or "Analizando resultados"
       )
     else
-      overlay.Status:SetText(L.SEARCHING)
+      overlay.Status:SetText(ZT and ZT("Searching") or "Buscando")
     end
   end
 
@@ -381,35 +323,18 @@ end
 
 
 local SELLING_EMPTY_SLOT_TEXTURE =
-  "Interface\\Buttons\\UI-Slot-Background"
+  "Interface\\AddOns\\Auctionator\\Images\\Selling_EmptySlot"
 
 function Selling:ShowEmptyItemSlot()
   if not Atr_SellControls_Tex then return end
 
   local itemName = GetAuctionSellItemInfo and GetAuctionSellItemInfo()
   if itemName then
-    local normalTexture = Atr_SellControls_Tex:GetNormalTexture()
-
-    if normalTexture then
-      normalTexture:SetTexCoord(0, 1, 0, 1)
-      normalTexture:SetVertexColor(1, 1, 1, 1)
-      normalTexture:SetAlpha(1)
-    end
-
-    Atr_SellControls_Tex:Show()
     return
   end
 
-  Atr_SellControls_Tex:SetNormalTexture(SELLING_EMPTY_SLOT_TEXTURE)
-
-  local normalTexture = Atr_SellControls_Tex:GetNormalTexture()
-  if normalTexture then
-    normalTexture:SetTexCoord(0, 0.640625, 0, 0.640625)
-    normalTexture:SetVertexColor(1, 1, 1, 1)
-    normalTexture:SetAlpha(1)
-  end
-
   Atr_SellControls_Tex:Show()
+  Atr_SellControls_Tex:SetNormalTexture(SELLING_EMPTY_SLOT_TEXTURE)
 
   if Atr_SetTextureButtonCount then
     Atr_SetTextureButtonCount("Atr_SellControls_Tex", 0)
@@ -441,12 +366,9 @@ function Selling:ClearSelectedAuctionItem()
     gSellPane:ClearSearch()
   end
 
-  if gCurrentPane and gSellPane and gCurrentPane == gSellPane then
+  if gCurrentPane == gSellPane then
     gCurrentPane.totalItems = 0
     gCurrentPane.fullStackSize = 0
-  elseif gSellPane then
-    gSellPane.totalItems = 0
-    gSellPane.fullStackSize = 0
   end
 
   if Atr_SellControls_TexName then
@@ -495,8 +417,8 @@ function Selling:Create()
   inventory:SetSize(282, 256)
   self.Inventory = inventory
 
-  -- Independent bag inventory. Atr_Hlist belongs to the legacy backend, so it is
-  -- deliberately kept outside the modern Selling inventory.
+  -- Independent bag inventory. The old Atr_Hlist is shared by Shopping and
+  -- More..., so reparenting it caused active auctions to leak into Selling.
   local inventoryScroll = CreateFrame("ScrollFrame", "Atr_ModernSellInventoryScroll", inventory)
   Reanchor(inventoryScroll, "TOPLEFT", inventory, "TOPLEFT", 7, -7)
   inventoryScroll:SetSize(248, 242)
@@ -540,13 +462,6 @@ function Selling:Create()
   results:SetSize(517, 256)
   self.Results = results
 
-  local tableBody = results:CreateTexture(nil, "BACKGROUND")
-  tableBody:SetTexture("Interface\\Buttons\\WHITE8X8")
-  tableBody:SetVertexColor(0.018, 0.018, 0.018, 1)
-  tableBody:SetPoint("TOPLEFT", results, "TOPLEFT", 5, -29)
-  tableBody:SetPoint("BOTTOMRIGHT", results, "BOTTOMRIGHT", -29, 34)
-  self.ResultsTableBody = tableBody
-
   -- Search status panel. It is independent from the result table and does not
   -- alter any of the existing layout, rows, scrollbars or auction controls.
   local searchOverlay = CreateFrame(
@@ -575,7 +490,8 @@ function Selling:Create()
   )
   loadingTitle:SetPoint("CENTER", searchOverlay, "CENTER", 0, 24)
   loadingTitle:SetText(
-    L.SEARCHING_AUCTION_HOUSE
+    ZT and ZT("Searching the Auction House")
+      or "Buscando en la casa de subastas"
   )
 
   local loadingSearchText = searchOverlay:CreateFontString(
@@ -594,7 +510,7 @@ function Selling:Create()
     "GameFontHighlightSmall"
   )
   loadingStatus:SetPoint("TOP", loadingSearchText, "BOTTOM", -8, -10)
-  loadingStatus:SetText(L.SEARCHING)
+  loadingStatus:SetText(ZT and ZT("Searching") or "Buscando")
   searchOverlay.Status = loadingStatus
 
   local loadingDots = searchOverlay:CreateFontString(
@@ -688,7 +604,7 @@ function Selling:Apply()
   if Atr_CreateAuctionButton then Atr_CreateAuctionButton:SetSize(160, 24) end
 
   -- Lower-left inventory is now a dedicated bag grid. Atr_Hlist remains under
-  -- Atr_Main_Panel only for compatibility with untouched legacy code.
+  -- Atr_Main_Panel because the More... tab uses it for active auctions.
   if Atr_Hlist and Atr_Hlist:GetParent() ~= Atr_Main_Panel then
     Atr_Hlist:SetParent(Atr_Main_Panel)
   end
@@ -702,30 +618,12 @@ function Selling:Apply()
   -- Lower-right competition/results area.
   -- The legacy result template was designed for a much wider panel, so both
   -- the outer frames and the three internal row columns are compacted here.
-  local resultsLevel = self.Results:GetFrameLevel()
-  self.Results:EnableMouse(false)
-
   if Atr_HeadingsBar then
     Atr_HeadingsBar:SetParent(self.Results)
     Reanchor(Atr_HeadingsBar, "TOPLEFT", self.Results, "TOPLEFT", 3, -1)
     Atr_HeadingsBar:SetSize(474, 50)
-    Atr_HeadingsBar:SetFrameLevel(resultsLevel + 8)
-    Atr_HeadingsBar:EnableMouse(false)
     if Atr_HeadingsBarMiddle then Atr_HeadingsBarMiddle:SetWidth(474) end
     CompactAuctionHeadings()
-  end
-
-  for _, headingButton in ipairs({
-    Atr_Col1_Heading_Button,
-    Atr_Col3_Heading_Button,
-    Atr_Back_Button,
-    Atr_SaveThisList_Button,
-  }) do
-    if headingButton then
-      headingButton:SetFrameLevel(resultsLevel + 12)
-      headingButton:EnableMouse(true)
-      headingButton:RegisterForClicks("LeftButtonUp")
-    end
   end
 
   if Atr_ListTabs then
@@ -737,7 +635,6 @@ function Selling:Apply()
     AuctionatorScrollFrame:SetParent(self.Results)
     Reanchor(AuctionatorScrollFrame, "TOPLEFT", self.Results, "TOPLEFT", 2, -36)
     AuctionatorScrollFrame:SetSize(470, 192)
-    AuctionatorScrollFrame:SetFrameLevel(resultsLevel + 4)
   end
 
   for i = 1, 15 do
@@ -745,10 +642,7 @@ function Selling:Apply()
     if row then
       row:SetParent(self.Results)
       row:SetWidth(460)
-      row:SetFrameLevel(resultsLevel + 14)
-      row:EnableMouse(true)
-      row:RegisterForClicks("LeftButtonUp")
-      CompactAuctionResultRow(row, i)
+      CompactAuctionResultRow(row)
 
       if i == 1 and AuctionatorScrollFrame then
         Reanchor(row, "TOPLEFT", AuctionatorScrollFrame, "TOPLEFT", 4, 0)
@@ -770,30 +664,6 @@ function Selling:Apply()
     Atr_Hilite1_btn:SetParent(self.Header)
     Reanchor(Atr_Hilite1_btn, "TOPLEFT", self.Header, "TOPLEFT", 0, 0)
     Atr_Hilite1_btn:SetSize(805, 92)
-    Atr_Hilite1_btn:SetFrameLevel(self.Header:GetFrameLevel() + 1)
-    Atr_Hilite1_btn:EnableMouse(false)
-    Atr_Hilite1_btn:Hide()
-
-    -- The invisible drop target must only cover the creation controls while an
-    -- item is actually being dragged. Otherwise it can steal normal clicks.
-    self.Header:SetScript("OnUpdate", function(header)
-      local cursorType = GetCursorInfo()
-      local shouldCapture = cursorType == "item"
-
-      if shouldCapture then
-        Atr_Hilite1_btn:SetFrameLevel(header:GetFrameLevel() + 40)
-        Atr_Hilite1_btn:EnableMouse(true)
-        Atr_Hilite1_btn:Show()
-      else
-        Atr_Hilite1_btn:EnableMouse(false)
-        Atr_Hilite1_btn:Hide()
-        Atr_Hilite1_btn:SetFrameLevel(header:GetFrameLevel() + 1)
-
-        if Atr_Hilite1 then
-          Atr_Hilite1:Hide()
-        end
-      end
-    end)
   end
 end
 
@@ -845,7 +715,7 @@ function Selling:RefreshInventory()
   for bag = 0, NUM_BAG_SLOTS do
     for slot = 1, GetContainerNumSlots(bag) do
       local item = GetBagItemInfo(bag, slot)
-      if item and IsBagItemAuctionable(bag, slot) then
+      if item then
         table.insert(items, item)
       end
     end
